@@ -4,9 +4,9 @@ import Link from 'next/link'
 export default function Header(){
   return (
     <header className='bg-white border-b flex justify-between p-4'>
-        <div className="flex gap-6">
+        <div className="flex items-center gap-6">
           <Link href={'/'}>FashionFinder </Link>
-          <nav className='flex items-center gap-4'>
+          <nav className='flex gap-4'>
           <Link href={'/about'}>About</Link>
           <Link href={'/contact'}>Contact</Link>
           <Link href={'/Albums'}>Albums</Link>
