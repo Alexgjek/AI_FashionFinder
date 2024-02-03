@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -9,18 +9,42 @@ import { faHeart, faShirt, faSackDollar } from '@fortawesome/free-solid-svg-icon
 import NextButton from '@/components/buttons/SignInPageButton';
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [user, setUser] = React.useState({
     email: '',
     password: '',
   });
 
+  const [buttonDisabled, setButtonDisabled] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+
   const onLogin = async () => {
-  };
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/users/login", user);
+      console.log("Login success", response.data);
+      router.push("/profile");
+    } catch (error){
+      console.log("login failed", error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (user.email.length > 0 && user.password.length > 0){
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  }, [user]);
 
   return (
     <main>
       <div className="max-w-lg mx-auto">
-        <h1 className="text-2xl font-bold mt-10 mb-5">Enter your email</h1>
+        <h1 className="text-2xl font-bold mt-10 mb-5">{loading ? "Loading": "Enter your email"}</h1>
         <input
           className="border border-black py-4 px-3 outline-none w-full mb-2"
           type="text"
@@ -30,7 +54,7 @@ export default function LoginPage() {
         />
         <input
           className="border border-black py-4 px-3 outline-none w-full"
-          type="text"
+          type="password"
           id="password"
           placeholder="password"
           onChange={(e) => setUser({ ...user, password: e.target.value })}
@@ -40,6 +64,7 @@ export default function LoginPage() {
           <span>Don't have an account?</span>
           <Link href={'/register'} className='hover:underline hover:text-purple-800'>Create account</Link>
         </div>
+        <hr className='border-gray-300 mt-4 mb-4'/>
         <span className="text-sm">Make your experience even more fun when signing in</span>
 
         <div className="p-5 text-xs space-y-3">

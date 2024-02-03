@@ -1,12 +1,13 @@
 'use client';
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { axios } from "axios";
+import axios from "axios";
 import RegisterButton from "@/components/buttons/RegisterButton";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [user, setUser] = React.useState({
     email: "",
     password: "",
@@ -15,7 +16,26 @@ export default function RegisterPage() {
   });
 
   const onSignup = async () => {
+    try {
+      const response = await axios.post("/api/users/register", user);
+      console.log("Signup success", response.data);
+      router.push("/login");
+    } catch (error){
+      console.log('singup failed', error.message);
+    }
   };
+
+  /*
+  const [buttonDisabled, setButtonDisabled] = React.useState(false)
+
+  useEffect (() => {
+    if (user.email.length > 0 && user.password.length > 0 && user.firstName > 0 && user.lastName > 0){
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  }, [user]);
+*/
 
   return (
     <div className="flex flex-col items-center justify-center py-10">
@@ -53,7 +73,7 @@ export default function RegisterPage() {
         <input
           className="border border-black p-3 outline-none mb-4"
           id="password"
-          type="text"
+          type="password"
           value={user.password}
           onChange={(e) => setUser({ ...user, password: e.target.value })}
           placeholder="Password"
