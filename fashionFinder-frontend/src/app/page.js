@@ -1,6 +1,4 @@
 import Header from '@/components/Header';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowUp } from '@fortawesome/free-solid-svg-icons'
 import SendChatButton from '@/components/buttons/SendChatButton';
 
 export default function Home() {
