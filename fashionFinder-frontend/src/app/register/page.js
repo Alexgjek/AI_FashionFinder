@@ -69,7 +69,10 @@ export default function RegisterPage() {
             id="firstName"
             type="text"
             value={user.firstName}
-            onChange={(e) => setUser({ ...user, firstName: e.target.value })}
+            onChange={(e) => {
+              setUser({ ...user, firstName: e.target.value });
+              setError("");
+            }}
             placeholder="First Name"
           />
           <input
@@ -77,7 +80,10 @@ export default function RegisterPage() {
             id="lastName"
             type="text"
             value={user.lastName}
-            onChange={(e) => setUser({ ...user, lastName: e.target.value })}
+            onChange={(e) => {
+              setUser({ ...user, lastName: e.target.value });
+              setError("");
+            }}
             placeholder="Last Name"
           />
         </div>
@@ -86,7 +92,10 @@ export default function RegisterPage() {
           id="password"
           type="password"
           value={user.password}
-          onChange={(e) => setUser({ ...user, password: e.target.value })}
+          onChange={(e) => {
+            setUser({ ...user, password: e.target.value });
+            setError("");
+          }}
           placeholder="Password"
         />
         <RegisterButton onSignup={onSignup} />

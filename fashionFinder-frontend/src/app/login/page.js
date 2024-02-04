@@ -18,7 +18,7 @@ export default function LoginPage() {
   });
 
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  //const [loading, setLoading] = React.useState(false);
 
 
   const onLogin = async () => {
@@ -31,9 +31,7 @@ export default function LoginPage() {
       console.log("login failed", error.message);
       setError("Login failed. Please check your email and password.");
 
-    } finally {
-      setLoading(false);
-    }
+    } 
   }
 
   /*
@@ -48,21 +46,27 @@ export default function LoginPage() {
   return (
     <main>
       <div className="max-w-lg mx-auto">
-        <h1 className="text-2xl font-bold mt-10 mb-5">{loading ? "Loading": "Enter your email"}</h1>
+        <h1 className="text-2xl font-bold mt-10 mb-5">Enter your email</h1>
         {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
         <input
           className="border border-black py-4 px-3 outline-none w-full mb-2"
           type="text"
           id="email"
           placeholder="E-mail address"
-          onChange={(e) => setUser({ ...user, email: e.target.value })}
+          onChange={(e) => {
+            setUser({ ...user, email: e.target.value });
+            setError("");
+          }}
         />
         <input
           className="border border-black py-4 px-3 outline-none w-full"
           type="password"
           id="password"
           placeholder="password"
-          onChange={(e) => setUser({ ...user, password: e.target.value })}
+          onChange={(e) => {
+            setUser({ ...user, password: e.target.value });
+            setError("");
+          }}
         />
         <NextButton onLogin={onLogin} />
         <div className='flex gap-1 text-sm py-2'>
