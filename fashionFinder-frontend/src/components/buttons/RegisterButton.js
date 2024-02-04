@@ -17,7 +17,7 @@ export default function RegisterButton({ onSignup }) {
 
   return (
     <button
-      className="bg-black text-white py-4 font-semibold text-center"
+      className="bg-black text-white py-4 font-semibold text-center hover:bg-gray-700"
       onClick={onSignup}>
       REGISTER
     </button>
