@@ -20,6 +20,11 @@ export async function POST(request) {
       return NextResponse.json({error: "User already exists"}, {status: 400})
     }
 
+    //check if all fields are present
+    if (!email || !firstName || !lastName || !password) {
+      return NextResponse.json({ error: "All fields are required" }, { status: 505 });
+    }
+
     //hashing password
     const salt = await bcryptjs.genSalt(10)
     const hashedPassword = await bcryptjs.hash(password, salt)
