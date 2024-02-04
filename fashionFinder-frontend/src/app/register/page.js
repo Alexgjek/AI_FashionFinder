@@ -22,14 +22,21 @@ export default function RegisterPage() {
       router.push("/login");
     } catch (error){
       console.log('singup failed', error.message);
+      if (error.response && error.response.status === 400){
+        setError("Account with that email already exists");
+      } else if (error.response && error.response.status === 505){
+        setError("All fields are required");
+      }
     }
   };
 
-  /*
-  const [buttonDisabled, setButtonDisabled] = React.useState(false)
+  
+  //const [buttonDisabled, setButtonDisabled] = React.useState(false)
+  const [error, setError] = React.useState("");
 
+  /*
   useEffect (() => {
-    if (user.email.length > 0 && user.password.length > 0 && user.firstName > 0 && user.lastName > 0){
+    if (user.email.length > 0 && user.password.length > 0 && user.firstName.length > 0 && user.lastName.length > 0){
       setButtonDisabled(false);
     } else {
       setButtonDisabled(true);
@@ -44,12 +51,16 @@ export default function RegisterPage() {
       </h1>
       <hr />
       <div className='flex flex-col'>
+      {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
         <input
-          className="border border-black p-3 outline-none mb-4"
+          className={`border ${error.includes("400") || error.includes("505") ? 'border-red-500' : 'border-black'} p-3 outline-none mb-4`}
           id="email"
           type="text"
           value={user.email}
-          onChange={(e) => setUser({ ...user, email: e.target.value })}
+          onChange={(e) => {
+            setUser({ ...user, email: e.target.value });
+            setError("");
+          }}
           placeholder="E-mail address"
         />
         <div className="flex gap-2">

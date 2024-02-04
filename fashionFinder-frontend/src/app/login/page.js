@@ -10,6 +10,7 @@ import NextButton from '@/components/buttons/SignInPageButton';
 
 export default function LoginPage() {
   const router = useRouter();
+  const [error, setError] = React.useState("");
 
   const [user, setUser] = React.useState({
     email: '',
@@ -28,11 +29,14 @@ export default function LoginPage() {
       router.push("/profile");
     } catch (error){
       console.log("login failed", error.message);
+      setError("Login failed. Please check your email and password.");
+
     } finally {
       setLoading(false);
     }
   }
 
+  /*
   useEffect(() => {
     if (user.email.length > 0 && user.password.length > 0){
       setButtonDisabled(false);
@@ -40,11 +44,12 @@ export default function LoginPage() {
       setButtonDisabled(true);
     }
   }, [user]);
-
+*/
   return (
     <main>
       <div className="max-w-lg mx-auto">
         <h1 className="text-2xl font-bold mt-10 mb-5">{loading ? "Loading": "Enter your email"}</h1>
+        {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
         <input
           className="border border-black py-4 px-3 outline-none w-full mb-2"
           type="text"
