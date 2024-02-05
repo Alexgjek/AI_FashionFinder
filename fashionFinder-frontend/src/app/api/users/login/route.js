@@ -19,10 +19,17 @@ export async function POST(request) {
       return NextResponse.json({error:"User does not exist"}, {status: 400})
     }
 
+    //check if valid email format
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isValidEmail) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 300 });
+    }
+  
+
     //check if the password is correct
     const validPassword = await bcryptjs.compare(password, user.password)
     if (!validPassword){
-      return NextResponse.json({error: "Invalid password"}, {status:400})
+      return NextResponse.json({error: "Invalid password"}, {status:500})
     }
     //create token data
     const tokenData = {

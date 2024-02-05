@@ -25,6 +25,13 @@ export async function POST(request) {
       return NextResponse.json({ error: "All fields are required" }, { status: 505 });
     }
 
+    //check if email is valid format
+    //check if valid email format
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isValidEmail) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 300 });
+    }
+
     //hashing password
     const salt = await bcryptjs.genSalt(10)
     const hashedPassword = await bcryptjs.hash(password, salt)
