@@ -27,10 +27,12 @@ export default function RegisterPage() {
       } else if (error.response && error.response.status === 505){
         setError("All fields are required");
       }
+      else if (error.response && error.response.status === 300){
+        setError("Invalid email format")
+      }
     }
   };
 
-  
   //const [buttonDisabled, setButtonDisabled] = React.useState(false)
   const [error, setError] = React.useState("");
 
@@ -53,7 +55,7 @@ export default function RegisterPage() {
       <div className='flex flex-col'>
       {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
         <input
-          className={`border ${error.includes("400") || error.includes("505") ? 'border-red-500' : 'border-black'} p-3 outline-none mb-4`}
+          className={`border ${error.includes("400") || error.includes("505") || error.includes("300") ? 'border-red-500' : 'border-black'} p-3 outline-none mb-4`}
           id="email"
           type="text"
           value={user.email}

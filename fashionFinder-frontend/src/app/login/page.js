@@ -28,10 +28,16 @@ export default function LoginPage() {
       console.log("Login success", response.data);
       router.push("/profile");
     } catch (error){
-      console.log("login failed", error.message);
-      setError("Login failed. Please check your email and password.");
-
-    } 
+      console.log('singup failed', error.message);
+      if (error.response && error.response.status === 400){
+        setError("User does not exist");
+      } else if (error.response && error.response.status === 300){
+        setError("Invalid email format");
+      }
+      else if (error.response && error.response.status === 500){
+        setError("Invalid login credentials");
+      }
+    }
   }
 
   /*
