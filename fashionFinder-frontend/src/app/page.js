@@ -1,6 +1,5 @@
 import Header from '@/components/Header';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowUp } from '@fortawesome/free-solid-svg-icons'
+import SendChatButton from '@/components/buttons/SendChatButton';
 
 export default function Home() {
   return (
@@ -18,11 +17,7 @@ export default function Home() {
             placeholder='Message your personal designer...'
             className="p-2 border border-gray-300 rounded-md block w-full text-sm outline-none"
           />
-          <button
-            type="button"
-            className="px-4 py-1.5 border border-gray-300 rounded-r-md bg-slate-500 text-white">
-            <FontAwesomeIcon icon={faArrowUp} className='text-white w-5'/>
-          </button>
+          <SendChatButton />
         </form>
       </section>
     </main>

@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 
-export default function NextButton({ onLogin }) {
+export default function RegisterButton({ onSignup }) {
   useEffect(() => {
     const handleKeyPress = (event) => {
       if (event.key === 'Enter') {
-        onLogin();
+        onSignup();
       }
     };
 
@@ -13,13 +13,13 @@ export default function NextButton({ onLogin }) {
     return () => {
       document.removeEventListener('keydown', handleKeyPress);
     };
-  }, [onLogin]);
+  }, [onSignup]);
 
   return (
     <button
-      className="bg-black text-white py-4 px-3 mt-4 mb-4 w-full font-semibold text-center hover:bg-gray-700"
-      onClick={onLogin}>
-      NEXT
+      className="bg-black text-white py-4 font-semibold text-center hover:bg-gray-700"
+      onClick={onSignup}>
+      REGISTER
     </button>
   );
 }
