@@ -1,7 +1,7 @@
 
 export default function ContactPage() {
   return ( 
-    <main className="flex justify-center items-center bg-gray-200 min-h-screen">
+    <main className="flex justify-center items-center mt-10">
       <div className="flex flex-col items-center bg-white p-8 rounded shadow-md w-5/6">
         <script src="https://cdn.jsdeliver.net/npm/@emailjs/brower@3/dist/email.min.js"></script>
         <script src="src/components/buttons/ContactUsPageButton.js"></script>
