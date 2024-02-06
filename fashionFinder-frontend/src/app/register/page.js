@@ -118,6 +118,11 @@ export default function RegisterPage() {
             setConfirmPassword(e.target.value);
             setError("");
           }}
+          onKeyDown={(e) => {
+            if (e.key === ' ') {
+              e.preventDefault();
+            }
+          }}
           placeholder="Confirm Password"
         />
         <RegisterButton onSignup={onSignup} />

@@ -21,7 +21,7 @@ export async function POST(request) {
     }
 
     //check if all fields are present
-    if (!email || !firstName || !lastName || !password) {
+    if (!email || !firstName || !lastName || !password || !confirmPassword) {
       return NextResponse.json({ error: "All fields are required" }, { status: 505 });
     }
 
