@@ -9,7 +9,7 @@ connect() // connencting to the database
 export async function POST(request) {
   try {
     const reqBody = await request.json()
-    const {email, firstName, lastName, password} = reqBody
+    const {email, firstName, lastName, password, confirmPassword} = reqBody
 
     console.log(reqBody);
 
@@ -25,7 +25,11 @@ export async function POST(request) {
       return NextResponse.json({ error: "All fields are required" }, { status: 505 });
     }
 
-    //check if email is valid format
+    //check if password and confirmPassword match
+    if (password !== confirmPassword) {
+      return NextResponse.json({ error: "Passwords do not match" }, { status: 402 });
+    }
+
     //check if valid email format
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!isValidEmail) {
