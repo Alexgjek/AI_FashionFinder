@@ -12,9 +12,10 @@ export async function POST(request) {
     const reqBody= await request.json()
     const {email, password} = reqBody;
     console.log(reqBody)
+    const lowercasedEmail = email.toLowerCase();
 
     //check if the user exists
-    const user = await User.findOne({email})
+    const user = await User.findOne({email: lowercasedEmail})
     if (!user){
       return NextResponse.json({error:"User does not exist"}, {status: 400})
     }
