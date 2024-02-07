@@ -35,7 +35,7 @@ export default function RegisterPage() {
         setError("Passwords do not match")
       }
       else if (error.response && error.response.status === 403){
-        setError(<>Password must meet requirements: <br />Minimum 8 characters<br />Contain at least 1 uppercase letter<br />Contain at least 1 number</>);
+        setError(<>Password must meet requirements: <br />Minimum 8 characters<br />Contain at least 1 capital letter<br />Contain at least 1 number</>);
       }
     }
   };
