@@ -60,7 +60,7 @@ export default function LoginPage() {
           id="email"
           placeholder="E-mail address"
           onChange={(e) => {
-            setUser({ ...user, email: e.target.value });
+            setUser({ ...user, email: e.target.value.toLowerCase()});
             setError("");
           }}
         />
