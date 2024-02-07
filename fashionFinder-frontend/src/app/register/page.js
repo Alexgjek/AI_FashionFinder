@@ -34,6 +34,9 @@ export default function RegisterPage() {
       else if (error.response && error.response.status === 402){
         setError("Passwords do not match")
       }
+      else if (error.response && error.response.status === 403){
+        setError(<>Password must meet requirements: <br />Minimum 8 characters<br />Contain at least 1 uppercase letter<br />Contain at least 1 number</>);
+      }
     }
   };
 
@@ -59,7 +62,7 @@ export default function RegisterPage() {
       <div className='flex flex-col'>
       {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
         <input
-          className={`border ${error.includes("400") || error.includes("505") || error.includes("300") ? 'border-red-500' : 'border-black'} p-3 outline-none mb-4`}
+          className="border border-black p-3 outline-none mb-4"
           id="email"
           type="text"
           value={user.email}

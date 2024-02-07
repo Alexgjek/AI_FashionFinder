@@ -25,6 +25,12 @@ export async function POST(request) {
       return NextResponse.json({ error: "All fields are required" }, { status: 505 });
     }
 
+    //check if password meets requirements
+    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
+    if (!passwordRequirements) {
+      return NextResponse.json({ error: "Password must be at least 8 characters, contain at least 1 uppercase letter and at least 1 number" }, { status: 403 });
+    }
+
     //check if password and confirmPassword match
     if (password !== confirmPassword) {
       return NextResponse.json({ error: "Passwords do not match" }, { status: 402 });
