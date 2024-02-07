@@ -10,6 +10,7 @@ export default function Header(){
           <Link href={'/about'}>About</Link>
           <Link href={'/contact'}>Contact</Link>
           <Link href={'/albums'}>Albums</Link>
+          <Link href={'/backend'}>Backend</Link>
           </nav>
         </div>
         <nav className='flex items-center gap-4'>
