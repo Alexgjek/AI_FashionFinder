@@ -53,6 +53,36 @@ export default function RegisterPage() {
   }, [user]);
 */
 
+useEffect(() => {
+  const passwordInput = document.getElementById('password');
+  const observer = new MutationObserver(() => {
+    if (passwordInput.type === 'text') {
+      passwordInput.type = 'password';
+    }
+  });
+
+  observer.observe(passwordInput, { attributes: true });
+
+  return () => {
+    observer.disconnect();
+  };
+}, []);
+
+useEffect(() => {
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const observer = new MutationObserver(() => {
+    if (confirmPasswordInput.type === 'text') {
+      confirmPasswordInput.type = 'password';
+    }
+  });
+
+  observer.observe(confirmPasswordInput, { attributes: true });
+
+  return () => {
+    observer.disconnect();
+  };
+}, []);
+
   return (
     <div className="flex flex-col items-center justify-center py-10">
       <h1 className="text-xl font-bold mb-5">
