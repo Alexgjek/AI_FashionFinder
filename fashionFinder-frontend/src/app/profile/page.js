@@ -58,8 +58,12 @@ export default function ProfilePage() {
             </h5>
             <hr className='border border-gray-300 mt-2 mb-2'/>
             <h6 className='mb-6'>
-              BUDGET
+              BRAND
             </h6>
+            <hr className='border border-gray-300 mt-2 mb-2'/>
+            <h7 className='mb-6'>
+              BUDGET
+            </h7>
           </div>
         </div>
         <button
