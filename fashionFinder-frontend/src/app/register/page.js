@@ -8,6 +8,7 @@ import RegisterButton from "@/components/buttons/RegisterButton";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [confirmPassword, setConfirmPassword] = React.useState("");
   const [user, setUser] = React.useState({
     email: "",
     password: "",
@@ -17,7 +18,7 @@ export default function RegisterPage() {
 
   const onSignup = async () => {
     try {
-      const response = await axios.post("/api/users/register", user);
+      const response = await axios.post("/api/users/register", {...user, confirmPassword});
       console.log("Signup success", response.data);
       router.push("/login");
     } catch (error){
@@ -29,6 +30,12 @@ export default function RegisterPage() {
       }
       else if (error.response && error.response.status === 300){
         setError("Invalid email format")
+      }
+      else if (error.response && error.response.status === 402){
+        setError("Passwords do not match")
+      }
+      else if (error.response && error.response.status === 403){
+        setError(<>Password must meet requirements: <br />Minimum 8 characters<br />Contain at least 1 capital letter<br />Contain at least 1 number</>);
       }
     }
   };
@@ -55,7 +62,7 @@ export default function RegisterPage() {
       <div className='flex flex-col'>
       {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
         <input
-          className={`border ${error.includes("400") || error.includes("505") || error.includes("300") ? 'border-red-500' : 'border-black'} p-3 outline-none mb-4`}
+          className="border border-black p-3 outline-none mb-4"
           id="email"
           type="text"
           value={user.email}
@@ -98,7 +105,28 @@ export default function RegisterPage() {
             setUser({ ...user, password: e.target.value });
             setError("");
           }}
+          onKeyDown={(e) => {
+            if (e.key === ' ') {
+              e.preventDefault();
+            }
+          }}
           placeholder="Password"
+        />
+        <input
+          className="border border-black p-3 outline-none mb-4"
+          id="confirmPassword"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            setError("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === ' ') {
+              e.preventDefault();
+            }
+          }}
+          placeholder="Confirm Password"
         />
         <RegisterButton onSignup={onSignup} />
       </div>
