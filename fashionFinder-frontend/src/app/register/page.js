@@ -84,8 +84,8 @@ useEffect(() => {
 }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center py-10">
-      <h1 className="text-xl font-bold mb-5">
+    <div className="flex flex-col items-center justify-center py-16">
+      <h1 className="text-2xl font-bold mb-5">
         Create your personal account
       </h1>
       <hr />

@@ -65,7 +65,7 @@ useEffect(() => {
 }, []);
   return (
     <main>
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-lg mx-auto py-6">
         <h1 className="text-2xl font-bold mt-10 mb-5">Enter your email</h1>
         {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
         <input
