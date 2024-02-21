@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons'
 
 
+
 export default function Home() {
   
   const [inputValue, setInputValue] = useState('');
@@ -20,6 +21,9 @@ export default function Home() {
       </button>
       </div>
       <div className='col-span-6 flex flex-col items-center justify-center'>
+        <div>
+        <img src="/FashionFinder.png" />
+        </div>
         <div className='mx-auto'>
         <h1 className='text-4xl mx-auto font-semibold text-center'>
           Tell us what you're looking for
