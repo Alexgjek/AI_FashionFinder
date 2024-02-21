@@ -160,7 +160,7 @@ useEffect(() => {
         />
         <RegisterButton onSignup={onSignup} />
       </div>
-      <div className="flex gap-1 p-2 text-sm">
+      <div className="flex gap-1 p-4 text-sm">
         <span>Already have an account?</span>
         <Link href="/login" className="hover:underline hover:text-purple-800">Sign in</Link>
       </div>
