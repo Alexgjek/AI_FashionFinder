@@ -22,7 +22,7 @@ export default function Home() {
       </div>
       <div className='col-span-6 flex flex-col items-center justify-center'>
         <div className='mx-auto'>
-          <img src="/FashionFinder.png" />
+          <img src="/FFlogo.png" />
           <h1 className='text-4xl mx-auto font-semibold text-center'>
             Tell us what you're looking for
           </h1>
