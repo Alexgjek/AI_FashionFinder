@@ -21,16 +21,14 @@ export default function Home() {
       </button>
       </div>
       <div className='col-span-6 flex flex-col items-center justify-center'>
-        <div>
-        <img src="/FashionFinder.png" />
-        </div>
         <div className='mx-auto'>
-        <h1 className='text-4xl mx-auto font-semibold text-center'>
-          Tell us what you're looking for
-        </h1>
-        <h2 className='font-semibold text-xl text-center p-2'>
-          We'll find it for you
-        </h2>
+          <img src="/FashionFinder.png" />
+          <h1 className='text-4xl mx-auto font-semibold text-center'>
+            Tell us what you're looking for
+          </h1>
+          <h2 className='font-semibold text-xl text-center p-2 mb-20'>
+            We'll find it for you
+          </h2>
         </div>
         <div className="absolute bottom-5 w-full flex justify-center h-16">
           <input
