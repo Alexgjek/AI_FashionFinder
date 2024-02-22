@@ -68,6 +68,7 @@ export default function AlbumsPage() {
             <button
               className="absolute bottom-0 right-0 bg-transparent text-white px-4 py-2 rounded-md font-semibold"
               onClick={() => handleDeleteAlbum(index)}
+              title='Delete Album'
             >
               <FontAwesomeIcon icon={faTrashCan} className='text-red-500' />
             </button>
