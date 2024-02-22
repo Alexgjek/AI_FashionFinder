@@ -43,15 +43,15 @@ export default function AlbumsPage() {
         {showModal && (
           <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-500 bg-opacity-50">
             <div className="bg-white p-10 rounded-md shadow-lg">
-              <h2 className="text-lg font-semibold mb-2">Enter Album Name:</h2>
+              <h2 className="text-lg font-semibold mb-2">Enter Album Name</h2>
               <input
                 type="text"
-                className="border border-gray-300 rounded-md p-2 mb-2 outline-none"
+                className="border border-gray-300 roxwunded-md p-2 mb-2 outline-none"
                 value={albumName}
                 onChange={handleModalInputChange}
                 placeholder='Album Name'
               />
-              <div className="flex justify-end">
+              <div className="flex items-center justify-center">
                 <button className="bg-blue-500 text-white p-2 rounded-md mr-2 font-semibold" onClick={handleModalSubmit}>Create</button>
                 <button className="bg-gray-300 text-gray-800 p-2 rounded-md font-semibold" onClick={handleModalClose}>Cancel</button>
               </div>
