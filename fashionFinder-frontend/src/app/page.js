@@ -30,7 +30,7 @@ export default function Home() {
             We'll find it for you
           </h2>
         </div>
-        <div className="absolute bottom-5 w-full flex justify-center h-16">
+        <div className="absolute bottom-5 w-5/6 flex justify-center h-16">
           <input
             type="text"
             value={inputValue}
