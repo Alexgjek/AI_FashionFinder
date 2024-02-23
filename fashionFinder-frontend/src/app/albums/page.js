@@ -8,6 +8,7 @@ export default function AlbumsPage() {
   const [albumName, setAlbumName] = useState('');
   const [albums, setAlbums] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null); 
 
   const handleCreateAlbum = () => {
     setShowModal(true);
@@ -32,7 +33,14 @@ export default function AlbumsPage() {
   };
 
   const handleDeleteAlbum = (index) => {
-    setAlbums(prevAlbums => prevAlbums.filter((_, i) => i !== index));
+    setDeleteIndex(index); 
+    setShowModal(true); 
+  };
+
+  const confirmDeleteAlbum = () => {
+    setAlbums(prevAlbums => prevAlbums.filter((_, i) => i !== deleteIndex)); 
+    setShowModal(false); 
+    setDeleteIndex(null); 
   };
 
   return (
@@ -45,18 +53,30 @@ export default function AlbumsPage() {
         {showModal && (
           <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-500 bg-opacity-50">
             <div className="bg-white p-10 rounded-md shadow-lg">
-              <h2 className="text-lg font-semibold mb-2">Enter Album Name</h2>
-              <input
-                type="text"
-                className="border border-gray-300 rounded-md p-2 mb-2 outline-none"
-                value={albumName}
-                onChange={handleModalInputChange}
-                placeholder='Album Name'
-              />
-              <div className="flex items-center justify-center">
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={handleModalSubmit}>Create</button>
-                <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" onClick={handleModalClose}>Cancel</button>
-              </div>
+              {deleteIndex !== null ? ( 
+                <>
+                  <h2 className="text-lg font-semibold mb-2">Are you sure you want to delete this album?</h2>
+                  <div className="flex items-center justify-center">
+                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={confirmDeleteAlbum}>Yes</button>
+                    <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" onClick={handleModalClose}>No</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-lg font-semibold mb-2">Enter Album Name</h2>
+                  <input
+                    type="text"
+                    className="border border-gray-300 rounded-md p-2 mb-2 outline-none"
+                    value={albumName}
+                    onChange={handleModalInputChange}
+                    placeholder='Album Name'
+                  />
+                  <div className="flex items-center justify-center">
+                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={handleModalSubmit}>Create</button>
+                    <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" onClick={handleModalClose}>Cancel</button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
