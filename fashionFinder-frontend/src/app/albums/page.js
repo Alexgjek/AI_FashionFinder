@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import Link from 'next/link';
 
 export default function AlbumsPage() {
   const [albumName, setAlbumName] = useState('');
@@ -105,7 +106,7 @@ export default function AlbumsPage() {
       <div className="grid grid-cols-3 gap-4 m-5">
         {albums.map((album, index) => (
           <div key={index} className="bg-white rounded-lg shadow-md p-4 relative">
-            <h2 className="text-center text-lg font-semibold mb-2">{album.name}</h2>
+            <Link href={`/albums/${album.name}`} className="text-center text-lg font-semibold mb-2 hover:opacity-70">{album.name}</Link>
             <button
               className="absolute bottom-0 right-0 bg-transparent text-white px-4 py-2 rounded-md font-semibold"
               onClick={() => handleDeleteAlbum(index)}
