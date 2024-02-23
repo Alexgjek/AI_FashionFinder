@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
 
@@ -43,6 +43,19 @@ export default function AlbumsPage() {
     setDeleteIndex(null); 
   };
 
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handleModalSubmit();
+      }
+    };
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [albumName]);
+
   return (
     <main>
       {showModal && (
@@ -69,6 +82,7 @@ export default function AlbumsPage() {
                   className="border border-gray-300 rounded-md p-2 mb-2 outline-none"
                   value={albumName}
                   onChange={handleModalInputChange}
+                  onKeyP
                   placeholder='Album Name'
                 />
                 <div className="flex items-center justify-center">
