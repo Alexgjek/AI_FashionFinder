@@ -10,13 +10,16 @@ export default function AlbumsPage() {
   const [albums, setAlbums] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null); 
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleCreateAlbum = () => {
     setShowModal(true);
+    setErrorMessage('');
   };
 
   const handleModalInputChange = (e) => {
     setAlbumName(e.target.value);
+    setErrorMessage('');
   };
 
   const handleModalClose = () => {
@@ -26,10 +29,18 @@ export default function AlbumsPage() {
 
   const handleModalSubmit = () => {
     if (albumName.trim() !== '') {
-      const newAlbum = { name: albumName, outfits: [] };
-      setAlbums(prevAlbums => [...prevAlbums, newAlbum]);
-      setShowModal(false);
-      setAlbumName('');
+      const newAlbumName = albumName.trim().toLowerCase();
+  
+      const isDuplicate = albums.some(album => album.name.toLowerCase() === newAlbumName);
+      
+      if (!isDuplicate) {
+        const newAlbum = { name: albumName.trim(), outfits: [] };
+        setAlbums(prevAlbums => [...prevAlbums, newAlbum]);
+        setShowModal(false);
+        setAlbumName('');
+      } else {
+        setErrorMessage('Album already exists');
+      }
     }
   };
 
@@ -78,6 +89,7 @@ export default function AlbumsPage() {
             ) : (
               <>
                 <h2 className="text-lg font-semibold mb-2">Enter Album Name</h2>
+                {errorMessage && <p className='text-sm text-red-500 mb-2'>{errorMessage}</p>}
                 <input
                   type="text"
                   className="border border-gray-300 rounded-md p-2 mb-2 outline-none"
@@ -105,8 +117,8 @@ export default function AlbumsPage() {
   
       <div className="grid grid-cols-3 gap-4 m-5">
         {albums.map((album, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md p-4 relative">
-            <Link href={`/albums/${album.name}`} className="text-center text-lg font-semibold mb-2 hover:opacity-70">{album.name}</Link>
+          <div key={index} className="bg-white rounded-lg shadow-md p-4 relative text-center">
+            <Link href={`/albums/${album.name}`} className="text-lg font-semibold mb-2 hover:opacity-70">{album.name}</Link>
             <button
               className="absolute bottom-0 right-0 bg-transparent text-white px-4 py-2 rounded-md font-semibold"
               onClick={() => handleDeleteAlbum(index)}
