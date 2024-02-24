@@ -1,66 +1,162 @@
-'use client';
+"use client";
 
 import Link from "next/link";
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation"; // Changed from "next/navigation"
 import RegisterButton from "@/components/buttons/RegisterButton";
+import axios from "axios";
+
+const PasswordStrengthBar = ({ password }) => {
+  const calculateStrength = (password) => {
+    // Define your criteria for assessing password strength
+    const minLength = 8;
+    const hasCapitalLetter = /[A-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+
+    // Calculate the strength based on the criteria
+    let strength = 0;
+    if (password.length >= minLength) {
+      strength++;
+    }
+    if (hasCapitalLetter) {
+      strength++;
+    }
+    if (hasNumber) {
+      strength++;
+    }
+
+    return strength;
+  };
+
+  const strength = calculateStrength(password);
+  const isWeak = strength <= 2;
+
+  return (
+    <div className="flex items-center w-full">
+      <div className="relative flex items-center w-1/2 mr-4">
+        <div className="w-20 h-3 bg-gray-200 rounded-full">
+          <div
+            className={`h-3 rounded-full ${
+              isWeak ? "bg-red-500" : "bg-green-500"
+            }`}
+            style={{ width: `${(strength / 3) * 100}%` }}
+          ></div>
+        </div>
+        <p
+          className={`ml-2 text-sm font-medium ${
+            isWeak ? "text-red-500" : "text-green-500"
+          }`}
+        >
+          {isWeak ? "Weak" : "Strong"}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [user, setUser] = React.useState({
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [user, setUser] = useState({
     email: "",
     password: "",
     firstName: "",
     lastName: "",
   });
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [showStrengthBar, setShowStrengthBar] = useState(false);
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+  });
+  const [verificationSent, setVerificationSent] = useState(false);
+
+  const handlePasswordVisibilityToggle = () => {
+    setPasswordVisible(!passwordVisible);
+  };
+
+  const handlePasswordChange = (e) => {
+    setUser({ ...user, password: e.target.value });
+    setShowStrengthBar(e.target.value !== "");
+  };
+
+  const sendVerificationEmail = async (email) => {
+    try {
+      const response = await axios.post("/api/users/email", { email });
+      setVerificationSent(true);
+    } catch (error) {
+      setErrors(error.response.data);
+    }
+  };
 
   const onSignup = async () => {
     try {
-      const response = await axios.post("/api/users/register", {...user, confirmPassword});
+      // Reset errors before validation
+      setErrors({
+        email: "",
+        password: "",
+        confirmPassword: "",
+        firstName: "",
+        lastName: "",
+      });
+  
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(user.email)) {
+        setErrors({ ...errors, email: "Invalid email format" });
+        return;
+      }
+  
+      setLoading(true);
+      const response = await axios.post("/api/users/register", {
+        ...user,
+        confirmPassword,
+      });
       console.log("Signup success", response.data);
-      router.push("/login");
-    } catch (error){
-      console.log('singup failed', error.message);
-      if (error.response && error.response.status === 400){
-        setError("Account with that email already exists");
-      } else if (error.response && error.response.status === 505){
-        setError("All fields are required");
-      }
-      else if (error.response && error.response.status === 300){
-        setError("Invalid email format")
-      }
-      else if (error.response && error.response.status === 402){
-        setError("Passwords do not match")
-      }
-      else if (error.response && error.response.status === 403){
-        setError(<>Password must meet requirements: <br />Minimum 8 characters<br />Contain at least 1 capital letter<br />Contain at least 1 number</>);
+      setLoading(false);
+      sendVerificationEmail(user.email);
+      // router.push("/email");
+    } catch (error) {
+      console.log("signup failed", error.message);
+      setLoading(false);
+      if (error.response && error.response.status === 400) {
+        setErrors({
+          ...errors,
+          email: "Account with that email already exists",
+        });
+      } else if (error.response && error.response.status === 505) {
+        setErrors({ ...errors, email: "All fields are required" });
+      } else if (error.response && error.response.status === 402) {
+        setErrors({ ...errors, confirmPassword: "Passwords must match" });
+      } else if (error.response && error.response.status === 403) {
+        setErrors({
+          ...errors,
+          password: "Password must meet requirements",
+        });
       }
     }
   };
 
-  //const [buttonDisabled, setButtonDisabled] = React.useState(false)
-  const [error, setError] = React.useState("");
-
-  /*
-  useEffect (() => {
-    if (user.email.length > 0 && user.password.length > 0 && user.firstName.length > 0 && user.lastName.length > 0){
-      setButtonDisabled(false);
-    } else {
-      setButtonDisabled(true);
-    }
-  }, [user]);
-*/
-
   return (
     <div className="flex flex-col items-center justify-center py-10">
-      <h1 className="text-xl font-bold mb-5">
-        Create your personal account
-      </h1>
+      <h1 className="text-xl font-bold mb-5">Create your personal account</h1>
+      {verificationSent && (
+        <div className="bg-green-100 text-green-800 px-4 py-2 rounded-md mb-4">
+          Check your email, a verification code has been sent!
+        </div>
+      )}
+      <div className="text-left text-sm">
+        <span>Mandatory fields*</span>
+      </div>
       <hr />
-      <div className='flex flex-col'>
-      {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
+      <div className="flex flex-col">
         <input
           className="border border-black p-3 outline-none mb-4"
           id="email"
@@ -68,10 +164,13 @@ export default function RegisterPage() {
           value={user.email}
           onChange={(e) => {
             setUser({ ...user, email: e.target.value });
-            setError("");
+            setErrors({ ...errors, email: "" });
           }}
-          placeholder="E-mail address"
+          placeholder="E-mail address*"
         />
+        {errors.email && (
+          <p className="text-red-500 text-sm mb-2">{errors.email}</p>
+        )}
         <div className="flex gap-2">
           <input
             className="border border-black p-3 outline-none mb-4"
@@ -80,10 +179,14 @@ export default function RegisterPage() {
             value={user.firstName}
             onChange={(e) => {
               setUser({ ...user, firstName: e.target.value });
-              setError("");
+              setErrors({ ...errors, firstName: "" });
             }}
-            placeholder="First Name"
+            placeholder="First Name*"
           />
+          {errors.firstName && (
+            <p className="text-red-500 text-sm mb-2">{errors.firstName}</p>
+          )}
+
           <input
             className="border border-black p-3 outline-none mb-4"
             id="lastName"
@@ -91,48 +194,76 @@ export default function RegisterPage() {
             value={user.lastName}
             onChange={(e) => {
               setUser({ ...user, lastName: e.target.value });
-              setError("");
+              setErrors({ ...errors, lastName: "" });
             }}
-            placeholder="Last Name"
+            placeholder="Last Name*"
+          />
+          {errors.lastName && (
+            <p className="text-red-500 text-sm mb-2">{errors.lastName}</p>
+          )}
+        </div>
+        {showStrengthBar && <PasswordStrengthBar password={user.password} />}
+        <div className="relative mb-4">
+          <input
+            className="border border-black py-4 px-3 outline-none w-full"
+            type={passwordVisible ? "text" : "password"}
+            id="password"
+            placeholder="Password"
+            value={user.password}
+            onChange={handlePasswordChange}
+          />
+          <img
+            src={passwordVisible ? "/eye.png" : "/eyeslash.png"}
+            width="24px"
+            height="24px"
+            style={{
+              display: "inline",
+              marginLeft: "-30px",
+              cursor: "pointer",
+              position: "absolute",
+              top: "50%",
+              transform: "translateY(-50%)",
+            }}
+            onClick={handlePasswordVisibilityToggle}
           />
         </div>
         <input
-          className="border border-black p-3 outline-none mb-4"
-          id="password"
-          type="password"
-          value={user.password}
-          onChange={(e) => {
-            setUser({ ...user, password: e.target.value });
-            setError("");
-          }}
-          onKeyDown={(e) => {
-            if (e.key === ' ') {
-              e.preventDefault();
-            }
-          }}
-          placeholder="Password"
-        />
-        <input
-          className="border border-black p-3 outline-none mb-4"
+          className="border border-black py-4 px-3 outline-none w-full"
+          type={passwordVisible ? "text" : "password"}
           id="confirmPassword"
-          type="password"
+          placeholder="Confirm Password"
           value={confirmPassword}
           onChange={(e) => {
             setConfirmPassword(e.target.value);
-            setError("");
+            setErrors({ ...errors, confirmPassword: "" });
           }}
-          onKeyDown={(e) => {
-            if (e.key === ' ') {
-              e.preventDefault();
-            }
-          }}
-          placeholder="Confirm Password"
         />
+        {errors.confirmPassword && (
+          <p className="text-red-500 text-sm mb-2">{errors.confirmPassword}</p>
+        )}
+        <label>
+          <div>
+            <span className="text-sm">
+              <>
+                Password must meet requirements: <br />
+                Minimum 8 characters
+                <br />
+                Contain at least 1 capital letter
+                <br />
+                Contain at least 1 number
+                <br />
+                <br />
+              </>
+            </span>
+          </div>
+        </label>
         <RegisterButton onSignup={onSignup} />
       </div>
       <div className="flex gap-1 p-2 text-sm">
         <span>Already have an account?</span>
-        <Link href="/login" className="hover:underline hover:text-purple-800">Sign in</Link>
+        <Link href="/login" className="hover:underline hover:text-purple-800">
+          Sign in
+        </Link>
       </div>
     </div>
   );

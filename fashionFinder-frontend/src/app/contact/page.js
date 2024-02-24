@@ -1,14 +1,45 @@
+'use client'
+import emailjs from 'emailjs-com';
+import { useState } from 'react';
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    emailjs.sendForm('service_znx1zwu', 'template_cq89pfq', e.target, 'UHSSbPh-j0hEtzASh')
+      .then((result) => {
+        console.log('Email sent successfully:', result.text);
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          message: ''
+        });
+      }, (error) => {
+        console.error('Failed to send email:', error.text);
+      });
+  };
+
   return ( 
     <main className="flex justify-center items-center mt-10">
-      <div className="flex flex-col items-center bg-white p-8 rounded shadow-md w-5/6">
-        <script src="https://cdn.jsdeliver.net/npm/@emailjs/brower@3/dist/email.min.js"></script>
-        <script src="src/components/buttons/ContactUsPageButton.js"></script>
+      <div className="flex flex-col items-center bg-white p-8 rounded shadow-md w-full md:w-4/6 lg:w-11/12">
         <h3 className="text-3xl font-bold mb-4">CONTACT US</h3>
         
-        <form action="./send_email" method="send">
-        {/* <form action="./send_email" method="get"> */}
+        <form onSubmit={handleSubmit} className="w-full">
           <div className="mb-4">
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-600">
               Full Name*
@@ -18,15 +49,19 @@ export default function ContactPage() {
                 type="text"
                 id="firstName"
                 name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
                 placeholder="First name"
-                className="w-full p-2 mb-4 md:w-5/6 md:mr-2 border border-gray-300 rounded"
+                className="w-full p-2 mb-4 md:w-1/2 border border-gray-300 rounded"
               />
               <input
                 type="text"
                 id="lastName"
                 name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
                 placeholder="Last name"
-                className="w-full p-2 mb-4 md:w-5/6 border border-gray-300 rounded"
+                className="w-full p-2 mb-4 md:w-1/2 border border-gray-300 rounded"
               />
             </div>
           </div>
@@ -36,31 +71,33 @@ export default function ContactPage() {
               Email Address*
             </label>
             <input
-              type="text"
+              type="email"
               id="email"
               name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="Email address"
-              className="w-full p-2 mb-4 md:w-5/6 border border-gray-300 rounded"
+              className="w-full p-2 mb-4 border border-gray-300 rounded"
             />
           </div>
 
-          <div className="w-full md:w-11/12 mb-4">
+          <div className="mb-4">
             <label htmlFor="message" className="block text-sm font-medium text-gray-600">
               Message*
             </label>
             <textarea
               id="message"
               name="message"
+              value={formData.message}
+              onChange={handleChange}
               placeholder="Write your message"
-              className="w-full p-2 border border-gray-300 rounded resize"
+              className="w-full p-2 border border-gray-300 rounded resize-none h-40"
             />
           </div>
 
           <button type="submit" className="bg-black text-white py-2 px-4 rounded hover:bg-gray-600">
             Send Message
           </button>
-          
-          <sendEmail />
         </form>
       </div>
     </main>

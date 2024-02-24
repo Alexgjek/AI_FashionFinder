@@ -3,26 +3,45 @@
 import axios from 'axios';
 import Link from 'next/link';
 import React, {useEffect, useState} from 'react';
+import { useRouter } from "next/navigation";
+
+
 
 export default function VerifyEmailPage() {
 
   const [token, setToken] = useState('');
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState(false);
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showNotification, setShowNotification] = useState(false); // New state for controlling notification visibility
 
   const verifyUserEmail = async () => {
     try {
-      await axios.post('/api/users/verifyemail', {token})
-      setVerified(true);
-    } catch (error) {
-      setError(true);
-      console.log(error.response.data);
-    }
-  }
+      const response = axios.post('/api/users/verifyEmail', {token})
 
+      if (response.status === 200) {
+        setError('');
+        setSuccess(true); // Set success state to true
+        setShowNotification(true); // Show notification box
+        setLoading(false);
+      } else if (response.status === 400) {
+        setError('This email is not registered.');
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again later.');
+    }
+    setLoading(true);
+  };
+  
+  
   useEffect(() => {
     const urlToken = window.location.search.split('=')[1];
-    setToken(urlToken);
+    setToken(urlToken || '');
   }, [])
 
   useEffect(() => {
