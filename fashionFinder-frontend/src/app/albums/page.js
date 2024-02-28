@@ -82,7 +82,7 @@ export default function AlbumsPage() {
               <>
                 <h2 className="text-lg font-semibold mb-2">Are you sure you want to delete this album?</h2>
                 <div className="flex items-center justify-center">
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={confirmDeleteAlbum}>Yes</button>
+                  <button className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={confirmDeleteAlbum}>Yes</button>
                   <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" onClick={handleModalClose}>No</button>
                 </div>
               </>
@@ -99,7 +99,7 @@ export default function AlbumsPage() {
                   placeholder='Album Name'
                 />
                 <div className="flex items-center justify-center">
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={handleModalSubmit}>Create</button>
+                  <button className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={handleModalSubmit}>Create</button>
                   <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" onClick={handleModalClose}>Cancel</button>
                 </div>
               </>
