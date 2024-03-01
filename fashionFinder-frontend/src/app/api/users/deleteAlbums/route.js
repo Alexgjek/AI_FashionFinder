@@ -31,11 +31,7 @@ export async function DELETE(request) {
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-/*
-    if (!user.albums.find(album => album.albumName === albumName)) {
-      return NextResponse.json({ error: "Album not found in user's albums" }, { status: 404 });
-    }
-*/
+
     return NextResponse.json({ success: true, message: "Album deleted successfully" });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
