@@ -4,13 +4,27 @@ import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function AlbumsPage() {
   const [albumName, setAlbumName] = useState('');
   const [albums, setAlbums] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [deleteIndex, setDeleteIndex] = useState(null); 
+  const [deleteAlbumName, setDeleteAlbum] = useState(''); 
   const [errorMessage, setErrorMessage] = useState('');
+
+  const fetchAlbums = async () => {
+    try {
+      const response = await axios.get('/api/users/getUserAlbums');
+      setAlbums(response.data.albums);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAlbums();
+  }, []);
 
   const handleCreateAlbum = () => {
     setShowModal(true);
@@ -27,33 +41,48 @@ export default function AlbumsPage() {
     setAlbumName('');
   };
 
-  const handleModalSubmit = () => {
-    if (albumName.trim() !== '') {
-      const newAlbumName = albumName.trim().toLowerCase();
-  
-      const isDuplicate = albums.some(album => album.name.toLowerCase() === newAlbumName);
-      
-      if (!isDuplicate) {
-        const newAlbum = { name: albumName.trim(), outfits: [] };
-        setAlbums(prevAlbums => [...prevAlbums, newAlbum]);
-        setShowModal(false);
-        setAlbumName('');
+  const handleModalSubmit = async () => {
+    try {
+      const response = await axios.post('/api/users/createAlbums', { albumName });
+      console.log(albumName);
+
+      setAlbums(prevAlbums => [...prevAlbums, { albumName }]);
+      setShowModal(false);
+      setAlbumName('');
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 400) {
+          setErrorMessage('Album already exists');
+        } else {
+          setErrorMessage('Failed to create album');
+        }
       } else {
-        setErrorMessage('Album already exists');
+        setErrorMessage('Network error. Please try again.');
       }
     }
   };
 
-  const handleDeleteAlbum = (index) => {
-    setDeleteIndex(index); 
+  const handleDeleteAlbum = async (albumName) => {
+    setDeleteAlbum(albumName); 
     setShowModal(true); 
   };
 
-  const confirmDeleteAlbum = () => {
-    setAlbums(prevAlbums => prevAlbums.filter((_, i) => i !== deleteIndex)); 
-    setShowModal(false); 
-    setDeleteIndex(null); 
+  const confirmDeleteAlbum = async () => {
+    if (deleteAlbumName) {
+      console.log("Deleting album:", deleteAlbumName);
+      try {
+        const response = await axios.delete(`/api/users/deleteAlbums?albumName=${deleteAlbumName}`);
+        setShowModal(false);
+        setDeleteAlbum("");
+        await fetchAlbums();
+      } catch (error) {
+        console.log(error);
+        console.log("Failed to delete album");
+      }
+    }
   };
+  
+  
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -71,14 +100,13 @@ export default function AlbumsPage() {
   return (
     <main>
       {showModal && (
-        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
-        </div>
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-500 bg-opacity-50 z-50"></div>
       )}
   
       {showModal && (
         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
           <div className="bg-white p-10 rounded-md shadow-lg">
-            {deleteIndex !== null ? ( 
+            {deleteAlbumName ? ( 
               <>
                 <h2 className="text-lg font-semibold mb-2">Are you sure you want to delete this album?</h2>
                 <div className="flex items-center justify-center">
@@ -95,7 +123,6 @@ export default function AlbumsPage() {
                   className="border border-gray-300 rounded-md p-2 mb-2 outline-none"
                   value={albumName}
                   onChange={handleModalInputChange}
-                  onKeyP
                   placeholder='Album Name'
                 />
                 <div className="flex items-center justify-center">
@@ -117,19 +144,22 @@ export default function AlbumsPage() {
   
       <div className="grid grid-cols-3 gap-4 m-5">
         {albums.map((album, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md p-4 relative text-center">
-            <Link href={`/albums/${album.name}`} className="text-lg font-semibold mb-2 hover:opacity-70">{album.name}</Link>
-            <button
-              className="absolute bottom-0 right-0 bg-transparent text-white px-4 py-2 rounded-md font-semibold"
-              onClick={() => handleDeleteAlbum(index)}
-              title='Delete Album'
-            >
-              <FontAwesomeIcon icon={faTrashCan} className='text-red-500' />
-            </button>
-          </div>
+          album && album.albumName && ( 
+            <div key={index} className="bg-white rounded-lg shadow-md p-4 relative text-center">
+              <Link href={`/albums/${album.albumName}`} className="text-lg font-semibold mb-2 hover:opacity-70">{album.albumName}</Link>
+              <button
+                className="absolute bottom-0 right-0 bg-transparent text-white px-4 py-2 rounded-md font-semibold"
+                onClick={() => handleDeleteAlbum(album.albumName)}
+                title='Delete Album'
+              >
+                <FontAwesomeIcon icon={faTrashCan} className='text-red-500' />
+              </button>
+            </div>
+          )
         ))}
       </div>
     </main>
   );
+  
   
 }
