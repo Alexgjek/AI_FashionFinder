@@ -146,13 +146,17 @@ export default function AlbumsPage() {
         {albums.map((album, index) => (
           album && album.albumName && ( 
             <div key={index} className="bg-white rounded-lg shadow-md p-4 relative text-center">
-              <Link href={`/albums/${album.albumName}`} className="text-lg font-semibold mb-2 hover:opacity-70">{album.albumName}</Link>
+              <Link 
+                href={`/albums/${album.albumName}`} 
+                className="text-lg font-semibold mb-2 hover:opacity-70 truncate w-32 block overflow-hidden"
+                style={{ textOverflow: 'ellipsis' }}>
+                  {album.albumName}
+              </Link>
               <button
-                className="absolute bottom-0 right-0 bg-transparent text-white px-4 py-2 rounded-md font-semibold"
+                className="absolute bottom-0 right-0 bg-transparent text-white px-4 py-2"
                 onClick={() => handleDeleteAlbum(album.albumName)}
-                title='Delete Album'
-              >
-                <FontAwesomeIcon icon={faTrashCan} className='text-red-500' />
+                title='Delete Album'>
+                  <FontAwesomeIcon icon={faTrashCan} className='text-red-500' />
               </button>
             </div>
           )
@@ -160,6 +164,4 @@ export default function AlbumsPage() {
       </div>
     </main>
   );
-  
-  
 }
