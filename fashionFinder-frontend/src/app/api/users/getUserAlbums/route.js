@@ -9,7 +9,7 @@ export async function GET(request) {
   const token = request.cookies.get("token")?.value || '';
   const decodedToken = jwt.decode(token);
   const email = decodedToken ? decodedToken.email : '';
-
+  
   try {
     const userEmail = email
 
