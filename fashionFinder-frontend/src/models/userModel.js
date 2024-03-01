@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 
+const albumSchema = new mongoose.Schema({
+  albumName: String,
+  outfits: Array
+}, {_id: false});
 const userSchema = new mongoose.Schema({
   email:{
     type: String,
@@ -22,6 +26,7 @@ const userSchema = new mongoose.Schema({
   forgotPasswordExpire: Date,
   verifyToken: String,
   verifyTokenExpire: Date,
+  albums: [albumSchema]
 })
 
 const User = mongoose.models.users || mongoose.model
