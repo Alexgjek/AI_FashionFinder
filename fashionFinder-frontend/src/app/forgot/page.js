@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
             placeholder="Enter your email"
             className="w-full border rounded-md py-2 px-3 mb-3"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value.toLowerCase())} 
           />
           {error && <p className="text-red-600 mb-3">{error}</p>}
           <button onClick={handleResetRequest} disabled={loading} className={`bg-black text-white py-2 px-4 rounded-md hover:bg-black focus:outline-none focus:bg-black ${loading && 'opacity-50 cursor-not-allowed'}`}>

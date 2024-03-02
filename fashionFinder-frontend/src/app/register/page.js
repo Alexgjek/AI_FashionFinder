@@ -158,7 +158,7 @@ export default function RegisterPage() {
           type="text"
           value={user.email}
           onChange={(e) => {
-            setUser({ ...user, email: e.target.value });
+            setUser({ ...user, email: e.target.value.toLowerCase() });
             setErrors({ email: "" });
           }}
           placeholder="E-mail address*"
