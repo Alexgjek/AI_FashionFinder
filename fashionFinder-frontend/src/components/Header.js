@@ -1,53 +1,76 @@
 'use client'
-import axios from 'axios';
-import Link from 'next/link';
+
+import React, { useState } from 'react';
+import { useAuth } from '@/app/authContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import axios from 'axios';
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const {showModal, setShowModal} = useAuth(); 
   const router = useRouter();
 
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const response = await axios.post('/api/users/check-auth', { token });
-          setIsLoggedIn(response.data.isValid);
-        }
-      } catch (error) {
-        console.error('Error checking login status:', error);
-        setIsLoggedIn(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, []);
-
   const handleLogout = async () => {
+    setShowModal(true); 
+  };
+
+  const confirmLogout = async () => {
     try {
-      localStorage.removeItem('token');
-      router.push('/');
+      await axios.get('/api/users/logout');
       setIsLoggedIn(false);
+      router.push('/');
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error("Error logging out:", error);
     }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
   };
 
   return (
     <header className='bg-white border-b flex justify-between p-4'>
       <div className="flex items-center gap-6">
-        <Link href={'/'}>FashionFinder</Link>
+        <Link href={'/'}>FashionFinder </Link>
         <nav className='flex gap-4'>
           <Link href={'/about'}>About</Link>
-          <Link href={'/contact'}>Contact</Link>
+          <Link href={'/contact'}>Contact Us</Link>
           <Link href={'/albums'}>Albums</Link>
         </nav>
       </div>
       <nav className='flex items-center gap-4'>
         {isLoggedIn ? (
-          <button onClick={handleLogout}>Logout</button>
+          <>
+          <Link href={'/profile'}>Profile</Link>
+            <button 
+              onClick={handleLogout}
+              className="bg-black text-white px-6 py-3 rounded-lg font-semibold text-lg"
+            >
+              Logout
+            </button>
+            {showModal && (
+              <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
+                <div className="bg-white p-10 rounded-md shadow-lg">
+                  <h2 className="text-lg font-semibold mb-4">Are you sure you want to logout?</h2>
+                  <div className="flex items-center justify-center">
+                    <button 
+                      className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold" 
+                      onClick={confirmLogout}
+                    >
+                      Yes
+                    </button>
+                    <button 
+                      className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" 
+                      onClick={closeModal}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <>
             <Link href={'/login'}>Sign In</Link>
@@ -56,63 +79,5 @@ export default function Header() {
         )}
       </nav>
     </header>
-  )
+  );
 }
-// export default function Header() {
-//   const [isLoggedIn, setIsLoggedIn] = useState(true);
-
-//   useEffect(() => {
-//     checkLoggedInStatus();
-//   }, []);
-
-//   const checkLoggedInStatus = async () => {
-//     try {
-//       const response = await axios.get("/api/users/login");
-//     if (response) {
-//       setIsLoggedIn(true);
-//     } else {
-//       setIsLoggedIn(false);
-//     }
-//     } catch (error) {
-//       console.error("Error checking login status", error);
-//       // Handle error, set isLoggedIn to false or show error message to the user
-//     }
-//   };
-//   const router = useRouter()
-//   const logout = async () => {
-    
-//         // localStorage.removeItem('rememberedUser');
-//        setIsLoggedIn(true);
-//         await axios.get('/api/users/logout');
-//         router.push('/');
-      
-//     }
-
-//   return (
-//     <header className='bg-white border-b flex justify-between p-4'>
-//       <div className="flex items-center gap-6">
-//         <Link href={'/'}>FashionFinder </Link>
-//         <nav className='flex gap-4'>
-//           <Link href={'/about'}>About</Link>
-//           <Link href={'/contact'}>Contact Us</Link>
-//           <Link href={'/albums'}>Albums</Link>
-//         </nav>
-//       </div>
-//       <nav className='flex items-center gap-4'>
-//         {isLoggedIn? (
-//           <button 
-//             onClick={logout}
-//             style={{ backgroundColor: 'black', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px' }}
-//           >
-//             Logout
-//           </button>
-//         ) : (
-//           <>
-//             <Link href={'/login'}>Sign In</Link>
-//             <Link href={'/register'}>Create Account</Link>
-//           </>
-//         )}
-//       </nav>
-//     </header>
-//   );
-// }

@@ -6,8 +6,11 @@ import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faShirt, faSackDollar } from '@fortawesome/free-solid-svg-icons';
 import NextButton from '@/components/buttons/SignInPageButton';
+import { useAuth } from '@/app/authContext';
 
 export default function LoginPage() {
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const {showModal, setShowModal} = useAuth(); 
   const router = useRouter();
   const [error, setError] = useState("");
   const [user, setUser] = useState({
@@ -27,7 +30,10 @@ export default function LoginPage() {
   const onLogin = async () => {
     try {
       const response = await axios.post("/api/users/login", user);
+      setIsLoggedIn(true);
+      setShowModal(false);
       console.log("Login success", response.data);
+      
       if (user.rememberMe) {
         localStorage.setItem('rememberedUser', JSON.stringify(user));
       } else {
@@ -98,7 +104,7 @@ export default function LoginPage() {
             <Link href={'/forgot'} className='hover:underline hover:text-purple-800'>Forgot Password?</Link>
           </div>
         </div>
-        <NextButton onLogin={onLogin} />
+        <NextButton onLogin={onLogin}/>
         <div className='flex gap-1 text-sm py-2'>
           <span>Don't have an account?</span>
           <Link href={'/register'} className='hover:underline hover:text-purple-800'>Create account</Link>

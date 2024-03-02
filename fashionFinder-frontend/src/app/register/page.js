@@ -2,18 +2,16 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // Changed from "next/navigation"
+import { useRouter } from "next/navigation";
 import RegisterButton from "@/components/buttons/RegisterButton";
 import axios from "axios";
 
 const PasswordStrengthBar = ({ password }) => {
   const calculateStrength = (password) => {
-    // Define your criteria for assessing password strength
     const minLength = 8;
     const hasCapitalLetter = /[A-Z]/.test(password);
     const hasNumber = /\d/.test(password);
 
-    // Calculate the strength based on the criteria
     let strength = 0;
     if (password.length >= minLength) {
       strength++;
@@ -59,7 +57,6 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [user, setUser] = useState({
     email: "",
@@ -96,9 +93,16 @@ export default function RegisterPage() {
     }
   };
 
+  const handleNameChange = (field, value) => {
+    const sanitizedValue = value.replace(/[^A-Za-z]/g, "");
+    setUser({
+      ...user,
+      [field]: sanitizedValue,
+    });
+  };
+
   const onSignup = async () => {
     try {
-      // Reset errors before validation
       setErrors({
         email: "",
         password: "",
@@ -106,14 +110,12 @@ export default function RegisterPage() {
         firstName: "",
         lastName: "",
       });
-  
-      // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(user.email)) {
-        setErrors({ ...errors, email: "Invalid email format" });
+        setErrors({ email: "Invalid email format" });
         return;
       }
-  
+
       setLoading(true);
       const response = await axios.post("/api/users/register", {
         ...user,
@@ -122,24 +124,17 @@ export default function RegisterPage() {
       console.log("Signup success", response.data);
       setLoading(false);
       sendVerificationEmail(user.email);
-      // router.push("/email");
     } catch (error) {
       console.log("signup failed", error.message);
       setLoading(false);
       if (error.response && error.response.status === 400) {
-        setErrors({
-          ...errors,
-          email: "Account with that email already exists",
-        });
+        setErrors({ email: "Account with that email already exists" });
       } else if (error.response && error.response.status === 505) {
-        setErrors({ ...errors, email: "All fields are required" });
+        setErrors({ email: "All fields are required" });
       } else if (error.response && error.response.status === 402) {
-        setErrors({ ...errors, confirmPassword: "Passwords must match" });
+        setErrors({ confirmPassword: "Passwords must match" });
       } else if (error.response && error.response.status === 403) {
-        setErrors({
-          ...errors,
-          password: "Password must meet requirements",
-        });
+        setErrors({ password: "Password must meet requirements" });
       }
     }
   };
@@ -164,7 +159,7 @@ export default function RegisterPage() {
           value={user.email}
           onChange={(e) => {
             setUser({ ...user, email: e.target.value });
-            setErrors({ ...errors, email: "" });
+            setErrors({ email: "" });
           }}
           placeholder="E-mail address*"
         />
@@ -178,14 +173,11 @@ export default function RegisterPage() {
             type="text"
             value={user.firstName}
             onChange={(e) => {
-              setUser({ ...user, firstName: e.target.value });
-              setErrors({ ...errors, firstName: "" });
+              handleNameChange("firstName", e.target.value);
+              setErrors({ firstName: "" });
             }}
             placeholder="First Name*"
           />
-          {errors.firstName && (
-            <p className="text-red-500 text-sm mb-2">{errors.firstName}</p>
-          )}
 
           <input
             className="border border-black p-3 outline-none mb-4"
@@ -193,15 +185,18 @@ export default function RegisterPage() {
             type="text"
             value={user.lastName}
             onChange={(e) => {
-              setUser({ ...user, lastName: e.target.value });
-              setErrors({ ...errors, lastName: "" });
+              handleNameChange("lastName", e.target.value);
+              setErrors({ lastName: "" });
             }}
             placeholder="Last Name*"
           />
-          {errors.lastName && (
-            <p className="text-red-500 text-sm mb-2">{errors.lastName}</p>
-          )}
         </div>
+        {errors.firstName && (
+          <p className="text-red-500 text-sm mb-2">{errors.firstName}</p>
+        )}
+        {errors.lastName && (
+          <p className="text-red-500 text-sm mb-2">{errors.lastName}</p>
+        )}
         {showStrengthBar && <PasswordStrengthBar password={user.password} />}
         <div className="relative mb-4">
           <input
@@ -235,11 +230,14 @@ export default function RegisterPage() {
           value={confirmPassword}
           onChange={(e) => {
             setConfirmPassword(e.target.value);
-            setErrors({ ...errors, confirmPassword: "" });
+            setErrors({ confirmPassword: "" });
           }}
         />
         {errors.confirmPassword && (
           <p className="text-red-500 text-sm mb-2">{errors.confirmPassword}</p>
+        )}
+        {errors.password && (
+          <p className="text-red-500 text-sm mb-2">{errors.password}</p>
         )}
         <label>
           <div>

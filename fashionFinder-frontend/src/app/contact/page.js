@@ -10,16 +10,25 @@ export default function ContactPage() {
     message: ''
   });
 
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [formError, setFormError] = useState('');
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    let sanitizedValue = value.replace(/[^A-Za-z]/ig, ''); 
     setFormData(prevState => ({
       ...prevState,
-      [name]: value
+      [name]: sanitizedValue
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.message) {
+      setFormError('Please fill in all fields.');
+      return;
+    }
     emailjs.sendForm('service_znx1zwu', 'template_cq89pfq', e.target, 'UHSSbPh-j0hEtzASh')
       .then((result) => {
         console.log('Email sent successfully:', result.text);
@@ -29,16 +38,26 @@ export default function ContactPage() {
           email: '',
           message: ''
         });
-      }, (error) => {
+        setSuccessMessage('Your message has been sent successfully!');
+        setErrorMessage('');
+        setFormError('');
+      })
+      .catch((error) => {
         console.error('Failed to send email:', error.text);
+        setErrorMessage('Failed to send message. Please try again later.');
+        setSuccessMessage('');
       });
   };
 
-  return ( 
+  return (
     <main className="flex justify-center items-center mt-10">
-      <div className="flex flex-col items-center bg-white p-8 rounded shadow-md w-full md:w-4/6 lg:w-11/12">
+      <div className="flex flex-col items-center bg-white p-8 rounded shadow-md w-full md:w-2/3 lg:w-1/2">
         <h3 className="text-3xl font-bold mb-4">CONTACT US</h3>
-        
+
+        {successMessage && <p className="text-green-500">{successMessage}</p>}
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        {formError && <p className="text-red-500">{formError}</p>}
+
         <form onSubmit={handleSubmit} className="w-full">
           <div className="mb-4">
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-600">
@@ -75,7 +94,7 @@ export default function ContactPage() {
               id="email"
               name="email"
               value={formData.email}
-              onChange={handleChange}
+              onChange={(e) => setFormData(prevState => ({ ...prevState, email: e.target.value }))}
               placeholder="Email address"
               className="w-full p-2 mb-4 border border-gray-300 rounded"
             />
@@ -89,7 +108,7 @@ export default function ContactPage() {
               id="message"
               name="message"
               value={formData.message}
-              onChange={handleChange}
+              onChange={(e) => setFormData(prevState => ({ ...prevState, message: e.target.value }))}
               placeholder="Write your message"
               className="w-full p-2 border border-gray-300 rounded resize-none h-40"
             />
@@ -101,5 +120,5 @@ export default function ContactPage() {
         </form>
       </div>
     </main>
-  ); 
+  );
 }

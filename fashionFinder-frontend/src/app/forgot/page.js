@@ -10,12 +10,11 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showNotification, setShowNotification] = useState(false); // New state for controlling notification visibility
+  const [showNotification, setShowNotification] = useState(false); 
 
   const handleResetRequest = async () => {
     setLoading(true);
     try {
-      // Check email format before making the request
       if (!validateEmail(email)) {
         setError('Please enter a valid email address.');
         setLoading(false);
@@ -26,8 +25,8 @@ export default function ForgotPasswordPage() {
 
       if (response.status === 200) {
         setError('');
-        setSuccess(true); // Set success state to true
-        setShowNotification(true); // Show notification box
+        setSuccess(true);
+        setShowNotification(true);
         setLoading(false);
       } else if (response.status === 400) {
         setError('This email is not registered.');
@@ -41,7 +40,6 @@ export default function ForgotPasswordPage() {
   };
 
   const validateEmail = (email) => {
-    // Regular expression for basic email validation
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
@@ -51,7 +49,7 @@ export default function ForgotPasswordPage() {
       <h1 className="text-2xl font-bold mb-4">Forgot/Change Password</h1>
       {success ? (
         <>
-          {showNotification && ( // Conditionally render the notification box
+          {showNotification && ( 
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
               <span className="block sm:inline">An email with instructions to reset your password has been sent.</span>
               <span className="absolute top-0 bottom-0 right-0 px-4 py-3">

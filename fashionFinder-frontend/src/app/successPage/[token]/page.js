@@ -36,7 +36,6 @@ export default function EmailVerificationSuccess({ params }) {
     verifyToken();
   }, [params.token]);
 
-  // Function to handle navigation back to the login page
   const navigateToLogin = () => {
     router.push('/login');
   };
