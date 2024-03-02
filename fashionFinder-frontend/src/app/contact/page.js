@@ -94,7 +94,7 @@ export default function ContactPage() {
               id="email"
               name="email"
               value={formData.email}
-              onChange={(e) => setFormData(prevState => ({ ...prevState, email: e.target.value }))}
+              onChange={(e) => setFormData(prevState => ({ ...prevState, email: e.target.value.toLowerCase() }))}
               placeholder="Email address"
               className="w-full p-2 mb-4 border border-gray-300 rounded"
             />
