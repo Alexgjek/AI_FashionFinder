@@ -26,10 +26,17 @@ const userSchema = new mongoose.Schema({
   forgotPasswordExpire: Date,
   verifyToken: String,
   verifyTokenExpire: Date,
-  albums: [albumSchema]
+  albums: [albumSchema],
+  brands: [{
+    type: String,
+  }],
+  budget: {
+    type: Number,
+  }
 })
 
 const User = mongoose.models.users || mongoose.model
 ("users", userSchema);
 
 export default User;
+
