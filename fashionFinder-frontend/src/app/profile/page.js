@@ -56,14 +56,11 @@ export default function ProfilePage() {
         brands: uniqueBrands 
       }));
   
-      // Update disabled inputs based on the saved brands
       setDisabledInputs(uniqueBrands.map(() => true));
     } catch (error) {
       console.error("Error setting brands and budget:", error);
     }
   };
-  
-  
   
   
   const handleChange = (field, value) => {
@@ -234,7 +231,7 @@ export default function ProfilePage() {
                               handleBrandChange(index, e.target.value)
                             }
                             placeholder="Enter brand"
-                            className="border border-gray-300 p-2 rounded-md mr-2"
+                            className="border border-gray-300 p-2 rounded-md mr-2 outline-none"
                             disabled={disabledInputs[index]}
                             />
                           {brand && (
@@ -272,7 +269,7 @@ export default function ProfilePage() {
                       value={userInfo.budget}
                       onChange={(e) => handleBudgetChange(e.target.value)}
                       placeholder="e.g. $1,000"
-                      className="border border-gray-300 p-2 rounded-md"
+                      className="border border-gray-300 p-2 rounded-md outline-none"
                     />
                     <button
                       onClick={handleBudgetReset}
