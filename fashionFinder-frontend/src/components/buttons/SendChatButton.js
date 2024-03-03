@@ -5,7 +5,7 @@ import { faArrowUp } from '@fortawesome/free-solid-svg-icons'
 export default function SendChatButton({ inputValue, clearInput }) {
   const handleClick = () => {
     console.log(inputValue);
-    clearInput();
+    clearInput(inputValue);
   };
 
   useEffect(() => {
