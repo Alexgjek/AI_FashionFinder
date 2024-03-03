@@ -3,8 +3,6 @@ import User from "@/models/userModel";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-connect();
-
 export async function POST(request) {
   const token = request.cookies.get("token")?.value || '';
   const decodedToken = jwt.decode(token);
@@ -13,7 +11,6 @@ export async function POST(request) {
   try {
     const lowercasedEmail = email.toLowerCase();
     const reqBody = await request.json();
-    console.log(reqBody);
     const { brands, budget } = reqBody;
     
     const user = await User.findOne({ email: lowercasedEmail });
@@ -21,15 +18,20 @@ export async function POST(request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (Array.isArray(brands)) {
-      brands.forEach(newBrand => {
-        if (!user.brands.includes(newBrand)) {
-          user.brands.push(newBrand);
-        }
-      });
-    } else if (brands) {
+    if (!Array.isArray(brands)) {
       return NextResponse.json({ error: "Brands should be an array" }, { status: 400 });
     }
+
+    const existingBrands = user.brands;
+    const newBrands = brands.filter(brand => !existingBrands.includes(brand));
+
+    for (const newBrand of newBrands) {
+      if (existingBrands.includes(newBrand)) {
+        return NextResponse.json({ error: `Brand '${newBrand}' already exists for this user` }, { status: 409 });
+      }
+    }
+
+    user.brands.push(...newBrands);
 
     if (budget) {
       user.budget = budget;
