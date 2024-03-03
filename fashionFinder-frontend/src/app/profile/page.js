@@ -6,6 +6,9 @@ import { useState, useEffect } from 'react';
 export default function ProfilePage() {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [brandError, setBrandError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [disabledInputs, setDisabledInputs] = useState([]);
   const [userInfo, setUserInfo] = useState({
     email: "",
     password: "",
@@ -18,6 +21,7 @@ export default function ProfilePage() {
       try {
         const response = await axios.get("/api/users/userInfo");
         setUserInfo(response.data);
+        setDisabledInputs(response.data.brands.map(() => true));
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -27,15 +31,38 @@ export default function ProfilePage() {
   }, []);
 
   const handleSubmit = async () => {
+    const filteredBrands = userInfo.brands.filter(brand => brand.trim() !== '');
+  
+    if (filteredBrands.length === 0 && !isEditing) {
+      setIsEditing(true); 
+      setBrandError(true); 
+      return;
+    } else {
+      setBrandError(false); 
+    }
+  
+    const uniqueBrands = [...new Set(filteredBrands.map(brand => brand.trim()))];
+    if (uniqueBrands.length !== filteredBrands.length) {
+      setErrorMessage("Duplicate brand");
+      return;
+    }
+  
     try {
-      const response = await axios.post("/api/users/setBrandOrBudget", userInfo);
+      const response = await axios.post("/api/users/setBrandOrBudget", { ...userInfo, brands: uniqueBrands });
       console.log(response.data);
       setIsEditing(false);
+      setUserInfo(prevUserInfo => ({
+        ...prevUserInfo,
+        brands: uniqueBrands 
+      }));
+      setDisabledInputs(userInfo.brands.map(() => true));
     } catch (error) {
       console.error("Error setting brands and budget:", error);
     }
   };
-
+  
+  
+  
   const handleChange = (field, value) => {
     setUserInfo({
       ...userInfo,
@@ -57,41 +84,78 @@ export default function ProfilePage() {
         budget: ''
       }));
       console.log("Budget reset successfully");
+      setErrorMessage('');
     } catch (error) {
       console.error("Error resetting budget:", error);
     }
   };
   
   const addBrand = () => {
+    const isEmptyField = userInfo.brands.some(brand => brand.trim() === "");
+    if (isEmptyField) {
+      setBrandError(true);
+      return;
+    } else {
+      setBrandError(false);
+    }
+  
     setUserInfo({
       ...userInfo,
-      brands: [...(userInfo.brands || []), ""],
+      brands: [...userInfo.brands, ""],
     });
-  };
+    setDisabledInputs(prevDisabledInputs => [...prevDisabledInputs, false]);
 
+  };
+  
+  
   const handleBrandChange = (index, value) => {
-    const capitalizedBrand = value.replace(/\b\w/g, (char) => char.toUpperCase());
-    const updatedBrand = capitalizedBrand.replace(/[^A-Za-z\s]/g, '');
+    const capitalizedBrand = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
     const updatedBrands = [...userInfo.brands];
-    updatedBrands[index] = updatedBrand;
+    updatedBrands[index] = capitalizedBrand;
     setUserInfo({
       ...userInfo,
       brands: updatedBrands,
     });
+  
+    if (!isEditing) {
+      setDisabledInputs(prevDisabledInputs => {
+        const updatedDisabledInputs = [...prevDisabledInputs];
+        updatedDisabledInputs[index] = false;
+        return updatedDisabledInputs;
+      });
+    }
   };
+  
+  
+  
+  
 
-  const handleDeleteBrand = async (deleteBrand) => {
+  const handleDeleteBrand = async (index) => {
     try {
-      await axios.delete(`/api/users/deleteBrands?brand=${deleteBrand}`);
-      setUserInfo(prevUserInfo => ({
-        ...prevUserInfo,
-        brands: prevUserInfo.brands.filter(brand => brand !== deleteBrand)
-      }));
-      console.log("Brand removed successfully");
+      const deletedBrand = userInfo.brands[index];
+      const response = await axios.delete(`/api/users/deleteBrands?brand=${deletedBrand}`);
+      if (response.data.success) {
+        setUserInfo(prevUserInfo => ({
+          ...prevUserInfo,
+          brands: [...prevUserInfo.brands.slice(0, index), ...prevUserInfo.brands.slice(index + 1)]
+        }));
+  
+        setDisabledInputs(prevDisabledInputs => {
+          const updatedDisabledInputs = [...prevDisabledInputs];
+          updatedDisabledInputs.splice(index, 1); 
+          return updatedDisabledInputs;
+        });
+  
+        console.log("Brand removed successfully");
+      } else {
+        console.log("Error removing brand:", response.data.error);
+      }
+      setErrorMessage('');
     } catch (error) {
       console.error("Error removing brand:", error);
     }
   }
+  
 
   const changePassword = () => {
     router.push("/forgot");
@@ -146,6 +210,12 @@ export default function ProfilePage() {
             </div>
             <h6 className="mb-4">
               BRANDS{" "}
+              {brandError && (
+                <p className='text-red-500 font-normal'>Field must be filled</p>
+              )}
+              {errorMessage && (
+                <p className='text-red-500 font-normal'>{errorMessage}</p>
+              )}
               <div>
                 {isEditing ? (
                   <>
@@ -162,25 +232,28 @@ export default function ProfilePage() {
                             }
                             placeholder="Enter brand"
                             className="border border-gray-300 p-2 rounded-md mr-2"
-                          />
-                          <button
-                            onClick={() => handleDeleteBrand(brand)}
-                            className="bg-gray-500 text-white px-2 py-1 rounded-md"
-                          >
-                            Remove
-                          </button>
+                            disabled={disabledInputs[index]}
+                            />
+                          {brand && (
+                            <button
+                              onClick={() => handleDeleteBrand(index)}
+                              className="bg-gray-500 text-white px-2 py-1 rounded-md"
+                            >
+                              Remove
+                            </button>
+                          )}
                         </div>
                       ))}
                     <button
                       onClick={addBrand}
                       className="bg-black text-white px-2 py-1 rounded-md mt-2"
                     >
-                    Add Brand
+                      Add Brand
                     </button>
                   </>
                 ) : (
                   <span className="font-normal">
-                    {userInfo.brands && userInfo.brands.join(", ")}
+                    {userInfo.brands && userInfo.brands.filter(Boolean).join(", ")}
                   </span>
                 )}
               </div>
@@ -204,7 +277,7 @@ export default function ProfilePage() {
                       Reset Budget 
                     </button>
                   </div>
-                ) : userInfo.budget !== null && userInfo.budget !== '' ? (
+                ) : userInfo.budget !== undefined && userInfo.budget !== '' ? (
                   <span className="font-normal">
                     {`$${userInfo.budget}`}
                   </span>
@@ -227,3 +300,4 @@ export default function ProfilePage() {
     </main>
   );
 }
+
