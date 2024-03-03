@@ -55,11 +55,14 @@ export default function ProfilePage() {
         ...prevUserInfo,
         brands: uniqueBrands 
       }));
-      setDisabledInputs(userInfo.brands.map(() => true));
+  
+      // Update disabled inputs based on the saved brands
+      setDisabledInputs(uniqueBrands.map(() => true));
     } catch (error) {
       console.error("Error setting brands and budget:", error);
     }
   };
+  
   
   
   
