@@ -23,23 +23,25 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide a password"]
   },
-  forgotPasswordToken: String,
-  forgotPasswordExpire: Date,
-  verifyToken: String,
-  verifyTokenExpiry: Date,
-  albums: [albumSchema],
-  brands: [{
-    type: String,
-  }],
-  budget: {
-    type: Number,
-  },
   resetToken: String,
   resetTokenExpiry: Date,
-  active: Boolean,
-  activatedAt: Date
+  verifyToken: String,
+  verifyTokenExpiry: Date,
+  active: {
+    type: Boolean,
+    default: false
+  },
+  activatedAt: {
+    type: Date,
+    default: Date.now
+  },
+  albums: [albumSchema],
+  brands: [String],
+  budget: Number,
+  forgotPasswordToken: String,
+  forgotPasswordExpire: Date,
 });
 
-const User = mongoose.models.users || mongoose.model("users", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;
