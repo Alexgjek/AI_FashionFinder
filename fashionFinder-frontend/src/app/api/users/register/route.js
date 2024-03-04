@@ -5,28 +5,28 @@ import bcryptjs from "bcryptjs";
 
 connect(); // Connect to the database
 
-// Function to delete inactive users
-// async function deleteInactiveUsers() {
-//   try {
-//     const sixMinutesAgo = new Date(Date.now() - 6 * 60 * 1000);
-//     const inactiveUsers = await User.find({
-//       activatedAt: { $exists: false } // Users without activatedAt attribute
-//     });
+ //Function to delete inactive users
+ async function deleteInactiveUsers() {
+   try {
+     const sixMinutesAgo = new Date(Date.now() - 6 * 60 * 1000);
+     const inactiveUsers = await User.find({
+       activatedAt: { $exists: false } // Users without activatedAt attribute
+     });
 
-//     // Filter out users whose activatedAt is older than 6 minutes
-//     const usersToDelete = inactiveUsers.filter(user => !user.activatedAt || user.activatedAt < sixMinutesAgo);
+     // Filter out users whose activatedAt is older than 6 minutes
+     const usersToDelete = inactiveUsers.filter(user => !user.activatedAt || user.activatedAt < sixMinutesAgo);
 
-//     await Promise.all(
-//       usersToDelete.map(async (user) => {
-//         await User.findByIdAndDelete(user._id);
-//       })
-//     );
+     await Promise.all(
+       usersToDelete.map(async (user) => {
+         await User.findByIdAndDelete(user._id);
+       })
+     );
 
-//     console.log(`Deleted ${usersToDelete.length} inactive users`);
-//   } catch (error) {
-//     console.error('Error deleting inactive users:', error);
-//   }
-// }
+     console.log(`Deleted ${usersToDelete.length} inactive users`);
+   } catch (error) {
+     console.error('Error deleting inactive users:', error);
+   }
+ }
 export async function POST(request) {
   try {
     const reqBody = await request.json()
@@ -80,7 +80,7 @@ export async function POST(request) {
     console.log(savedUser);
 
 
-    // setInterval(deleteInactiveUsers, 360000); 
+    setInterval(deleteInactiveUsers, 360000); 
     
     return NextResponse.json({
       message: "User created succesfully",
@@ -88,8 +88,6 @@ export async function POST(request) {
       savedUser
     })
   
-
-
   } catch (error) {
     console.error(error); 
 
