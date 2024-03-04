@@ -55,9 +55,7 @@ const PasswordStrengthBar = ({ password }) => {
 export default function RegisterPage() {
   const router = useRouter();
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
   const [user, setUser] = useState({
     email: "",
     password: "",
@@ -74,6 +72,7 @@ export default function RegisterPage() {
     lastName: "",
   });
   const [verificationSent, setVerificationSent] = useState(false);
+  const [registrationAttempted, setRegistrationAttempted] = useState(false);
 
   const handlePasswordVisibilityToggle = () => {
     setPasswordVisible(!passwordVisible);
@@ -89,7 +88,7 @@ export default function RegisterPage() {
       const response = await axios.post("/api/users/email", { email });
       setVerificationSent(true);
     } catch (error) {
-      setErrors(error.response.data);
+      setErrors({ ...errors, email: error.response.data.error });
     }
   };
 
@@ -101,21 +100,43 @@ export default function RegisterPage() {
     });
   };
 
-  const onSignup = async () => {
-    try {
-      setErrors({
-        email: "",
-        password: "",
-        confirmPassword: "",
-        firstName: "",
-        lastName: "",
-      });
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(user.email)) {
-        setErrors({ email: "Invalid email format" });
-        return;
-      }
+  const validateFields = () => {
+    let formErrors = {};
 
+    if (!user.email) {
+      formErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(user.email)) {
+      formErrors.email = "Invalid email format";
+    }
+
+    if (!user.firstName) {
+      formErrors.firstName = "First Name is required";
+    }
+
+    if (!user.lastName) {
+      formErrors.lastName = "Last Name is required";
+    }
+
+    if (!user.password) {
+      formErrors.password = "Password is required";
+    }
+
+    if (!confirmPassword) {
+      formErrors.confirmPassword = "Confirm Password is required";
+    }
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
+
+  const onSignup = async () => {
+    setRegistrationAttempted(true);
+
+    if (!validateFields()) {
+      return;
+    }
+
+    try {
       setLoading(true);
       const response = await axios.post("/api/users/register", {
         ...user,
@@ -129,8 +150,6 @@ export default function RegisterPage() {
       setLoading(false);
       if (error.response && error.response.status === 400) {
         setErrors({ email: "Account with that email already exists" });
-      } else if (error.response && error.response.status === 505) {
-        setErrors({ email: "All fields are required" });
       } else if (error.response && error.response.status === 402) {
         setErrors({ confirmPassword: "Passwords must match" });
       } else if (error.response && error.response.status === 403) {
@@ -153,57 +172,66 @@ export default function RegisterPage() {
       <hr />
       <div className="flex flex-col">
         <input
-          className="border border-black p-3 outline-none mb-4"
+          className={`border border-black p-3 outline-none mb-4 ${
+            registrationAttempted && errors.email && "border-red-500"
+          }`}
           id="email"
           type="text"
           value={user.email}
           onChange={(e) => {
             setUser({ ...user, email: e.target.value.toLowerCase() });
-            setErrors({ email: "" });
+            setErrors({ ...errors, email: "" });
           }}
           placeholder="E-mail address*"
         />
-        {errors.email && (
-          <p className="text-red-500 text-sm mb-2">{errors.email}</p>
+        {registrationAttempted && errors.email && (
+          <p className="text-red-500 text-xs mb-2">{errors.email}</p>
         )}
         <div className="flex gap-2">
           <input
-            className="border border-black p-3 outline-none mb-4"
+            className={`border border-black p-3 outline-none mb-4 ${
+              registrationAttempted && errors.firstName && "border-red-500"
+            }`}
             id="firstName"
             type="text"
             value={user.firstName}
             onChange={(e) => {
               handleNameChange("firstName", e.target.value);
-              setErrors({ firstName: "" });
+              setErrors({ ...errors, firstName: "" });
             }}
             placeholder="First Name*"
           />
-
           <input
-            className="border border-black p-3 outline-none mb-4"
+            className={`border border-black p-3 outline-none mb-4 ${
+              registrationAttempted && errors.lastName && "border-red-500"
+            }`}
             id="lastName"
             type="text"
             value={user.lastName}
             onChange={(e) => {
               handleNameChange("lastName", e.target.value);
-              setErrors({ lastName: "" });
+              setErrors({ ...errors, lastName: "" });
             }}
             placeholder="Last Name*"
           />
         </div>
-        {errors.firstName && (
-          <p className="text-red-500 text-sm mb-2">{errors.firstName}</p>
-        )}
-        {errors.lastName && (
-          <p className="text-red-500 text-sm mb-2">{errors.lastName}</p>
-        )}
+        <div className="flex">
+          {registrationAttempted && errors.firstName && (
+            <p className="text-red-500 text-xs mb-2 ml-0">{errors.firstName}</p>
+          )}
+          {registrationAttempted && errors.lastName && (
+            <p className="text-red-500 text-xs mb-2 ml-auto">{errors.lastName}</p>
+          )}
+        </div>
         {showStrengthBar && <PasswordStrengthBar password={user.password} />}
         <div className="relative mb-4">
           <input
-            className="border border-black py-4 px-3 outline-none w-full"
+            className={`border border-black py-4 px-3 outline-none w-full ${
+              registrationAttempted && errors.password && "border-red-500"
+            }`}
             type={passwordVisible ? "text" : "password"}
             id="password"
-            placeholder="Password"
+            placeholder="Password*"
             value={user.password}
             onChange={handlePasswordChange}
           />
@@ -222,22 +250,24 @@ export default function RegisterPage() {
             onClick={handlePasswordVisibilityToggle}
           />
         </div>
+        {registrationAttempted && errors.password && (
+          <p className="text-red-500 text-xs mb-2">{errors.password}</p>
+        )}
         <input
-          className="border border-black py-4 px-3 outline-none w-full"
+          className={`border border-black py-4 px-3 outline-none w-full ${
+            registrationAttempted && errors.confirmPassword && "border-red-500"
+          }`}
           type={passwordVisible ? "text" : "password"}
           id="confirmPassword"
-          placeholder="Confirm Password"
+          placeholder="Confirm Password*"
           value={confirmPassword}
           onChange={(e) => {
             setConfirmPassword(e.target.value);
-            setErrors({ confirmPassword: "" });
+            setErrors({ ...errors, confirmPassword: "" });
           }}
         />
-        {errors.confirmPassword && (
-          <p className="text-red-500 text-sm mb-2">{errors.confirmPassword}</p>
-        )}
-        {errors.password && (
-          <p className="text-red-500 text-sm mb-2">{errors.password}</p>
+        {registrationAttempted && errors.confirmPassword && (
+          <p className="text-red-500 text-xs mb-2">{errors.confirmPassword}</p>
         )}
         <label>
           <div>
@@ -255,7 +285,12 @@ export default function RegisterPage() {
             </span>
           </div>
         </label>
-        <RegisterButton onSignup={onSignup} />
+        <button
+          onClick={onSignup}
+          className="border bg-black text-white border-black py-4 px-3 outline-none w-full"
+        >
+          Register
+        </button>
       </div>
       <div className="flex gap-1 p-2 text-sm">
         <span>Already have an account?</span>
