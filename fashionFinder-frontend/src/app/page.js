@@ -1,5 +1,8 @@
+// newest code 
+
 'use client';
-import { useState, useRef, useEffect } from 'react'; 
+import { useState, useRef, useEffect } from 'react';
+import Header from '@/components/Header';
 import SendChatButton from '@/components/buttons/SendChatButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
@@ -8,17 +11,16 @@ export default function Home() {
   const [inputValue, setInputValue] = useState('');
   const [conversation, setConversation] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const conversationContainerRef = useRef(null); 
+  const conversationContainerRef = useRef(null);
 
   const clearInput = () => {
-    setIsSubmitted(true);
-    setConversation([...conversation, inputValue, "Hi"]); 
     setInputValue('');
   };
 
+
   const handleNewChat = () => {
-    setConversation([]); 
-    setIsSubmitted(false); 
+    setConversation([]);
+    setIsSubmitted(false);
   };
 
   useEffect(() => {
@@ -27,12 +29,61 @@ export default function Home() {
     }
   }, [conversation]);
 
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    console.log(inputValue)
+
+    setIsSubmitted(true)
+    conversation.push({
+      sender: "You",
+      message: `${inputValue}`,
+      link: false
+    }, {
+      sender: "FashionFinder",
+      message: `Looking for the best match for "${inputValue}"`,
+      link: false
+    });
+    clearInput();
+    
+    await fetch("http://localhost:3005/prompt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        prompt: inputValue
+      })
+    }).then(response => response.json()).then(function(resp) {
+      let results = [{
+        sender: "FashionFinder",
+        message: `Found ${resp.length} results matching your query`,
+        link: false
+      }, {
+        sender: "FashionFinder",
+        message: resp.map(item => item.product_url).join("\n"),
+        link: true
+      }];
+
+      conversation.push(...results);
+      console.log(conversation);
+    });
+  };
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  }
+
+
   return (
     <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
       <div className='bg-gray-200 col-span-1 left-0 p-1'>
-        <button 
+        <button
           className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
-          onClick={handleNewChat} 
+          onClick={handleNewChat}
         >
           <span className='font-semibold text-sm'>New Chat</span>
           <FontAwesomeIcon icon={faPenToSquare} />
@@ -41,26 +92,17 @@ export default function Home() {
       <div className='col-span-6 flex flex-col items-center justify-center'>
         {isSubmitted ? (
           <div
-            ref={conversationContainerRef} 
+            ref={conversationContainerRef}
             className='absolute top-20 w-5/6 p-2'
             style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}
           >
-            {conversation.map((message, index) => (
+            {conversation.map((conv, index) => (
               <div key={index} className='p-2'>
-                {index % 2 === 0 && (
-                  <>
-                    <p className='font-bold'>You</p>
-                    <p className='font-md'>{message}</p>
-                    <hr className='bg-black' />
-                  </>
-                )}
-                {index % 2 !== 0 && (
-                  <>
-                    <p className='font-bold'>FashionFinder</p>
-                    <p className='font-md'>{message}</p>
-                    <hr className='bg-black' />
-                  </>
-                )}
+                <>
+                  <p className='font-bold'>{conv.sender}</p>
+                  <div className='font-md'>{conv.message.split("\n").map((part, idx) => conv.link ? (<a key={idx} href={part} target="_blank" style={{display:"block",color:"blue",textDecoration:"underline"}}>{part}</a>) : (<p key={idx}>{part}</p>))}</div>
+                  <hr className='bg-black' />
+                </>
               </div>
             ))}
           </div>
@@ -75,16 +117,18 @@ export default function Home() {
             </h2>
           </div>
         )}
-        <div className="absolute bottom-5 w-5/6 flex justify-center h-16">
+        <div className="absolute bottom-5 w-5/6 flex justify-center h-16" >
           <input
             type="text"
             value={inputValue}
+            onKeyDown={handleKeyDown}
             onChange={e => setInputValue(e.target.value)}
             className="w-2/4 p-4 border rounded-xl outline-none z-10"
             placeholder="Message FashionFinder..."
           />
-          <SendChatButton inputValue={inputValue} clearInput={clearInput} />
+          <SendChatButton inputValue={inputValue} clearInput={clearInput} handleClick={handleSubmit} />
         </div>
+
       </div>
     </div>
   );
