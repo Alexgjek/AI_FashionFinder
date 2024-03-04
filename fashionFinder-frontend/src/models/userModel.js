@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   forgotPasswordToken: String,
   forgotPasswordExpire: Date,
   verifyToken: String,
-  verifyTokenExpire: Date,
+  verifyTokenExpiry: Date,
   albums: [albumSchema],
   brands: [{
     type: String,
