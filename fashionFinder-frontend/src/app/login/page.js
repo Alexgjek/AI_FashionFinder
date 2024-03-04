@@ -49,23 +49,9 @@ export default function LoginPage() {
     }
   }, [user]);
 */
-useEffect(() => {
-  const passwordInput = document.getElementById('password');
-  const observer = new MutationObserver(() => {
-    if (passwordInput.type === 'text') {
-      passwordInput.type = 'password';
-    }
-  });
-
-  observer.observe(passwordInput, { attributes: true });
-
-  return () => {
-    observer.disconnect();
-  };
-}, []);
   return (
     <main>
-      <div className="max-w-lg mx-auto py-6">
+      <div className="max-w-lg mx-auto">
         <h1 className="text-2xl font-bold mt-10 mb-5">Enter your email</h1>
         {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
         <input
