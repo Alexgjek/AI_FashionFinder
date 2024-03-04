@@ -1,54 +1,59 @@
-'use client';
-
-import React, { useEffect } from 'react';
+'use client'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faShirt, faSackDollar } from '@fortawesome/free-solid-svg-icons';
 import NextButton from '@/components/buttons/SignInPageButton';
+import { useAuth } from '@/app/authContext';
 
 export default function LoginPage() {
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const {showModal, setShowModal} = useAuth(); 
   const router = useRouter();
-  const [error, setError] = React.useState("");
-
-  const [user, setUser] = React.useState({
+  const [error, setError] = useState("");
+  const [user, setUser] = useState({
     email: '',
     password: '',
+    rememberMe: false
   });
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const [buttonDisabled, setButtonDisabled] = React.useState(false);
-  //const [loading, setLoading] = React.useState(false);
-
+  useEffect(() => {
+    const storedUser = localStorage.getItem('rememberedUser');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const onLogin = async () => {
     try {
-      //setLoading(true);
       const response = await axios.post("/api/users/login", user);
+      setIsLoggedIn(true);
+      setShowModal(false);
       console.log("Login success", response.data);
+      
+      if (user.rememberMe) {
+        localStorage.setItem('rememberedUser', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('rememberedUser');
+      }
       router.push("/profile");
-    } catch (error){
-      console.log('singup failed', error.message);
+    } catch (error) {
+      console.log('login failed', error.message);
       if (error.response && error.response.status === 400){
         setError("User does not exist");
       } else if (error.response && error.response.status === 300){
         setError("Invalid email format");
-      }
-      else if (error.response && error.response.status === 500){
+      } else if (error.response && error.response.status === 401){
+        setError("Account not activated");
+      } else if (error.response && error.response.status === 500){
         setError("Invalid login credentials");
       }
     }
-  }
+  };
 
-  /*
-  useEffect(() => {
-    if (user.email.length > 0 && user.password.length > 0){
-      setButtonDisabled(false);
-    } else {
-      setButtonDisabled(true);
-    }
-  }, [user]);
-*/
   return (
     <main>
       <div className="max-w-lg mx-auto">
@@ -59,22 +64,47 @@ export default function LoginPage() {
           type="text"
           id="email"
           placeholder="E-mail address"
+          value={user.email}
           onChange={(e) => {
             setUser({ ...user, email: e.target.value.toLowerCase()});
             setError("");
           }}
         />
-        <input
-          className="border border-black py-4 px-3 outline-none w-full"
-          type="password"
-          id="password"
-          placeholder="password"
-          onChange={(e) => {
-            setUser({ ...user, password: e.target.value });
-            setError("");
-          }}
-        />
-        <NextButton onLogin={onLogin} />
+        <div className="relative">
+          <input
+            className="border border-black py-4 px-3 outline-none w-full"
+            type={passwordVisible ? "text" : "password"}
+            id="password"
+            placeholder="Password"
+            value={user.password}
+            onChange={(e) => {
+              setUser({ ...user, password: e.target.value });
+              setError("");
+            }}
+          />
+          <img
+            src={passwordVisible ? "/eye.png" : "/eyeslash.png"}
+            width="24px"
+            height="24px"
+            style={{ display: 'inline', marginLeft: '-30px', cursor: 'pointer', position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
+            onClick={() => setPasswordVisible(!passwordVisible)}
+          />
+        </div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={user.rememberMe}
+              onChange={(e) => setUser({ ...user, rememberMe: e.target.checked })}
+            />
+            <label htmlFor="rememberMe" className="ml-2">Remember me</label>
+          </div>
+          <div>
+            <Link href={'/forgot'} className='hover:underline hover:text-purple-800'>Forgot Password?</Link>
+          </div>
+        </div>
+        <NextButton onLogin={onLogin}/>
         <div className='flex gap-1 text-sm py-2'>
           <span>Don't have an account?</span>
           <Link href={'/register'} className='hover:underline hover:text-purple-800'>Create account</Link>
