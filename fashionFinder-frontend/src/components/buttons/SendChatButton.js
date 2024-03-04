@@ -1,34 +1,11 @@
-import { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons'
 
-export default function SendChatButton({ inputValue, clearInput }) {
-  const handleClick = () => {
-    console.log(inputValue);
-    clearInput(inputValue);
-  };
-
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        handleClick();
-      }
-    };
-  
-    document.addEventListener('keydown', handleKeyPress);
-  
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [handleClick]);
-
+export default function SendChatButton() {
   return (
     <button
       type="button"
-      className="px-4 py-1.5 border border-gray-300 rounded-xl bg-slate-500 text-white"
-      onClick={handleClick}
-    >
+      className="px-4 py-1.5 border border-gray-300 rounded-r-md bg-slate-500 text-white">
       <FontAwesomeIcon icon={faArrowUp} className="text-white w-5" />
     </button>
   );
