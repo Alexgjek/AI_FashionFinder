@@ -46,7 +46,7 @@ export default function Home() {
     });
     clearInput();
     
-    await fetch("http://localhost:3005/prompt", {
+    await fetch("http://localhost:3000/prompt", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
