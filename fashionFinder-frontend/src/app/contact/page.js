@@ -1,4 +1,3 @@
-
 export default function ContactPage() {
   return ( 
     <main className="flex justify-center items-center mt-10">
@@ -9,54 +8,53 @@ export default function ContactPage() {
         
         <form action="./send_email" method="send">
         {/* <form action="./send_email" method="get"> */}
+        <h3 class="text-l font-bold text-center mb-2 text-gray-500">All Fields are Required</h3>
           <div className="mb-4">
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-600">
-              Full Name*
+            <label  htmlFor="fullName" className="block text-sm font-medium text-gray-600">
+              
             </label>
             <div className="flex space-x-2">
-              <input
+              <input 
                 type="text"
                 id="firstName"
                 name="firstName"
-                placeholder="First name"
+                placeholder="First name" 
                 className="w-full p-2 mb-4 md:w-5/6 md:mr-2 border border-gray-300 rounded"
               />
               <input
                 type="text"
                 id="lastName"
                 name="lastName"
-                placeholder="Last name"
-                className="w-full p-2 mb-4 md:w-5/6 border border-gray-300 rounded"
+                placeholder="Last name" 
+                className=" w-full p-2 mb-4 md:w-5/6 border border-gray-300 rounded"
               />
             </div>
           </div>
 
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-600">
-              Email Address*
             </label>
             <input
               type="text"
               id="email"
               name="email"
-              placeholder="Email address"
+              placeholder="Email address" 
               className="w-full p-2 mb-4 md:w-5/6 border border-gray-300 rounded"
             />
           </div>
 
           <div className="w-full md:w-11/12 mb-4">
             <label htmlFor="message" className="block text-sm font-medium text-gray-600">
-              Message*
             </label>
             <textarea
               id="message"
-              name="message"
+              name="message" 
               placeholder="Write your message"
               className="w-full p-2 border border-gray-300 rounded resize"
             />
           </div>
 
-          <button type="submit" className="bg-black text-white py-2 px-4 rounded hover:bg-gray-600">
+          <button type="submit" className="bg-black text-white py-2 px-4 rounded hover:bg-gray-600" >
             Send Message
           </button>
           
@@ -66,3 +64,4 @@ export default function ContactPage() {
     </main>
   ); 
 }
+
