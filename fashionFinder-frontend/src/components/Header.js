@@ -8,7 +8,7 @@ export default function Header(){
           <Link href={'/'}>FashionFinder </Link>
           <nav className='flex gap-4'>
           <Link href={'/about'}>About</Link>
-          <Link href={'/contact'}>Contact</Link>
+          <Link href={'/contact'}>Contact Us</Link>
           <Link href={'/albums'}>Albums</Link>
           </nav>
         </div>
@@ -19,3 +19,4 @@ export default function Header(){
     </header>
   )
 }
+
