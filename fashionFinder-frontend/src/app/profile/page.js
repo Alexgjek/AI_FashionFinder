@@ -72,8 +72,8 @@ export default function ProfilePage() {
 
   const handleBudgetChange = (value) => {
     const formattedValue = value.replace(/^0(?!\.)/, '');
-    const numberWithCommas = formattedValue.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    handleChange("budget", numberWithCommas);
+    //const numberWithCommas = formattedValue.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    handleChange("budget", formattedValue);
   };
 
   const handleBudgetReset = async () => {
