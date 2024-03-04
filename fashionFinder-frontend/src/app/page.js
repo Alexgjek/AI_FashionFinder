@@ -17,7 +17,6 @@ export default function Home() {
     setInputValue('');
   };
 
-
   const handleNewChat = () => {
     setConversation([]);
     setIsSubmitted(false);
@@ -35,18 +34,20 @@ export default function Home() {
     console.log(inputValue)
 
     setIsSubmitted(true)
-    conversation.push({
+    const newMessage = {
       sender: "You",
       message: `${inputValue}`,
       link: false
-    }, {
+    };
+    const fashionFinderMessage = {
       sender: "FashionFinder",
       message: `Looking for the best match for "${inputValue}"`,
       link: false
-    });
+    };
+    setConversation(prevConversation => [...prevConversation, newMessage, fashionFinderMessage]);
     clearInput();
     
-    await fetch("http://localhost:3000/prompt", {
+    const response = await fetch("http://localhost:3000/prompt", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -54,20 +55,21 @@ export default function Home() {
       body: JSON.stringify({
         prompt: inputValue
       })
-    }).then(response => response.json()).then(function(resp) {
-      let results = [{
-        sender: "FashionFinder",
-        message: `Found ${resp.length} results matching your query`,
-        link: false
-      }, {
-        sender: "FashionFinder",
-        message: resp.map(item => item.product_url).join("\n"),
-        link: true
-      }];
-
-      conversation.push(...results);
-      console.log(conversation);
     });
+    const respJson = await response.json();
+    const results = [
+      {
+        sender: "FashionFinder",
+        message: `Found ${respJson.length} results matching your query`,
+        link: false
+      },
+      {
+        sender: "FashionFinder",
+        message: respJson.map(item => item.product_url).join("\n"),
+        link: true
+      }
+    ];
+    setConversation(prevConversation => [...prevConversation, ...results]);
   };
 
   function handleKeyDown(e) {
