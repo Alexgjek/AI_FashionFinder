@@ -53,39 +53,9 @@ export default function RegisterPage() {
   }, [user]);
 */
 
-useEffect(() => {
-  const passwordInput = document.getElementById('password');
-  const observer = new MutationObserver(() => {
-    if (passwordInput.type === 'text') {
-      passwordInput.type = 'password';
-    }
-  });
-
-  observer.observe(passwordInput, { attributes: true });
-
-  return () => {
-    observer.disconnect();
-  };
-}, []);
-
-useEffect(() => {
-  const confirmPasswordInput = document.getElementById('confirmPassword');
-  const observer = new MutationObserver(() => {
-    if (confirmPasswordInput.type === 'text') {
-      confirmPasswordInput.type = 'password';
-    }
-  });
-
-  observer.observe(confirmPasswordInput, { attributes: true });
-
-  return () => {
-    observer.disconnect();
-  };
-}, []);
-
   return (
-    <div className="flex flex-col items-center justify-center py-16">
-      <h1 className="text-2xl font-bold mb-5">
+    <div className="flex flex-col items-center justify-center py-10">
+      <h1 className="text-xl font-bold mb-5">
         Create your personal account
       </h1>
       <hr />
@@ -160,7 +130,7 @@ useEffect(() => {
         />
         <RegisterButton onSignup={onSignup} />
       </div>
-      <div className="flex gap-1 p-4 text-sm">
+      <div className="flex gap-1 p-2 text-sm">
         <span>Already have an account?</span>
         <Link href="/login" className="hover:underline hover:text-purple-800">Sign in</Link>
       </div>
