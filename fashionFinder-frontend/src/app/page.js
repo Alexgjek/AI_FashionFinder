@@ -47,7 +47,7 @@ export default function Home() {
     setConversation(prevConversation => [...prevConversation, newMessage, fashionFinderMessage]);
     clearInput();
     
-    const response = await fetch("http://localhost:3000/prompt", {
+    const response = await fetch("http://localhost:3005/prompt", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
