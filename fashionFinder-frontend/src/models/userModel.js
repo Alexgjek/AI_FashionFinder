@@ -33,7 +33,6 @@ const userSchema = new mongoose.Schema({
   },
   activatedAt: {
     type: Date,
-    default: Date.now
   },
   albums: [albumSchema],
   brands: [String],

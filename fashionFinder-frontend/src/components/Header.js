@@ -1,16 +1,27 @@
-'use client'
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/app/authContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 
 export default function Header() {
-  const { isLoggedIn, setIsLoggedIn } = useAuth();
-  const { showModal, setShowModal } = useAuth();
-  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const {isLoggedIn, setIsLoggedIn} = useAuth();
+  const {showModal, setShowModal} = useAuth(); 
+  const router = useRouter();
+
+  useEffect(() => {
+    grabEmail();
+  }, []);
+
+  const grabEmail = async () => {
+    try {
+      const response = await axios.get('api/users/grabUserEmail');
+      setIsLoggedIn(true); 
+    } catch (error) {
+      setIsLoggedIn(false); 
+    }
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -20,16 +31,16 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setShowModal(true);
   };
 
   const confirmLogout = async () => {
     try {
       await axios.get('/api/users/logout');
-      setIsLoggedIn(false);
-      setIsMobileMenuOpen(false);
-      router.push('/');
+      setIsLoggedIn(false); 
+      setIsMobileMenuOpen(false); 
+      router.push('/login');
       setShowModal(false); 
     } catch (error) {
       console.error("Error logging out:", error);
@@ -37,14 +48,14 @@ export default function Header() {
   };
 
   const closeModal = () => {
-    setShowModal(false);
+    setShowModal(false); 
   };
 
   return (
     <header className='bg-white border-b flex justify-between p-4'>
       <div className="flex items-center gap-6">
-      <nav className='hidden md:flex gap-4'>
         <Link href={'/'}>FashionFinder </Link>
+        <nav className='hidden md:flex gap-4'>
           <Link href={'/about'}>About</Link>
           <Link href={'/contact'}>Contact Us</Link>
           <Link href={'/albums'}>Albums</Link>
@@ -92,7 +103,6 @@ export default function Header() {
                 </svg>
               </button>
               <nav className="flex flex-col items-center gap-4 text-white">
-                <Link href="/" onClick={handleMenuItemClick}>FashionFinder</Link>
                 <Link href="/about" onClick={handleMenuItemClick}>About</Link>
                 <Link href="/contact" onClick={handleMenuItemClick}>Contact</Link>
                 <Link href="/albums" onClick={handleMenuItemClick}>Albums</Link>
@@ -146,7 +156,7 @@ export default function Header() {
             <Link href={'/profile'}>Profile</Link>
             <button
               onClick={handleLogout}
-              className="bg-black text-white px-6 py-3 rounded-lg font-semibold text-lg"
+              className="bg-transparent text-black px-5 text-md"
             >
               Logout
             </button>
@@ -161,4 +171,3 @@ export default function Header() {
     </header>
   );
 }
-

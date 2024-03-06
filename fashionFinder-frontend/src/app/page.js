@@ -1,11 +1,10 @@
-// newest code 
 
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import Header from '@/components/Header';
 import SendChatButton from '@/components/buttons/SendChatButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 export default function Home() {
   const [inputValue, setInputValue] = useState('');
@@ -33,44 +32,33 @@ export default function Home() {
 
     console.log(inputValue)
 
-    setIsSubmitted(true)
+    setIsSubmitted(true);
     const newMessage = {
       sender: "You",
       message: `${inputValue}`,
       link: false
     };
-    const fashionFinderMessage = {
-      sender: "FashionFinder",
-      message: `Looking for the best match for "${inputValue}"`,
-      link: false
-    };
-    setConversation(prevConversation => [...prevConversation, newMessage, fashionFinderMessage]);
+    setConversation(prevConversation => [...prevConversation, newMessage]);
     clearInput();
-    
-    const response = await fetch("http://localhost:3005/prompt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        prompt: inputValue
-      })
-    });
-    const respJson = await response.json();
-    const results = [
-      {
+
+    try {
+      const response = await axios.post('http://localhost:8000/getAIResponse', {
+        prompt: inputValue,
+      });
+      const respJson = response.data;
+
+      const fashionFinderMessage = {
         sender: "FashionFinder",
-        message: `Found ${respJson.length} results matching your query`,
+        message: respJson.ai_response,
         link: false
-      },
-      {
-        sender: "FashionFinder",
-        message: respJson.map(item => item.product_url).join("\n"),
-        link: true
-      }
-    ];
-    setConversation(prevConversation => [...prevConversation, ...results]);
+      };
+
+      setConversation(prevConversation => [...prevConversation, fashionFinderMessage]);
+    } catch (error) {
+      console.error('Error fetching AI response:', error);
+    }
   };
+
 
   function handleKeyDown(e) {
     if (e.key === 'Enter') {
@@ -102,23 +90,23 @@ export default function Home() {
               <div key={index} className='p-2'>
                 <>
                   <p className='font-bold'>{conv.sender}</p>
-                  <div className='font-md'>{conv.message.split("\n").map((part, idx) => conv.link ? (<a key={idx} href={part} target="_blank" style={{display:"block",color:"blue",textDecoration:"underline"}}>{part}</a>) : (<p key={idx}>{part}</p>))}</div>
+                  <div className='font-md'>{conv.message.split("\n").map((part, idx) => conv.link ? (<a key={idx} href={part} target="_blank" style={{ display: "block", color: "blue", textDecoration: "underline" }}>{part}</a>) : (<p key={idx}>{part}</p>))}</div>
                   <hr className='bg-black' />
                 </>
               </div>
             ))}
           </div>
         ) : (
-          <div className='mx-auto'>
-            <img src="/FFlogo.png" />
-            <h1 className='text-4xl mx-auto font-semibold text-center'>
-              Tell us what you're looking for
-            </h1>
-            <h2 className='font-semibold text-xl text-center p-2 mb-20'>
-              We'll find it for you
-            </h2>
-          </div>
-        )}
+            <div className='mx-auto'>
+              <img src="/FFlogo.png" />
+              <h1 className='text-4xl mx-auto font-semibold text-center'>
+                Tell us what you're looking for
+              </h1>
+              <h2 className='font-semibold text-xl text-center p-2 mb-20'>
+                We'll find it for you
+              </h2>
+            </div>
+          )}
         <div className="absolute bottom-5 w-5/6 flex justify-center h-16" >
           <input
             type="text"
