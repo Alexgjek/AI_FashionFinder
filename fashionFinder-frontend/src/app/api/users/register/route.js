@@ -45,7 +45,11 @@ export async function POST(request) {
     }
 
    
-    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
+    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/.test(password);
+    if (!passwordRequirements) {
+    return NextResponse.json({ error: "Password must be at least 8 characters, contain at least 1 uppercase letter, at least 1 number, and may include special characters" }, { status: 403 });
+    }
+    
     //check if password meets requirements
     
     if (!passwordRequirements) {

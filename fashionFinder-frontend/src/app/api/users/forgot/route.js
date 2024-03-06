@@ -29,7 +29,7 @@ export const POST = async (request) => {
     existingUser.resetTokenExpiry=passwordResetExpires;
    
     const resetUrl = `http://localhost:3000/reset/${resetToken}`;
-    const body = `Reset Password by clicking here, you have 6 min to verify before the link expires"${resetUrl} ${resetUrl}`;
+    const body = `Reset Password by clicking here, you have 6 min to verify before the link expires"${resetUrl}`;
     console.log(resetUrl);
 
 
