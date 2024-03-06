@@ -2,10 +2,11 @@
 
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import Header from '@/components/Header';
+//import Header from '@/components/Header';
 import SendChatButton from '@/components/buttons/SendChatButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 export default function Home() {
   const [inputValue, setInputValue] = useState('');
@@ -30,47 +31,36 @@ export default function Home() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-
+  
     console.log(inputValue)
-
-    setIsSubmitted(true)
+  
+    setIsSubmitted(true);
     const newMessage = {
       sender: "You",
       message: `${inputValue}`,
       link: false
     };
-    const fashionFinderMessage = {
-      sender: "FashionFinder",
-      message: `Looking for the best match for "${inputValue}"`,
-      link: false
-    };
-    setConversation(prevConversation => [...prevConversation, newMessage, fashionFinderMessage]);
+    setConversation(prevConversation => [...prevConversation, newMessage]);
     clearInput();
     
-    const response = await fetch("http://localhost:3005/prompt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        prompt: inputValue
-      })
-    });
-    const respJson = await response.json();
-    const results = [
-      {
+    try {
+      const response = await axios.post('http://localhost:8000/getAIResponse', {
+        prompt: inputValue,
+      });
+      const respJson = response.data;
+  
+      const fashionFinderMessage = {
         sender: "FashionFinder",
-        message: `Found ${respJson.length} results matching your query`,
+        message: respJson.ai_response, 
         link: false
-      },
-      {
-        sender: "FashionFinder",
-        message: respJson.map(item => item.product_url).join("\n"),
-        link: true
-      }
-    ];
-    setConversation(prevConversation => [...prevConversation, ...results]);
+      };
+  
+      setConversation(prevConversation => [...prevConversation, fashionFinderMessage]);
+    } catch (error) {
+      console.error('Error fetching AI response:', error);
+    }
   };
+  
 
   function handleKeyDown(e) {
     if (e.key === 'Enter') {
@@ -99,15 +89,15 @@ export default function Home() {
             style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}
           >
             {conversation.map((conv, index) => (
-              <div key={index} className='p-2'>
-                <>
-                  <p className='font-bold'>{conv.sender}</p>
-                  <div className='font-md'>{conv.message.split("\n").map((part, idx) => conv.link ? (<a key={idx} href={part} target="_blank" style={{display:"block",color:"blue",textDecoration:"underline"}}>{part}</a>) : (<p key={idx}>{part}</p>))}</div>
-                  <hr className='bg-black' />
-                </>
-              </div>
-            ))}
-          </div>
+      <div key={index} className='p-2'>
+        <>
+          <p className='font-bold'>{conv.sender}</p>
+          <div className='font-md'>{conv.message.split("\n").map((part, idx) => conv.link ? (<a key={idx} href={part} target="_blank" style={{display:"block",color:"blue",textDecoration:"underline"}}>{part}</a>) : (<p key={idx}>{part}</p>))}</div>
+          <hr className='bg-black' />
+        </>
+      </div>
+    ))}
+  </div>
         ) : (
           <div className='mx-auto'>
             <img src="/FFlogo.png" />
