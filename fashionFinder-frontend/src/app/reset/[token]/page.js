@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useSession } from 'next-auth/react';
+import { useSession } from "next-auth/react";
 
 export default function ResetPasswordPage({ params }) {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function ResetPasswordPage({ params }) {
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        const response = await fetch('/api/users/verify-token', {
+        const response = await fetch("/api/users/verify-token", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -31,18 +31,18 @@ export default function ResetPasswordPage({ params }) {
         });
 
         if (response.status === 400) {
-          setError('Invalid Token or has expired');
+          setError("Invalid Token or has expired");
           setVerified(true);
         }
         if (response.status === 200) {
-          setError('');
+          setError("");
           setVerified(true);
           const userData = await response.json();
           setUser(userData);
         }
       } catch (error) {
-        setError('Error, try again later.');
-        console.log(error)
+        setError("Error, try again later.");
+        console.log(error);
       }
     };
     verifyToken();
@@ -54,20 +54,35 @@ export default function ResetPasswordPage({ params }) {
     }
   }, [sessionStatus, router]);
 
-  
   const handleResetRequest = async (e) => {
     e.preventDefault();
     const newPassword = e.target[0].value;
-  
+
     if (!validatePassword(newPassword)) {
       setError("Password must meet requirements, try again.");
       return;
     }
-  
+
     try {
+      if (user && user.password) {
+        if (newPassword.length === user.password.length) {
+          let different = false;
+          for (let i = 0; i < newPassword.length; i++) {
+            if (newPassword[i] !== user.password[i]) {
+              different = true;
+              break;
+            }
+          }
+          if (!different) {
+            setError("New password must be different from the old one.");
+            return;
+          }
+        }
+      }
+
       const res = await axios.post("/api/users/reset", {
         password: newPassword,
-        email: user?.email
+        email: user?.email,
       });
       if (res.status === 200) {
         setError("");
@@ -75,11 +90,11 @@ export default function ResetPasswordPage({ params }) {
         setSuccess(true);
       }
     } catch (error) {
-      setError("Error, try again");
+      setError("Must be a new password.");
       console.log(error);
     }
   };
-  
+
   const validatePassword = (password) => {
     const minLength = 8;
     const hasCapitalLetter = /[A-Z]/.test(password);
@@ -94,14 +109,22 @@ export default function ResetPasswordPage({ params }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="bg-white p-8 rounded shadow-md w-96">
-        <h1 className="text-4xl text-center font-semibold mb-8">Reset Password</h1>
+        <h1 className="text-4xl text-center font-semibold mb-8">
+          Reset Password
+        </h1>
         {success && (
           <>
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <div
+              className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+              role="alert"
+            >
               Password successfully changed
             </div>
-            <button onClick={() => router.push('/login')} className="bg-black text-white py-2 px-4 rounded-md mt-4 hover:bg-black focus:outline-none focus:bg-black">
-              Back to Login
+            <button
+              onClick={() => router.push("/login")}
+              className="bg-black text-white py-2 px-4 rounded-md mt-4 hover:bg-black focus:outline-none focus:bg-black"
+            >
+              Back to Profile
             </button>
           </>
         )}
@@ -130,20 +153,22 @@ export default function ResetPasswordPage({ params }) {
             >
               Reset Password
             </button>
-            {error && <p className="text-red-600 text-[16px] mb-4">{error && error}</p>}
-        <div>
-          <span className="text-sm">
-            Password must meet requirements: <br />
-            Minimum 8 characters
-            <br />
-            Contain at least 1 capital letter
-            <br />
-            Contain at least 1 number
-          </span>
-        </div>
-        </form>
+            {error && (
+              <p className="text-red-600 text-[16px] mb-4">{error && error}</p>
+            )}
+            <div>
+              <span className="text-sm">
+                Password must meet requirements: <br />
+                Minimum 8 characters
+                <br />
+                Contain at least 1 capital letter
+                <br />
+                Contain at least 1 number
+              </span>
+            </div>
+          </form>
         )}
       </div>
     </div>
   );
-};
+}

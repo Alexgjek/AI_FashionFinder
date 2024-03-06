@@ -1,7 +1,6 @@
 "use client";
-
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import { useRouter } from "next/navigation";
 import RegisterButton from "@/components/buttons/RegisterButton";
 import axios from "axios";
@@ -132,6 +131,7 @@ export default function RegisterPage() {
   const onSignup = async () => {
     setRegistrationAttempted(true);
 
+
     if (!validateFields()) {
       return;
     }
@@ -158,6 +158,22 @@ export default function RegisterPage() {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        onSignup();
+      }
+    };
+
+
+    document.addEventListener('keydown', handleKeyDown);
+
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onSignup]);
+  
   return (
     <div className="flex flex-col items-center justify-center py-10">
       <h1 className="text-xl font-bold mb-5">Create your personal account</h1>
@@ -167,71 +183,75 @@ export default function RegisterPage() {
         </div>
       )}
       <div className="text-left text-sm">
-        <span>Mandatory fields*</span>
+        <span>All Fields Mandatory</span>
       </div>
       <hr />
       <div className="flex flex-col">
-        <input
-          className={`border border-black p-3 outline-none mb-4 ${
-            registrationAttempted && errors.email && "border-red-500"
-          }`}
-          id="email"
-          type="text"
-          value={user.email}
-          onChange={(e) => {
-            setUser({ ...user, email: e.target.value.toLowerCase() });
-            setErrors({ ...errors, email: "" });
-          }}
-          placeholder="E-mail address*"
-        />
-        {registrationAttempted && errors.email && (
-          <p className="text-red-500 text-xs mb-2">{errors.email}</p>
-        )}
-        <div className="flex gap-2">
+        <div className="input-container mb-2">
           <input
-            className={`border border-black p-3 outline-none mb-4 ${
-              registrationAttempted && errors.firstName && "border-red-500"
+            className={`border border-black p-3 outline-none w-full ${
+              registrationAttempted && errors.email && "border-red-500"
             }`}
-            id="firstName"
+            id="email"
             type="text"
-            value={user.firstName}
+            value={user.email}
             onChange={(e) => {
-              handleNameChange("firstName", e.target.value);
-              setErrors({ ...errors, firstName: "" });
+              setUser({ ...user, email: e.target.value.toLowerCase() });
+              setErrors({ ...errors, email: "" });
             }}
-            placeholder="First Name*"
+            placeholder="E-mail address"
           />
-          <input
-            className={`border border-black p-3 outline-none mb-4 ${
-              registrationAttempted && errors.lastName && "border-red-500"
-            }`}
-            id="lastName"
-            type="text"
-            value={user.lastName}
-            onChange={(e) => {
-              handleNameChange("lastName", e.target.value);
-              setErrors({ ...errors, lastName: "" });
-            }}
-            placeholder="Last Name*"
-          />
+          {registrationAttempted && errors.email && (
+            <p className="text-red-500 text-xs mb-2">{errors.email}</p>
+          )}
         </div>
-        <div className="flex">
-          {registrationAttempted && errors.firstName && (
-            <p className="text-red-500 text-xs mb-2 ml-0">{errors.firstName}</p>
-          )}
-          {registrationAttempted && errors.lastName && (
-            <p className="text-red-500 text-xs mb-2 ml-auto">{errors.lastName}</p>
-          )}
+        <div className="flex gap-2">
+          <div className="input-container mb-2">
+            <input
+              className={`border border-black p-3 outline-none ${
+                registrationAttempted && errors.firstName && "border-red-500"
+              }`}
+              id="firstName"
+              type="text"
+              value={user.firstName}
+              onChange={(e) => {
+                handleNameChange("firstName", e.target.value);
+                setErrors({ ...errors, firstName: "" });
+              }}
+              placeholder="First Name"
+            />
+            {registrationAttempted && errors.firstName && (
+              <p className="text-red-500 text-xs mb-2">{errors.firstName}</p>
+            )}
+          </div>
+          <div className="input-container mb-2">
+            <input
+              className={`border border-black p-3 outline-none ${
+                registrationAttempted && errors.lastName && "border-red-500"
+              }`}
+              id="lastName"
+              type="text"
+              value={user.lastName}
+              onChange={(e) => {
+                handleNameChange("lastName", e.target.value);
+                setErrors({ ...errors, lastName: "" });
+              }}
+              placeholder="Last Name"
+            />
+            {registrationAttempted && errors.lastName && (
+              <p className="text-red-500 text-xs mb-2">{errors.lastName}</p>
+            )}
+          </div>
         </div>
         {showStrengthBar && <PasswordStrengthBar password={user.password} />}
-        <div className="relative mb-4">
+        <div className="input-container relative mb-2">
           <input
             className={`border border-black py-4 px-3 outline-none w-full ${
               registrationAttempted && errors.password && "border-red-500"
             }`}
             type={passwordVisible ? "text" : "password"}
             id="password"
-            placeholder="Password*"
+            placeholder="Password"
             value={user.password}
             onChange={handlePasswordChange}
           />
@@ -244,34 +264,37 @@ export default function RegisterPage() {
               marginLeft: "-30px",
               cursor: "pointer",
               position: "absolute",
-              top: "50%",
-              transform: "translateY(-50%)",
+              top: "30%",
+              
             }}
             onClick={handlePasswordVisibilityToggle}
           />
+          {registrationAttempted && errors.password && (
+            <p className="text-red-500 text-xs mb-2 mt-1">{errors.password}</p>
+          )}
         </div>
-        {registrationAttempted && errors.password && (
-          <p className="text-red-500 text-xs mb-2">{errors.password}</p>
-        )}
-        <input
-          className={`border border-black py-4 px-3 outline-none w-full ${
-            registrationAttempted && errors.confirmPassword && "border-red-500"
-          }`}
-          type={passwordVisible ? "text" : "password"}
-          id="confirmPassword"
-          placeholder="Confirm Password*"
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-            setErrors({ ...errors, confirmPassword: "" });
-          }}
-        />
-        {registrationAttempted && errors.confirmPassword && (
-          <p className="text-red-500 text-xs mb-2">{errors.confirmPassword}</p>
-        )}
+       
+        <div className="input-container mb-2">
+          <input
+            className={`border border-black py-4 px-3 outline-none w-full ${
+              registrationAttempted && errors.confirmPassword && "border-red-500"
+            }`}
+            type={passwordVisible ? "text" : "password"}
+            id="confirmPassword"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setErrors({ ...errors, confirmPassword: "" });
+            }}
+          />
+          {registrationAttempted && errors.confirmPassword && (
+            <p className="text-red-500 text-xs mb-2 mt-1">{errors.confirmPassword}</p>
+          )}
+        </div>
         <label>
           <div>
-            <span className="text-sm">
+            <span className="text-sm text-gray-600">
               <>
                 Password must meet requirements: <br />
                 Minimum 8 characters
@@ -286,11 +309,11 @@ export default function RegisterPage() {
           </div>
         </label>
         <button
-          onClick={onSignup}
-          className="border bg-black text-white border-black py-4 px-3 outline-none w-full"
-        >
-          Register
-        </button>
+  onClick={onSignup}
+  className="border bg-black text-white border-black py-4 px-3 outline-none w-full hover:bg-gray-700"
+>
+  <strong>REGISTER</strong>
+</button>
       </div>
       <div className="flex gap-1 p-2 text-sm">
         <span>Already have an account?</span>
