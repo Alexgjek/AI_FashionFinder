@@ -32,6 +32,8 @@ export default function LoginPage() {
       const response = await axios.post("/api/users/login", user);
       setIsLoggedIn(true);
       setShowModal(false);
+
+      await axios.get('/api/users/grabUserEmail');
       console.log("Login success", response.data);
       
       if (user.rememberMe) {
