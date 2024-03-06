@@ -40,7 +40,7 @@ export default function Header() {
       await axios.get('/api/users/logout');
       setIsLoggedIn(false); 
       setIsMobileMenuOpen(false); 
-      router.push('/');
+      router.push('/login');
       setShowModal(false); 
     } catch (error) {
       console.error("Error logging out:", error);
