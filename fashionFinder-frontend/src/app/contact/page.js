@@ -50,7 +50,7 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="flex justify-center items-center mt-10 p-2">
+    <main className="flex justify-center items-center mt-10">
       <div className="flex flex-col items-center bg-white p-8 rounded shadow-md w-full md:w-2/3 lg:w-1/2">
         <h3 className="text-3xl font-bold mb-4">CONTACT US</h3>
 
@@ -61,7 +61,7 @@ export default function ContactPage() {
         <form onSubmit={handleSubmit} className="w-full">
           <div className="mb-4">
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-600">
-              Full Name
+              Full Name*
             </label>
             <div className="flex space-x-2">
               <input
@@ -87,7 +87,7 @@ export default function ContactPage() {
 
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-600">
-              Email Address
+              Email Address*
             </label>
             <input
               type="email"
@@ -102,7 +102,7 @@ export default function ContactPage() {
 
           <div className="mb-4">
             <label htmlFor="message" className="block text-sm font-medium text-gray-600">
-              Message
+              Message*
             </label>
             <textarea
               id="message"
