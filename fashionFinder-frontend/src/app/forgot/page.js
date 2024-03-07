@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
             onClick={() => router.push("/login")}
             className="bg-black text-white py-2 px-4 rounded-md mt-4 hover:bg-black focus:outline-none focus:bg-black"
           >
-            Back to Profile
+            Back to Login
           </button>
         </>
       ) : (
