@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faShirt, faSackDollar } from '@fortawesome/free-solid-svg-icons';
 import NextButton from '@/components/buttons/SignInPageButton';
 import { useAuth } from '@/app/authContext';
+import ShortHeader from '@/components/ShortHeader';
 
 export default function LoginPage() {
   const { isLoggedIn, setIsLoggedIn } = useAuth();
@@ -41,7 +42,7 @@ export default function LoginPage() {
       } else {
         localStorage.removeItem('rememberedUser');
       }
-      router.push("/profile");
+      router.push("/chat");
     } catch (error) {
       console.log('login failed', error.message);
       if (error.response && error.response.status === 400){
@@ -58,6 +59,7 @@ export default function LoginPage() {
 
   return (
     <main>
+      <ShortHeader />
       <div className="max-w-lg mx-auto">
         <h1 className="text-2xl font-bold mt-10 mb-5">Enter your email</h1>
         {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
