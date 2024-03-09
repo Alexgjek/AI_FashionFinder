@@ -7,8 +7,8 @@ import axios from 'axios';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const {isLoggedIn, setIsLoggedIn} = useAuth();
-  const {showModal, setShowModal} = useAuth(); 
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const { showModal, setShowModal } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -18,9 +18,9 @@ export default function Header() {
   const grabEmail = async () => {
     try {
       const response = await axios.get('api/users/grabUserEmail');
-      setIsLoggedIn(true); 
+      setIsLoggedIn(true);
     } catch (error) {
-      setIsLoggedIn(false); 
+      setIsLoggedIn(false);
     }
   };
 
@@ -39,17 +39,17 @@ export default function Header() {
   const confirmLogout = async () => {
     try {
       await axios.get('/api/users/logout');
-      setIsLoggedIn(false); 
-      setIsMobileMenuOpen(false); 
-      router.push('/'); 
-      setShowModal(false); 
+      setIsLoggedIn(false);
+      setIsMobileMenuOpen(false);
+      router.push('/');
+      setShowModal(false);
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
   const closeModal = () => {
-    setShowModal(false); 
+    setShowModal(false);
   };
 
   return (
@@ -107,23 +107,13 @@ export default function Header() {
                 <Link href="/about" onClick={handleMenuItemClick}>About</Link>
                 <Link href="/contact" onClick={handleMenuItemClick}>Contact</Link>
                 <Link href="/albums" onClick={handleMenuItemClick}>Albums</Link>
-                {isLoggedIn ? (
-                  <>
-                    <Link href="/profile" onClick={handleMenuItemClick}>Profile</Link>
-                    <button
-                      onClick={handleLogout}
-                      className="text-white"
-                    >
-                      Logout
-                    </button>
-                    
-                  </>
-                ) : (
-                  <>
-                    <Link href="/login" onClick={handleMenuItemClick}>Sign In</Link>
-                    <Link href="/register" onClick={handleMenuItemClick}>Create Account</Link>
-                  </>
-                )}
+                <Link href="/profile" onClick={handleMenuItemClick}>Profile</Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-white"
+                >
+                  Logout
+                </button>
               </nav>
             </div>
           </div>
@@ -152,22 +142,13 @@ export default function Header() {
         </div>
       )}
       <nav className='hidden md:flex items-center gap-4'>
-        {isLoggedIn ? (
-          <>
-            <Link href={'/profile'}>Profile</Link>
-            <button
-              onClick={handleLogout}
-              className="bg-transparent text-black px-5 text-md"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link href={'/login'}>Sign In</Link>
-            <Link href={'/register'}>Create Account</Link>
-          </>
-        )}
+        <Link href={'/profile'}>Profile</Link>
+        <button
+          onClick={handleLogout}
+          className="bg-transparent text-black px-5 text-md"
+        >
+          Logout
+        </button>
       </nav>
     </header>
   );
