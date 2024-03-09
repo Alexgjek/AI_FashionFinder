@@ -249,10 +249,10 @@ export default function AlbumsPage() {
       <div className="grid grid-cols-3 gap-4 m-5">
         {albums.map((album, index) => (
           album && album.albumName && (
-            <div key={index} className="bg-white rounded-lg shadow-md p-4 relative text-center">
+            <div key={index} className="flex bg-white rounded-lg shadow-md p-4 relative text-center">
               <Link
                 href={`/albums/${album.albumName}`}
-                className="text-lg font-semibold mb-2 hover:opacity-70 truncate w-32 block overflow-hidden"
+                className="text-lg font-semibold mb-2 hover:opacity-70 truncate flex-1"
                 style={{ textOverflow: 'ellipsis' }}>
                 {album.albumName}
               </Link>
@@ -281,3 +281,5 @@ export default function AlbumsPage() {
     </main>
   );
 }
+
+
