@@ -7,6 +7,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import Header from '@/components/Header';
 import AlbumSort from '@/components/sorting/albumSorting/AlbumSort';
+import SearchBar from '@/components/SearchBar';
 
 export default function AlbumsPage() {
   const [albumName, setAlbumName] = useState('');
@@ -18,24 +19,23 @@ export default function AlbumsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [oldAlbumName, setOldAlbumName] = useState('');
   const [sortType, setSortType] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredAlbums, setFilteredAlbums] = useState([]);
 
 
   const handleSortChange = async (option) => {
     try {
       const response = await axios.get('/api/users/getUserAlbums');
       const fetchedAlbums = response.data.albums;
-  
+      
       let sortedAlbums = [...fetchedAlbums];
+      
       if (option === 'alphabetical') {
         sortedAlbums.sort((a, b) => a.albumName.localeCompare(b.albumName));
       } else if (option === 'ascending') {
         sortedAlbums.sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated));
       } else if (option === 'descending') {
         sortedAlbums.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-      } else if (option === 'newest') {
-        sortedAlbums.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-      } else if (option === 'oldest') {
-        sortedAlbums.sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated));
       }
       
       setSortType(option);
@@ -55,11 +55,21 @@ export default function AlbumsPage() {
     try {
       const response = await axios.get('/api/users/getUserAlbums');
       setAlbums(response.data.albums);
+      setFilteredAlbums(response.data.albums);
     } catch (error) {
       console.log(error);
     }
   };
 
+  const handleSearch = (query) => {
+    setSearchQuery(query); 
+  };
+
+  useEffect(() => {
+    const filtered = albums.filter(album => album.albumName.toLowerCase().includes(searchQuery.toLowerCase()));
+    setFilteredAlbums(filtered);
+  }, [searchQuery,albums]);
+  
   const handleCreateAlbum = () => {
     setShowModal(true);
     setErrorMessage('');
@@ -245,9 +255,12 @@ export default function AlbumsPage() {
           Create Album
         </button>
       </div>
-      <AlbumSort albums={albums} onSortChange={handleSortChange} />
+      <div className='inline-flex gap-3'>
+        <AlbumSort albums={albums} onSortChange={handleSortChange} />
+        <SearchBar onSearch={handleSearch} />
+      </div>
       <div className="grid grid-cols-3 gap-4 m-5">
-        {albums.map((album, index) => (
+        {filteredAlbums.map((album, index) => (
           album && album.albumName && (
             <div key={index} className="flex bg-white rounded-lg shadow-md p-4 relative text-center">
               <Link
