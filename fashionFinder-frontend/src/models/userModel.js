@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 
 const albumSchema = new mongoose.Schema({
   albumName: String,
-  outfits: Array
+  outfits: Array,
+  dateCreated: {
+    type: Date,
+    default: Date.now
+  }
 }, { _id: false });
 
 const userSchema = new mongoose.Schema({
