@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/app/authContext';
 import { useRouter } from 'next/navigation';
@@ -40,7 +41,7 @@ export default function Header() {
       await axios.get('/api/users/logout');
       setIsLoggedIn(false); 
       setIsMobileMenuOpen(false); 
-      router.push('/login');
+      router.push('/'); 
       setShowModal(false); 
     } catch (error) {
       console.error("Error logging out:", error);
@@ -54,7 +55,7 @@ export default function Header() {
   return (
     <header className='bg-white border-b flex justify-between p-4'>
       <div className="flex items-center gap-6">
-        <Link href={'/'}>FashionFinder </Link>
+        <Link href={'/chat'}>FashionFinder </Link>
         <nav className='hidden md:flex gap-4'>
           <Link href={'/about'}>About</Link>
           <Link href={'/contact'}>Contact Us</Link>
