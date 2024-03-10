@@ -16,7 +16,6 @@ def scrape_clothing_photos():
             clothing_photo = {}
             img_tag = item.select_one('.S-product-card__img-container')
             if img_tag:
-                # Extracting additional attributes like product name and URL
                 overlay_tag = item.select_one('.S-product-card__img-container')
                 if overlay_tag:
                     clothing_photo['product_name'] = overlay_tag['aria-label']
