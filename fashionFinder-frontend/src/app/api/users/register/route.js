@@ -5,28 +5,28 @@ import bcryptjs from "bcryptjs";
 
 connect(); // Connect to the database
 
-// Function to delete inactive users
-// async function deleteInactiveUsers() {
-//   try {
-//     const sixMinutesAgo = new Date(Date.now() - 6 * 60 * 1000);
-//     const inactiveUsers = await User.find({
-//       activatedAt: { $exists: false } // Users without activatedAt attribute
-//     });
+ //Function to delete inactive users
+ async function deleteInactiveUsers() {
+   try {
+     const sixMinutesAgo = new Date(Date.now() - 6 * 60 * 1000);
+     const inactiveUsers = await User.find({
+       activatedAt: { $exists: false } // Users without activatedAt attribute
+     });
 
-//     // Filter out users whose activatedAt is older than 6 minutes
-//     const usersToDelete = inactiveUsers.filter(user => !user.activatedAt || user.activatedAt < sixMinutesAgo);
+     // Filter out users whose activatedAt is older than 6 minutes
+     const usersToDelete = inactiveUsers.filter(user => !user.activatedAt || user.activatedAt < sixMinutesAgo);
 
-//     await Promise.all(
-//       usersToDelete.map(async (user) => {
-//         await User.findByIdAndDelete(user._id);
-//       })
-//     );
+     await Promise.all(
+       usersToDelete.map(async (user) => {
+         await User.findByIdAndDelete(user._id);
+       })
+     );
 
-//     console.log(`Deleted ${usersToDelete.length} inactive users`);
-//   } catch (error) {
-//     console.error('Error deleting inactive users:', error);
-//   }
-// }
+     console.log(`Deleted ${usersToDelete.length} inactive users`);
+   } catch (error) {
+     console.error('Error deleting inactive users:', error);
+   }
+ }
 export async function POST(request) {
   try {
     const reqBody = await request.json()
@@ -45,7 +45,11 @@ export async function POST(request) {
     }
 
    
-    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
+    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/.test(password);
+    if (!passwordRequirements) {
+    return NextResponse.json({ error: "Password must be at least 8 characters, contain at least 1 uppercase letter, at least 1 number, and may include special characters" }, { status: 403 });
+    }
+    
     //check if password meets requirements
     
     if (!passwordRequirements) {
@@ -80,7 +84,7 @@ export async function POST(request) {
     console.log(savedUser);
 
 
-    // setInterval(deleteInactiveUsers, 360000); 
+    setInterval(deleteInactiveUsers, 360000); 
     
     return NextResponse.json({
       message: "User created succesfully",
@@ -88,8 +92,6 @@ export async function POST(request) {
       savedUser
     })
   
-
-
   } catch (error) {
     console.error(error); 
 
