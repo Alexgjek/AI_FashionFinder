@@ -44,8 +44,11 @@ export default function Home() {
     clearInput();
 
     try {
-      const response = await axios.post('http://localhost:8000/getAIResponse', {
+      const userInfoResponse = await axios.get('http://localhost:3000/api/users/userInfo');
+      const userInfo = userInfoResponse.data;
+      const response = await axios.post('http://localhost:8000/getAIResponse/', {
         prompt: inputValue,
+        userInfo: userInfo,
       });
       const respJson = response.data;
 
