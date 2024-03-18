@@ -4,6 +4,7 @@ import React, { useState, useEffect} from "react";
 import { useRouter } from "next/navigation";
 import RegisterButton from "@/components/buttons/RegisterButton";
 import axios from "axios";
+import ShortHeader from "@/components/ShortHeader";
 
 const PasswordStrengthBar = ({ password }) => {
   const calculateStrength = (password) => {
@@ -175,7 +176,9 @@ export default function RegisterPage() {
   }, [onSignup]);
   
   return (
-    <div className="flex flex-col items-center justify-center py-10">
+    <main>
+      <ShortHeader />
+      <div className="flex flex-col items-center justify-center py-10">
       <h1 className="text-xl font-bold mb-5">Create your personal account</h1>
       {verificationSent && (
         <div className="bg-green-100 text-green-800 px-4 py-2 rounded-md mb-4">
@@ -309,11 +312,10 @@ export default function RegisterPage() {
           </div>
         </label>
         <button
-  onClick={onSignup}
-  className="border bg-black text-white border-black py-4 px-3 outline-none w-full hover:bg-gray-700"
->
-  <strong>REGISTER</strong>
-</button>
+          onClick={onSignup}
+          className="border bg-black text-white border-black py-4 px-3 outline-none w-full hover:bg-gray-700">
+          <strong>REGISTER</strong>
+        </button>
       </div>
       <div className="flex gap-1 p-2 text-sm">
         <span>Already have an account?</span>
@@ -321,6 +323,8 @@ export default function RegisterPage() {
           Sign in
         </Link>
       </div>
-    </div>
+      </div>
+    </main>
+    
   );
 }

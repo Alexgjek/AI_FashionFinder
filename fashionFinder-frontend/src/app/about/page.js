@@ -1,6 +1,9 @@
+import Header from "@/components/Header";
 export default function AboutPage() {
   return (
-    <div className="container mx-auto p-4">
+    <main>
+      <Header />
+      <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-16">About FashionFinder</h1>
       <img src="/FFlogo.png" className="mx-auto"/>
       <div className="text-2xl text-gray-1500">
@@ -9,6 +12,8 @@ export default function AboutPage() {
         </p>
       </div>
     </div>
+    </main>
+    
   );
 }
 

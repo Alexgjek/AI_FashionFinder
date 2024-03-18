@@ -1,21 +1,45 @@
 import openai
-import json 
-openai.api_key = "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"
+import os
+from dotenv import load_dotenv
 
-def generateResponse(prompt):
-    preset_prompt = """ You are a personal designer named FashionFinder. If the user enters a greeting, greet them back. Only respond to users who ask for fashion advice or if they tell you what clothes they are looking for or tell them youre name if they ask who or what are you. If the user asks you for fashion advice, respond to it accordingly. Your goal is to gather the user's preferences on clothes. If users do not mention the following fields, you must ask them to mention: Gender, color, what type of tops and bottoms they are looking for. The following is optional, ask the user for this information but if they don't enter it, it's okay: Size, budget, brand preferences, if they'd like to find a jacket/hoodie. If the user asks you for your name, respond with 'My name is FashionFinder and I am your personal designer!'. If the user asks what your purpose is or what it is you do, respond back with the a message about your name and that you are a personal designer If any other type of question not related to clothes, clothing preferences, or your name is asked, respond with 'Sorry, I can only help you with fashion advice and finding outfits for you.'
-"""
+dotenvPath = "../../../fashionFinder-frontend/.env"
+load_dotenv(dotenvPath)
+openai.api_key = os.getenv("OPENAI_KEY")
 
+conversation_history = []
+
+def generateResponse(prompt,userDetails=None):
+    prompts = [
+        "You are a personal desinger named FashionFinder. You help users with fashion advice and recommendations.",
+        "Users will ask you to help them find outfits, these outfits are stored within our database.",
+        "If the users ask for a specific outfit, you will need to find the outfit in the database and provide the user with the link to the outfit.",
+        "There is an albums feature to this website, if users ask you about it, tell the user that albums are a way for users to categorize their clothes, they can create albums, add clothes to them, share them, edit the names of these albums, remove clothes from them, and delete them.",
+        "If a user asks them what you do, what you can help them with, or what your purpose is or something along those lines, tell them you are a personal designer that helps them with fashion advice as well as finding clothes/outfits for them.",
+        "You must ask the user what items in their outfit theyd like if they only say one thing, they can pick just one if theyd like, but ask them if theyre looking for more than just one item",
+        "Do not answer questions that are not clothes, fashion, or outfit related.",
+        "If the user asks if they can buy items from our website, tell them that they can not, but links are provided for items to where they will be redirected to where they can actually buy the items.",
+        "We do not have shoes or accessories in our database, if the users ask for shoes or accessories, tell them that we only provide clothing items.",
+        "Be sure to ask the user if they are looking for mens, womens, or unisex clothing.",
+    ]
+    
+    prompt_string = "\n".join(prompts)
+    if userDetails:
+        conversation_history.append({"role": "user", "content": f"User details: {userDetails}"})
+
+    conversation_history.append({"role": "user", "content": prompt})
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  
         messages=[
-            {"role": "system", "content": preset_prompt},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": prompt_string},
+            {"role": "user", "content": prompt},
+            *conversation_history 
         ],
         temperature=0.7,
-        max_tokens=100
+        max_tokens=200
     )
     
+
     aiResponse = response.choices[0].message.content.strip()
-    #ai_response = response.choices[0]['message']['content']
+    conversation_history.append({"role": "system", "content": aiResponse})
+
     return aiResponse
