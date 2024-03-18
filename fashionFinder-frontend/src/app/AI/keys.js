@@ -86,12 +86,6 @@ app.post('/prompt', async (req, res) =>{
 
     var attributes = JSON.parse(response.choices[0].message.content);
 
-    /**
-     * TODO
-     * Pass these attributes to MongoDB to filter the results
-     * and get the links back (links)
-     * then send back the result to the user using res.send(links)
-     */
     let matches = await db.findMatches(attributes);
 
     // res.send(attributes);

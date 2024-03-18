@@ -30,3 +30,15 @@
 body {
   @apply bg-gray-100;
 }
+
+.ai-result-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.ai-result {
+  width: 100px;
+}
+.ai-result .ai-image {
+  width: 100%;
+}
