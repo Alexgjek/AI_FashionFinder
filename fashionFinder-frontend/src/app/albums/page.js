@@ -21,7 +21,7 @@ export default function AlbumsPage() {
   const [sortType, setSortType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredAlbums, setFilteredAlbums] = useState([]);
-
+  
 
   const handleSortChange = async (option) => {
     try {
