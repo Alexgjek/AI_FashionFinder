@@ -54,7 +54,7 @@ export default function Home() {
 
       const fashionFinderMessage = {
         sender: "FashionFinder",
-        message: respJson.ai_response,
+        message: respJson.ai_response ? respJson.ai_response : "An error occurred while processing the request",
         link: false
       };
 
@@ -115,12 +115,12 @@ export default function Home() {
             </div>
           )}
         <div className="absolute bottom-5 w-5/6 flex justify-center h-16" >
-          <input
+          <textarea
             type="text"
             value={inputValue}
             onKeyDown={handleKeyDown}
             onChange={e => setInputValue(e.target.value)}
-            className="w-2/4 p-4 border rounded-xl outline-none z-10"
+            className="w-2/4 p-4 rounded-l-xl outline-none z-10 bg-transparent border border-gray-300 border-r-0 resize-none"
             placeholder="Message FashionFinder..."
           />
           <SendChatButton inputValue={inputValue} clearInput={clearInput} handleClick={handleSubmit} />
