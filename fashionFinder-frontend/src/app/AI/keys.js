@@ -40,8 +40,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
 const openai = new OpenAI({
-    apiKey: "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"
-    //"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"
+    apiKey: OPENAI_KEY
 })
 
 const saveResult = async (content) => {
@@ -87,12 +86,6 @@ app.post('/prompt', async (req, res) =>{
 
     var attributes = JSON.parse(response.choices[0].message.content);
 
-    /**
-     * TODO
-     * Pass these attributes to MongoDB to filter the results
-     * and get the links back (links)
-     * then send back the result to the user using res.send(links)
-     */
     let matches = await db.findMatches(attributes);
 
     // res.send(attributes);

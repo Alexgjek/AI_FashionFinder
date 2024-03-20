@@ -17,8 +17,8 @@ from .openaiIntegration import generateResponse
 
 logging.basicConfig(level=logging.INFO)
 
-def api_view(request):
-    prompt = "what is your name?"
-    ai_response = generateResponse(prompt)
-    # Return AI response as JSON
-    return JsonResponse({'ai_response': ai_response})
+# def api_view(request):
+#     prompt = "what is your name?"
+#     ai_response = generateResponse(prompt)
+#     # Return AI response as JSON
+#     return JsonResponse({'ai_responseeee': ai_response})

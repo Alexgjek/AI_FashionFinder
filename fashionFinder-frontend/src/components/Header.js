@@ -49,7 +49,7 @@ export default function Header() {
   };
 
   const closeModal = () => {
-    setShowModal(false);
+    setShowModal(false); 
   };
 
   return (
