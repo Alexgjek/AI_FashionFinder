@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import Header from '@/components/Header';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -167,7 +168,9 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className='p-6'>
+    <main>
+      <Header />
+      <div className='p-6'>
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold p-3">Personal Information</h1>
         <div className="flex flex-col items-start">
@@ -302,7 +305,9 @@ export default function ProfilePage() {
           <p className='font-semibold'>Edit</p>}
         </button>
       </div>
+    </div>
     </main>
+    
   );
 }
 

@@ -13,7 +13,7 @@ export async function POST(request) {
   try {
     const reqBody = await request.json();
     reqBody.email = email;
-    const { albumName } = reqBody;
+    let { albumName } = reqBody;
     const lowercasedEmail = email.toLowerCase();
     const user = await User.findOne({ email: lowercasedEmail });
 
@@ -25,14 +25,19 @@ export async function POST(request) {
       return NextResponse.json({ error: "Album name cannot be empty" }, { status: 400 });
     }
 
-    const existingAlbum = user.albums.find(album => album.albumName.toLowerCase() === albumName.toLowerCase());
+    albumName = albumName.trim();
+
+    const existingAlbum = user.albums.find(album => album.albumName.trim().toLowerCase() === albumName.toLowerCase());
     if (existingAlbum) {
       return NextResponse.json({ error: "Album already exists" }, { status: 400 });
     }
 
-    user.albums.push({ albumName, outfits: [] });
+    user.albums.push({
+      albumName,
+      outfits: [],
+      dateCreated: new Date()});
+      
     await user.save();
-
     return NextResponse.json({ message: "Album created successfully", user });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
