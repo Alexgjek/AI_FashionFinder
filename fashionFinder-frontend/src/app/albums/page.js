@@ -66,9 +66,10 @@ export default function AlbumsPage() {
   };
 
   useEffect(() => {
-    const filtered = albums.filter(album => album.albumName.toLowerCase().includes(searchQuery.toLowerCase()));
+    const filtered = albums.filter(album => album.albumName.toLowerCase().startsWith(searchQuery.toLowerCase()));
     setFilteredAlbums(filtered);
-  }, [searchQuery,albums]);
+  }, [searchQuery, albums]);
+  
   
   const handleCreateAlbum = () => {
     setShowModal(true);
