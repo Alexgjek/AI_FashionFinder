@@ -21,7 +21,7 @@ export default function AlbumsPage() {
   const [sortType, setSortType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredAlbums, setFilteredAlbums] = useState([]);
-
+  
 
   const handleSortChange = async (option) => {
     try {
@@ -66,9 +66,10 @@ export default function AlbumsPage() {
   };
 
   useEffect(() => {
-    const filtered = albums.filter(album => album.albumName.toLowerCase().includes(searchQuery.toLowerCase()));
+    const filtered = albums.filter(album => album.albumName.toLowerCase().startsWith(searchQuery.toLowerCase()));
     setFilteredAlbums(filtered);
-  }, [searchQuery,albums]);
+  }, [searchQuery, albums]);
+  
   
   const handleCreateAlbum = () => {
     setShowModal(true);
@@ -224,8 +225,8 @@ export default function AlbumsPage() {
                   placeholder='New Album Name'
                 />
                 <div className="flex items-center justify-center">
-                  <button className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold w-1/3 disabled:opacity-50" onClick={handleEditModalSubmit} disabled={!editAlbumName}>Save</button>
-                  <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold w-1/3" onClick={handleModalClose}>Cancel</button>
+                  <button className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold w-2/5 disabled:opacity-50" onClick={handleEditModalSubmit} disabled={!editAlbumName}>Save</button>
+                  <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold w-2/5" onClick={handleModalClose}>Cancel</button>
                 </div>
               </>
             ) : (
