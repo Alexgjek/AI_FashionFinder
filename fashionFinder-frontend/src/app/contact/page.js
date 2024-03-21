@@ -2,6 +2,7 @@
 import emailjs from 'emailjs-com';
 import { useState, useEffect} from 'react';
 import axios from 'axios';
+import Header from '@/components/Header';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -67,7 +68,9 @@ export default function ContactPage() {
   }, []);
 
   return (
-    <main className="flex justify-center items-center mt-10">
+    <main>
+      <Header />
+      <div className="flex justify-center items-center mt-10">
       <div className="flex flex-col items-center bg-white p-8 rounded shadow-md w-full md:w-2/3 lg:w-1/2">
         <h3 className="text-3xl font-bold mb-4">CONTACT US</h3>
 
@@ -126,6 +129,8 @@ export default function ContactPage() {
           </button>
         </form>
       </div>
+    </div>
     </main>
+    
   );
 }

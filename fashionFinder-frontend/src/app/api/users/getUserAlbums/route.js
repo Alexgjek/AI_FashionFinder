@@ -9,7 +9,7 @@ export async function GET(request) {
   const token = request.cookies.get("token")?.value || '';
   const decodedToken = jwt.decode(token);
   const email = decodedToken ? decodedToken.email : '';
-  
+
   try {
     const userEmail = email
 
@@ -23,7 +23,9 @@ export async function GET(request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ albums: user.albums });
+    const albums = user.albums;
+
+    return NextResponse.json({ albums });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

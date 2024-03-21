@@ -11,12 +11,14 @@ def api_view(request):
     return HttpResponse("AI Response printed to terminal")
 
 '''
-
+import logging
 from django.http import JsonResponse
-from .openaiIntegration import generate_response
+from .openaiIntegration import generateResponse
 
-def api_view(request):
-    prompt = "what is your name?"
-    ai_response = generate_response(prompt)
-    # Return AI response as JSON
-    return JsonResponse({'ai_response': ai_response})
+logging.basicConfig(level=logging.INFO)
+
+# def api_view(request):
+#     prompt = "what is your name?"
+#     ai_response = generateResponse(prompt)
+#     # Return AI response as JSON
+#     return JsonResponse({'ai_responseeee': ai_response})

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-
+import ShortHeader from "@/components/ShortHeader";
+import Header from "@/components/Header";
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -67,7 +68,9 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-4 bg-white shadow-md rounded-md">
+    <main>
+      {userInfo.email ? <Header /> : <ShortHeader />}
+      <div className="max-w-md mx-auto mt-8 p-4 bg-white shadow-md rounded-md">
       <h1 className="text-2xl font-bold mb-4">Forgot/Change Password</h1>
       {success ? (
         <>
@@ -90,10 +93,10 @@ export default function ForgotPasswordPage() {
             </div>
           )}
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => userInfo.email ? router.push("/profile") : router.push("/login")}
             className="bg-black text-white py-2 px-4 rounded-md mt-4 hover:bg-black focus:outline-none focus:bg-black"
           >
-            Back to Profile
+            {userInfo.email ? "Back to Profile" : "Back to Login"}
           </button>
         </>
       ) : (
@@ -119,5 +122,7 @@ export default function ForgotPasswordPage() {
         </>
       )}
     </div>
+    </main>
+    
   );
 }
