@@ -7,13 +7,12 @@ import certifi
 
 # MongoDB connection
 client = pymongo.MongoClient('mongodb+srv://oloofakalid:Mongo2024@cluster0.liexh8o.mongodb.net/?retryWrites=true&w=majority', tlsCAFile=certifi.where())
-db = client['clothing_data'] 
+db = client['ClothingData'] 
 
 collection_top = db['top']
 collection_Shorts = db['shorts']
 collection_Hood = db['hoodie']
 collection_dress = db['dress']
-collection_Sweats= db['sweats']
 collection_Pants= db['pants']
 collection_coat= db['jackets']
 
@@ -30,7 +29,8 @@ def scroll_page(duration_minutes):
 
 def scrape_nike_clothing_images():
     base_url = "https://www.nike.com"
-    url = f"{base_url}/w/mens-clothing-6ymx6znik1"
+    #/w?q=men%20sweatpants&vst=men%20sweatpants
+    url = f"{base_url}/w?q=men%20sweatpants&vst=men%20sweatpants"
     driver.get(url)
     scroll_page(5)  # Scroll for 5 minutes
     content = driver.page_source
@@ -57,7 +57,7 @@ def parse_image_data(soup):
                 product_name = product_name_tag.text.strip()
                 product_url = product_url_tag['href']
                 price = price_tag.text.strip()
-
+                '''
                 gender_text = gender_tag.text.lower()
                 if 'men' in gender_text or 'mens' in gender_text:
                     gender = 'Male'
@@ -65,7 +65,8 @@ def parse_image_data(soup):
                     gender = 'Female'
                 else:
                     gender = 'Unknown'
-                
+                   ''' 
+                gender = 'Male'
                 types = clothing_type['alt'].split()[-1]
                 color_text = color_tag.text.strip()
                 color_count = int(''.join(filter(str.isdigit, color_text)))
@@ -90,9 +91,7 @@ def save_to_mongodb(image_data):
                     collection_dress.insert_one(data)
                 elif data['type'] in ['hoodie', 'Hoodie']:
                     collection_Hood.insert_one(data)
-                elif data['type'] in[' Sweatpants, Joggers', 'Leggings','Tights']:
-                    collection_Sweats.insert_one(data)
-                elif data['type'] in ['pants','Pants', 'Jeans','Jean']:
+                elif data['type'] in ['pants','Pants', 'Jeans','Jean',' Sweatpants, Joggers', 'Leggings','Tights']:
                     collection_Pants.insert_one(data)
                 elif data['type'] in['Coat', 'Jacket']:
                     collection_coat.insert_one(data)
