@@ -18,6 +18,7 @@ collection_top = db['top']
 collection_hoodie = db['hoodie']
 collection_pants = db['pants']
 collection_coat= db['jackets']
+collection_suit= db['suit']
 
 
 options = Options()
@@ -49,7 +50,10 @@ def scrape_macys():
         #shop/womens-clothing/hoodies-sweatshirts/Women_regular_size_t,Pageindex,Productsperpage/2%252C%20S,4,120?id=293359
         #shop/womens-clothing/hoodies-sweatshirts/Women_regular_size_t,Pageindex,Productsperpage/6%252C%20M%7C8%252C%20M,3,120?id=293359
         #shop/womens-clothing/hoodies-sweatshirts/Women_regular_size_t,Pageindex,Productsperpage/10%252C%20L%7C12%252C%20L,3,120?id=293359
-        url = f"{base_url}"
+        #shop/featured/men%20suit/Mens_suit_blazer_size_t,Pageindex,Productsperpage/36L%252C%20S%7C36R%252C%20S%7C36S%252C%20S%7C37R%252C%20S%7C37S%252C%20S%7C38L%252C%20S%7C38R%252C%20S%7C38S%252C%20S,4,120   
+        #shop/featured/men%20suit/Mens_suit_blazer_size_t,Pageindex,Productsperpage/39L%252C%20M%7C39R%252C%20M%7C39S%252C%20M%7C40L%252C%20M%7C40R%252C%20M%7C40S%252C%20M%7C41L%252C%20M%7C41R%252C%20M,4,120
+        #"{base_url}shop/featured/men%20suit/Mens_suit_blazer_size_t,Pageindex,Productsperpage/45R%252C%20XL%7C46R%252C%20XL%7C46S%252C%20XL%7C47R%252C%20XL%7C48R%252C%20XL%7C48S%252C%20XL,4,120      
+        url = f"{base_url}
         driver.get(url)
         content = driver.page_source
         soup = BeautifulSoup(content, "html.parser")
@@ -73,8 +77,8 @@ def parse_image_data(soup):
             if len(clothing_type_parts) > 1:
                 clothing_type = clothing_type_parts[0].split()[-1].strip()
 
-        size = 'L'
-        gender = 'Female'
+        size = 'XL'
+        gender = 'Male'
         color = 'N/A'
         if color_swatch:
            color = [swatch.get('data-colorswatchfamily') for swatch in color_swatch if swatch.get('data-colorswatchfamily')]
@@ -143,8 +147,10 @@ def save_to_mongodb(image_data):
                         collection_hoodie.insert_one(data)
                     elif data['type'] in ['pants','Pants', 'Jeans', 'Jean','jeans', 'jean','pant','Pant']:
                         collection_pants.insert_one(data)
-                    elif data['type'] in['Coat', 'Jacket', 'Hood','Parka']:
+                    elif data['type'] in[  'Hood','Parka']:
                         collection_coat.insert_one(data)
+                    elif data['type'] in ['Suit','Suits','Coat','Coats','Separates', 'Jacket','Vest']:
+                        collection_suit.insert_one(data)  
                     elif data['type'] == 'Shorts':
                         collection_Shorts.insert_one(data)
                 else:

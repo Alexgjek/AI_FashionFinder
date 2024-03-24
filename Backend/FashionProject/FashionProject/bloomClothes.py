@@ -14,6 +14,10 @@ collection_top = db['top']
 collection_hoodie = db['hoodie']
 collection_pants = db['pants']
 collection_coat= db['jackets']
+collection_skirt= db['skirts']
+collection_suit= db['suit']
+
+
 
 
 options = Options()
@@ -62,6 +66,12 @@ def scrape_bloom():
         #shop/mens/coats-jackets/Men_tops_and_jackets_t,Pageindex,Productsperpage/M,6,120?id=11548
         #shop/mens/coats-jackets/Men_tops_and_jackets_t,Pageindex,Productsperpage/L,6,120?id=11548
         #shop/mens/coats-jackets/Men_tops_and_jackets_t,Pageindex,Productsperpage/XL,5,120?id=11548
+        #shop/womens-apparel/skirts/Rtw_denim_regular_size_t,Pageindex,Productsperpage/22%252C%2000%7C23%252C%2000%7C24%252C%2000%7C25%252C%200,5,120?id=19951
+        #shop/womens-apparel/skirts/Rtw_denim_regular_size_t,Pageindex,Productsperpage/26%252C%202%7C27%252C%204,5,120?id=19951
+        #shop/womens-apparel/skirts/Rtw_denim_regular_size_t,Pageindex,Productsperpage/28%252C%206%7C29%252C%208,5,120?id=19951
+        #shop/womens-apparel/skirts/Rtw_denim_regular_size_t,Pageindex,Productsperpage/30%252C%2010%7C31%252C%2012,5,120?id=19951
+        #shop/womens-apparel/skirts/Rtw_denim_regular_size_t,Pageindex,Productsperpage/32%252C%2014%7C33%252C%2016,3,120?id=19951
+        #shop/womens-apparel/skirts/Rtw_denim_regular_size_t,Pageindex,Productsperpage/32%252C%2014%7C33%252C%2016,3,120?id=19951"
         url = f"{base_url}"
         driver.get(url)
         content = driver.page_source
@@ -87,7 +97,7 @@ def parse_image_data(soup, base_url):
         if brand_desc_tag:
             clothing_type = brand_desc_tag.text.strip().split()[-1].strip()
 
-        size='XL'
+        size='S'
         gender='Male'
         color = 'N/A'
         if color_swatch:
@@ -158,6 +168,10 @@ def save_to_mongodb(image_data):
                         collection_pants.insert_one(data)
                     elif data['type'] in['Coat', 'Jacket', 'Hood','Parka']:
                         collection_coat.insert_one(data)
+                    elif data['type'] == 'Skirt':
+                        collection_skirt.insert_one(data) 
+                    elif data['type'] == 'Suit':
+                        collection_suit.insert_one(data)    
                     elif data['type'] == 'Shorts':
                         collection_Shorts.insert_one(data)
                 else:
