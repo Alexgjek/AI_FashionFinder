@@ -1,16 +1,44 @@
-
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SendChatButton from '@/components/buttons/SendChatButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faBars,faTimes } from '@fortawesome/free-solid-svg-icons';
+
 import axios from 'axios';
+
 
 export default function Home() {
   const [inputValue, setInputValue] = useState('');
   const [conversation, setConversation] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const conversationContainerRef = useRef(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(0); // Initialize with 0 
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setWindowWidth(window.innerWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setWindowWidth(window.innerWidth);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (conversationContainerRef.current) {
+      conversationContainerRef.current.scrollTop = conversationContainerRef.current.scrollHeight;
+    }
+  }, [conversation]);
 
   const clearInput = () => {
     setInputValue('');
@@ -19,18 +47,13 @@ export default function Home() {
   const handleNewChat = () => {
     setConversation([]);
     setIsSubmitted(false);
+    setIsMenuOpen(false); 
   };
-
-  useEffect(() => {
-    if (conversationContainerRef.current) {
-      conversationContainerRef.current.scrollTop = conversationContainerRef.current.scrollHeight;
-    }
-  }, [conversation]);
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    console.log(inputValue)
+    console.log(inputValue);
 
     setIsSubmitted(true);
     const newMessage = {
@@ -57,8 +80,7 @@ export default function Home() {
     } catch (error) {
       console.error('Error fetching AI response:', error);
     }
-  };
-
+  }
 
   function handleKeyDown(e) {
     if (e.key === 'Enter') {
@@ -67,18 +89,28 @@ export default function Home() {
     }
   }
 
-
   return (
-    <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
-      <div className='bg-gray-200 col-span-1 left-0 p-1'>
-        <button
-          className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
-          onClick={handleNewChat}
-        >
-          <span className='font-semibold text-sm'>New Chat</span>
-          <FontAwesomeIcon icon={faPenToSquare} />
-        </button>
-      </div>
+    <div className='m-0 w-full h-screen grid grid-cols-7 relative' style={{ height: 'calc(100vh - 60px)' }}>
+      {windowWidth > 768 || isMenuOpen ? (
+        <div className='bg-gray-200 col-span-1 left-0 p-1 relative'>
+          <button
+            className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
+            onClick={handleNewChat}
+          >
+            <span className='font-semibold text-sm'>New Chat</span>
+            <FontAwesomeIcon icon={faPenToSquare} />
+          </button>
+        </div>
+      ) : (
+        <div className='p-1'>
+          <button
+            className='rounded-lg p-2 hover:bg-gray-100'
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </button>
+        </div>
+      )}
       <div className='col-span-6 flex flex-col items-center justify-center'>
         {isSubmitted ? (
           <div
@@ -97,17 +129,27 @@ export default function Home() {
             ))}
           </div>
         ) : (
-            <div className='mx-auto'>
-              <img src="/FFlogo.png" />
-              <h1 className='text-4xl mx-auto font-semibold text-center'>
-                Tell us what you're looking for
-              </h1>
-              <h2 className='font-semibold text-xl text-center p-2 mb-20'>
-                We'll find it for you
-              </h2>
-            </div>
+          <div className='mx-auto'>
+            <img src="/FFlogo.png" alt="FashionFinder Logo" />
+            <h1 className='text-4xl mx-auto font-semibold text-center'>
+              Tell us what you're looking for
+            </h1>
+            <h2 className='font-semibold text-xl text-center p-2 mb-20'>
+              We'll find it for you
+            </h2>
+          </div>
+        )}
+        <div className="absolute top-5 right-5">
+          {isMenuOpen && (
+            <button
+              className='p-2 rounded-full hover:bg-gray-100'
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
           )}
-        <div className="absolute bottom-5 w-5/6 flex justify-center h-16" >
+        </div>
+        <div className="absolute bottom-5 w-5/6 flex justify-center h-16">
           <input
             type="text"
             value={inputValue}
@@ -118,8 +160,11 @@ export default function Home() {
           />
           <SendChatButton inputValue={inputValue} clearInput={clearInput} handleClick={handleSubmit} />
         </div>
-
       </div>
     </div>
   );
+  
 }
+
+
+
