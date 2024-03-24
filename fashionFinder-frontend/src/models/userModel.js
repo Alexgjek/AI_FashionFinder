@@ -6,6 +6,12 @@ const albumSchema = new mongoose.Schema({
   dateCreated: {
     type: Date,
     default: Date.now
+  },
+  shareToken: String,
+  shareExpiry: Date,
+  timesOpened:{
+    type: Number,
+    default: 0
   }
 }, { _id: false });
 
