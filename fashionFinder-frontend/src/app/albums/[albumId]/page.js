@@ -85,7 +85,6 @@ export default function AlbumId({ params }) {
   };
   
   
-  
 
   const handleSortChange = async (option) => {
     try {
@@ -134,7 +133,6 @@ export default function AlbumId({ params }) {
       }
       console.log('Sorted outfits:', sortedOutfits);
       setSortType(option);
-      setOutfits(sortedOutfits); 
       setOutfits(sortedOutfits); 
     } catch (error) {
       console.error('Failed to handle sorting:', error);
@@ -289,35 +287,6 @@ export default function AlbumId({ params }) {
         ))}
       </div>
       </div>
-       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
-        {outfits.map((outfit, index) => (
-          <div key={index} className="relative group">
-            <img
-              src={outfit.imageUrl}
-              alt={`Outfit ${index + 1}`}
-              className="cursor-pointer"
-              onClick={() => window.open(outfit.outfitUrl, '_blank')}
-            />
-            <div className="absolute inset-0 bg-gray-400 opacity-0 group-hover:opacity-50 flex flex-col justify-center items-center z-30">
-              <button
-                className="text-violet-800 text-xl font-bold mb-4"
-                onClick={() => window.open(outfit.outfitUrl, '_blank')}
-              >
-                Go
-              </button>
-              {!shareToken && (
-                <button
-                  className="text-red-500 text-xl font-bold"
-                  onClick={() => handleDeleteOutfit(outfit.outfitUrl)}
-                >
-                  Delete
-                </button>
-              )}
-
-            </div>
-          </div>
-        ))}
-      </div> *
       {showDeleteConfirmation && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
           <div className="bg-white p-8 rounded-lg">
@@ -379,6 +348,6 @@ export default function AlbumId({ params }) {
           </div>
         )}
     </main>
-  );vf
+  );
   
 }
