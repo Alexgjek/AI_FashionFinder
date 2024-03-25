@@ -1,4 +1,3 @@
-// OutfitSort.js
 import { useState } from 'react';
 
 export default function OutfitSort({ outfits, onSortChange }) {
