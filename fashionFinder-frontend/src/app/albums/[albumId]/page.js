@@ -85,6 +85,7 @@ export default function AlbumId({ params }) {
   };
   
   
+  
 
   const handleSortChange = async (option) => {
     try {
@@ -133,6 +134,7 @@ export default function AlbumId({ params }) {
       }
       console.log('Sorted outfits:', sortedOutfits);
       setSortType(option);
+      setOutfits(sortedOutfits); 
       setOutfits(sortedOutfits); 
     } catch (error) {
       console.error('Failed to handle sorting:', error);
@@ -287,8 +289,7 @@ export default function AlbumId({ params }) {
         ))}
       </div>
       </div>
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
-        
+       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
         {outfits.map((outfit, index) => (
           <div key={index} className="relative group">
             <img
@@ -316,7 +317,7 @@ export default function AlbumId({ params }) {
             </div>
           </div>
         ))}
-      </div> */}
+      </div> *
       {showDeleteConfirmation && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
           <div className="bg-white p-8 rounded-lg">
@@ -351,25 +352,26 @@ export default function AlbumId({ params }) {
                 <hr className='bg-black mt-2'/>
               </div>
               <div className='m-2 font-semibold outline-none'>
-                <p className='text-xl text-center'>Budget Range</p>
-                {error && <p className='text-red-500 text-center'>{error}</p>}
-                <div className='flex justify-center'>
-                  <div className='flex flex-col'>
-                    <input
-                      className='border border-gray-300 outline-none mb-2'
-                      placeholder='Lower Limit'
-                      value={lowerBound}
-                      onChange={handleLowerBoundChange}
-                    />
-                    <input
-                      className='border border-gray-300 outline-none'
-                      placeholder='Upper Limit'
-                      value={upperBound}
-                      onChange={handleUpperBoundChange}
-                    />
-                  </div>
-                </div>
-              </div>
+  <p className='text-xl text-center'>Budget Range</p>
+  {error && <p className='text-red-500 text-center'>{error}</p>}
+  <div className='flex justify-center'>
+    <div className='flex flex-col'>
+      <input
+        className='border border-gray-300 outline-none mb-2'
+        placeholder='Lower Limit'
+        value={lowerBound}
+        onChange={handleLowerBoundChange}
+      />
+      <input
+        className='border border-gray-300 outline-none'
+        placeholder='Upper Limit'
+        value={upperBound}
+        onChange={handleUpperBoundChange}
+      />
+    </div>
+  </div>
+</div>
+
               <div className="flex justify-center gap-4">
                 <button onClick={handleModalCancel} className="px-4 py-2 bg-black text-white font-semibold rounded-md max-w-2/5">Apply</button>
                 <button onClick={handleModalCancel} className="px-4 py-2 bg-gray-300 text-black font-semibold rounded-md max-w-2/5">Cancel</button>
