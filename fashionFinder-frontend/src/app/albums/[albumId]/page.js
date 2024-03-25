@@ -6,7 +6,6 @@ import axios from 'axios';
 import Header from '@/components/Header';
 import ShortHeader from '@/components/ShortHeader'; 
 import OutfitSort from '@/components/sorting/outfitSorting/OutfitSort';
-import { set } from 'mongoose';
 
 export default function AlbumId({ params }) {
   const router = useRouter();
@@ -23,7 +22,21 @@ export default function AlbumId({ params }) {
   const [itemBrands, setItemBrands] = useState([]);
   const [lowerBound, setLowerBound] = useState('');
   const [upperBound, setUpperBound] = useState('');
+  const [selectedFilters, setSelectedFilters] = useState([]);
   const [error, setError] = useState('');
+
+  const handleFilterSelection = (filter) => {
+    setSelectedFilters(prevFilters => {
+      const isSelected = prevFilters.includes(filter);
+      if (isSelected) {
+        return prevFilters.filter(item => item !== filter);
+      } else {
+        return [...prevFilters, filter];
+      }
+    });
+  };
+  
+  
 
   const handleLowerBoundChange = (e) => {
     setLowerBound(e.target.value);
@@ -306,19 +319,25 @@ export default function AlbumId({ params }) {
                 <p className='text-xl text-center font-semibold'>Brand</p>
                 <div className="flex flex-wrap justify-center gap-2 mt-2">
                     {itemBrands.map((brand, index) => (
-                      <button key={index} className="border border-gray-200 shadow-md text-gray-800 px-3 py-1 rounded-md w-full truncate flex-1 overflow-ellipsis">{brand}</button>
+                      <button key={index} 
+                      className={`border border-gray-200 shadow-md text-gray-800 px-3 py-1 rounded-md w-full truncate flex-1 overflow-ellipsis ${selectedFilters.includes(brand) ? 'bg-green-400 opacity-50' : 'bg-white'}`}
+                      onClick={() => handleFilterSelection(brand)}>{brand}</button>
                     ))}
                 </div>
-                <hr className='bg-black mt-2'/>
+                <hr className='bg-black mt-2 shadow-sm'/>
               </div>
               <div className='text-xl mb-2 font-semibold'>
                 <p className='text-center'>Color</p>
                   <div className="flex flex-wrap justify-center gap-2 mt-2">
                     {itemColors.map((color, index) => (
-                      <button key={index} className="border border-gray-200 shadow-md text-gray-800 px-3 py-1 rounded-md w-full truncate flex-1 overflow-ellipsis">{color}</button>
+                      <button key={index} 
+                      className={`border border-gray-200 shadow-md px-3 py-1 rounded-md w-full truncate flex-1 overflow-ellipsis ${
+                        selectedFilters.includes(color) ? 'bg-green-400 opacity-50' : 'bg-white'
+                      }`}
+                      onClick={() => handleFilterSelection(color)}>{color}</button>
                     ))}
                 </div>
-                <hr className='bg-black mt-2'/>
+                <hr className='bg-black mt-2 shadow-sm'/>
               </div>
               <div className='m-2 font-semibold outline-none'>
                 <p className='text-xl text-center'>Budget Range</p>
