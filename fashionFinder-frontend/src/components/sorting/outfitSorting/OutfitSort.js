@@ -9,7 +9,7 @@ export default function OutfitSort({ outfits, onSortChange }) {
   };
 
   return (
-    <div className='mt-3 ml-5 inline-flex shadow-md border border-gray-300'>
+    <div className='mt-3 ml-4 inline-flex shadow-md border border-gray-300'>
       <select className='outline-none' value={sortType} onChange={(e) => handleSortChange(e.target.value)}>
         <option value="">Sort by</option>
         <option value="ascendingPrice">Price Low to High</option>
