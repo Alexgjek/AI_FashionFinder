@@ -18,22 +18,30 @@ export default function AlbumId({ params }) {
   const [outfitToDelete, setOutfitToDelete] = useState(null);
   const [shareToken, setShareToken] = useState('');
   const [sortType, setSortType] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [itemColors, setItemColors] = useState([]);
+  const [itemBrands, setItemBrands] = useState([]);
+  const [lowerBound, setLowerBound] = useState('');
+  const [upperBound, setUpperBound] = useState('');
+  const [error, setError] = useState('');
 
-  // const [sortedOutfits, setSortedOutfits] = useState([]);
+  const handleLowerBoundChange = (e) => {
+    setLowerBound(e.target.value);
+  };
 
-
+  const handleUpperBoundChange = (e) => {
+    setUpperBound(e.target.value);
+  };
 
   const fetchOutfits = async () => {
     try {
       console.log('Fetching outfits...');
       console.log('Album ID:', decodedAlbumId);
       
-      // Check if a share token is present in the URL
       const searchParams = new URLSearchParams(window.location.search);
       const shareToken = searchParams.get("token");
       setShareToken(shareToken);
       
-      // Determine the API endpoint based on whether a share token is present
       let endpoint;
       if (shareToken) {
         endpoint = `/api/users/getOutfitsFromAlbum?albumName=${decodedAlbumId}&token=${shareToken}`;
@@ -42,9 +50,31 @@ export default function AlbumId({ params }) {
       }
       
       const response = await axios.get(endpoint);
-      console.log('Outfits response:', response.data);
       setOutfits(response.data.outfits);
-      // setSortedOutfits(response.data.outfits);
+  
+      const colors = [];
+      const brands = [];
+      response.data.outfits.forEach(outfit => {
+        if (outfit.color) {
+          let colorArray = Array.isArray(outfit.color) ? outfit.color : outfit.color.split(',');
+          colorArray.forEach(color => {
+            let normalizedColor = color.trim().toLowerCase();
+            if (!colors.includes(normalizedColor)) {
+              colors.push(normalizedColor);
+            }
+          });
+        }
+        if (outfit.brand) {
+          let normalizedBrand = outfit.brand.trim().toLowerCase();
+          if (!brands.includes(normalizedBrand)) {
+            brands.push(normalizedBrand);
+          }
+        }
+      });
+      
+      setItemColors(colors);
+      console.log('brands:', brands)
+      setItemBrands(brands);
     } catch (error) {
       console.error('Failed to grab outfits:', error);
       if (error.response && error.response.status === 404) {
@@ -53,6 +83,7 @@ export default function AlbumId({ params }) {
       }
     }
   };
+  
   
 
   const handleSortChange = async (option) => {
@@ -102,7 +133,7 @@ export default function AlbumId({ params }) {
       }
       console.log('Sorted outfits:', sortedOutfits);
       setSortType(option);
-      setOutfits(sortedOutfits); // Update state with sorted outfits
+      setOutfits(sortedOutfits); 
     } catch (error) {
       console.error('Failed to handle sorting:', error);
     }
@@ -193,6 +224,23 @@ export default function AlbumId({ params }) {
     setShareExpiry();
   }, []);
 
+  const filtersModal = () => {
+    setShowModal(true);
+  };
+
+  const handleModalSubmit = () => {
+    setError('');
+    
+    if (parseFloat(lowerBound) > parseFloat(upperBound)) {
+      setError('Lower bound cannot be greater than upper bound.');
+    }
+    setShowModal(false);
+  };
+
+  const handleModalCancel = () => {
+    setShowModal(false);
+  };
+
   return (
     <main>
       {userEmail !== '' ? <Header /> : <ShortHeader />}
@@ -200,7 +248,14 @@ export default function AlbumId({ params }) {
         <h1 className="flex items-center justify-center font-semibold text-4xl">{decodedAlbumId}</h1>
       </div>
       <div>
-        <OutfitSort outfits={outfits} onSortChange={handleSortChange} />
+        <div className="inline-flex gap-3">
+          <OutfitSort outfits={outfits} onSortChange={handleSortChange} />
+          <button 
+          className='bg-white shadow-md mt-3 px-6 border border-gray-300'
+          onClick={filtersModal}>
+          Filter
+        </button>
+        </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
         
         {outfits.map((outfit, index) => (
@@ -273,9 +328,56 @@ export default function AlbumId({ params }) {
           </div>
         </div>
       )}
+      {showModal && (
+          <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
+            <div className="bg-white p-8 rounded-lg w-2/5">
+              <p className="text-3xl font-semibold mb-4 text-center">Filters</p>
+              <div className="mb-2">
+                <p className='text-xl text-center font-semibold'>Brand</p>
+                <div className="flex flex-wrap justify-center gap-2 mt-2">
+                    {itemBrands.map((brand, index) => (
+                      <button key={index} className="border border-gray-200 shadow-md text-gray-800 px-3 py-1 rounded-md w-full truncate flex-1 overflow-ellipsis">{brand}</button>
+                    ))}
+                </div>
+                <hr className='bg-black mt-2'/>
+              </div>
+              <div className='text-xl mb-2 font-semibold'>
+                <p className='text-center'>Color</p>
+                  <div className="flex flex-wrap justify-center gap-2 mt-2">
+                    {itemColors.map((color, index) => (
+                      <button key={index} className="border border-gray-200 shadow-md text-gray-800 px-3 py-1 rounded-md w-full truncate flex-1 overflow-ellipsis">{color}</button>
+                    ))}
+                </div>
+                <hr className='bg-black mt-2'/>
+              </div>
+              <div className='m-2 font-semibold outline-none'>
+                <p className='text-xl text-center'>Budget Range</p>
+                {error && <p className='text-red-500 text-center'>{error}</p>}
+                <div className='flex justify-center'>
+                  <div className='flex flex-col'>
+                    <input
+                      className='border border-gray-300 outline-none mb-2'
+                      placeholder='Lower Limit'
+                      value={lowerBound}
+                      onChange={handleLowerBoundChange}
+                    />
+                    <input
+                      className='border border-gray-300 outline-none'
+                      placeholder='Upper Limit'
+                      value={upperBound}
+                      onChange={handleUpperBoundChange}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-center gap-4">
+                <button onClick={handleModalCancel} className="px-4 py-2 bg-black text-white font-semibold rounded-md max-w-2/5">Apply</button>
+                <button onClick={handleModalCancel} className="px-4 py-2 bg-gray-300 text-black font-semibold rounded-md max-w-2/5">Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
     </main>
   );
   
 }
-
-
