@@ -352,26 +352,25 @@ export default function AlbumId({ params }) {
                 <hr className='bg-black mt-2'/>
               </div>
               <div className='m-2 font-semibold outline-none'>
-  <p className='text-xl text-center'>Budget Range</p>
-  {error && <p className='text-red-500 text-center'>{error}</p>}
-  <div className='flex justify-center'>
-    <div className='flex flex-col'>
-      <input
-        className='border border-gray-300 outline-none mb-2'
-        placeholder='Lower Limit'
-        value={lowerBound}
-        onChange={handleLowerBoundChange}
-      />
-      <input
-        className='border border-gray-300 outline-none'
-        placeholder='Upper Limit'
-        value={upperBound}
-        onChange={handleUpperBoundChange}
-      />
-    </div>
-  </div>
-</div>
-
+                <p className='text-xl text-center'>Budget Range</p>
+                {error && <p className='text-red-500 text-center'>{error}</p>}
+                <div className='flex justify-center'>
+                  <div className='flex flex-col'>
+                    <input
+                      className='border border-gray-300 outline-none mb-2'
+                      placeholder='Lower Limit'
+                      value={lowerBound}
+                      onChange={handleLowerBoundChange}
+                    />
+                    <input
+                      className='border border-gray-300 outline-none'
+                      placeholder='Upper Limit'
+                      value={upperBound}
+                      onChange={handleUpperBoundChange}
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="flex justify-center gap-4">
                 <button onClick={handleModalCancel} className="px-4 py-2 bg-black text-white font-semibold rounded-md max-w-2/5">Apply</button>
                 <button onClick={handleModalCancel} className="px-4 py-2 bg-gray-300 text-black font-semibold rounded-md max-w-2/5">Cancel</button>
