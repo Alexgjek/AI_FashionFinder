@@ -25,7 +25,7 @@ export async function POST(request) {
         outfits.forEach(({ outfitUrl, imageUrl, price, color, brand, rating }) => {
           const outfitExists = album.outfits.some((outfit) => outfit.outfitUrl === outfitUrl && outfit.imageUrl === imageUrl);
           if (!outfitExists) {
-            album.outfits.push({ outfitUrl, imageUrl,price, color, brand, rating});
+            album.outfits.push({ outfitUrl, imageUrl,price, color, brand, rating, dateAdded: Date.now()});
           }
         });
       } else {
