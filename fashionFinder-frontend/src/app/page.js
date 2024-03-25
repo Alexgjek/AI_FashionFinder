@@ -2,10 +2,9 @@
 import { useState, useRef, useEffect } from 'react';
 import SendChatButton from '@/components/buttons/SendChatButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare, faBars,faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 import axios from 'axios';
-
 
 export default function Home() {
   const [inputValue, setInputValue] = useState('');
@@ -88,7 +87,12 @@ export default function Home() {
       handleSubmit(e);
     }
   }
-
+  useEffect(() => {
+    // Close menu automatically when window width exceeds 
+    if (windowWidth > 768) {
+      setIsMenuOpen(false);
+    }
+  }, [windowWidth]);
   return (
     <div className='m-0 w-full h-screen grid grid-cols-7 relative' style={{ height: 'calc(100vh - 60px)' }}>
       {windowWidth > 768 || isMenuOpen ? (
@@ -139,16 +143,11 @@ export default function Home() {
             </h2>
           </div>
         )}
-        <div className="absolute top-5 right-5">
-          {isMenuOpen && (
-            <button
-              className='p-2 rounded-full hover:bg-gray-100'
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          )}
-        </div>
+        {isMenuOpen && (
+          <div className="absolute top-0 left-1/4 transform -translate-x-2/4">
+            <FontAwesomeIcon icon={faTimes} className='text-2xl' onClick={() => setIsMenuOpen(false)} /> {/* Close menu when 'x' is clicked */}
+          </div>
+        )}
         <div className="absolute bottom-5 w-5/6 flex justify-center h-16">
           <input
             type="text"
@@ -163,8 +162,4 @@ export default function Home() {
       </div>
     </div>
   );
-  
 }
-
-
-
