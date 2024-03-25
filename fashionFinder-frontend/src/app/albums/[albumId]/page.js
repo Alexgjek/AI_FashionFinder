@@ -377,7 +377,7 @@ export default function AlbumId({ params }) {
               </div>
             </div>
           </div>
-        )}f
+        )}
     </main>
   );
   
