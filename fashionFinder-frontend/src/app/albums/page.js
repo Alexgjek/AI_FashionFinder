@@ -8,6 +8,7 @@ import axios from 'axios';
 import Header from '@/components/Header';
 import AlbumSort from '@/components/sorting/albumSorting/AlbumSort';
 import SearchBar from '@/components/SearchBar';
+import ShortHeader from '@/components/ShortHeader';
 
 export default function AlbumsPage() {
   const [albumName, setAlbumName] = useState('');
@@ -21,6 +22,23 @@ export default function AlbumsPage() {
   const [sortType, setSortType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredAlbums, setFilteredAlbums] = useState([]);
+  const [copyMessage, setCopyMessage] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  const fetchUserEmail = async () => {
+    try {
+      console.log('Fetching user email...');
+      const response = await axios.get('/api/users/grabUserEmail');
+      console.log('User email response:', response.data);
+      setUserEmail(response.data.email);
+    } catch (error) {
+      console.error('Failed to grab user email:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserEmail();
+  },[]);
   
 
   const handleSortChange = async (option) => {
@@ -195,9 +213,30 @@ export default function AlbumsPage() {
     };
   }, [editMode, editAlbumName, albumName]);
 
+  const shareFunctionality = async (albumURL) => {
+    try {
+      const albumName = albumURL.split('/').pop();
+      const response = await axios.post('api/users/shareAlbum', { albumName });
+      const { shareToken } = response.data;
+  
+      const shareLink = `${window.location.origin}/albums/${albumName}?token=${shareToken}`;
+  
+      await navigator.clipboard.writeText(shareLink);
+      console.log('Link copied to clipboard:', shareLink);
+  
+      setCopyMessage('Link copied to clipboard');
+      setTimeout(() => {
+        setCopyMessage('');
+      }, 3000);
+    } catch (error) {
+      console.log('Failed to copy text to clipboard', error);
+    }
+  };
+  
+  
   return (
     <main>
-      <Header />
+      {userEmail !== '' ? <Header /> : <ShortHeader />}
       {showModal && (
         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-500 bg-opacity-50 z-50"></div>
       )}
@@ -260,19 +299,29 @@ export default function AlbumsPage() {
         <AlbumSort albums={albums} onSortChange={handleSortChange} />
         <SearchBar onSearch={handleSearch} />
       </div>
+      {copyMessage && (
+        <div className='flex items-center justify-center m-2'>
+          <div className="border bg-green-200 border-green-400 w-2/3 rounded-md p-2 text-center">
+            <p className='text-green-600'>
+              {copyMessage}
+            </p>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-4 m-5">
         {filteredAlbums.map((album, index) => (
           album && album.albumName && (
             <div key={index} className="flex bg-white rounded-lg shadow-md p-4 relative text-center">
               <Link
-                href={`/albums/${album.albumName}`}
-                className="text-lg font-semibold mb-2 hover:opacity-70 truncate flex-1"
-                style={{ textOverflow: 'ellipsis' }}>
+                href={`/albums/${encodeURIComponent(album.albumName)}`}
+                className="text-lg font-semibold mb-2 hover:opacity-70 truncate flex-1 overflow-ellipsis"
+                /* style={{ textOverflow: 'ellipsis' }}*/>
                 {album.albumName}
               </Link>
               <div className='flex justify-end absolute bottom-0 right-0 space-x-2 mr-2'>
                 <button
-                title='Share Album'>
+                title='Share Album'
+                onClick={() => shareFunctionality(window.location.origin + `/albums/${album.albumName}`)}>
                   <FontAwesomeIcon icon={faShareFromSquare} className='text-gray-500'/>
                 </button>
                 <button

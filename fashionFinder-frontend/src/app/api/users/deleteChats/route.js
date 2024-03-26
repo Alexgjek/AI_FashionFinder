@@ -9,20 +9,21 @@ export async function DELETE(request) {
   const token = request.cookies.get("token")?.value || '';
   const decodedToken = jwt.decode(token);
   const email = decodedToken ? decodedToken.email : '';
+  
+  const searchParams = request.nextUrl.searchParams;
+  const chatId = searchParams.get('chatId'); // Update to use chatId instead of chatName
+  console.log(chatId);
 
   try {
     const userEmail = email.toLowerCase();
-    const searchParams = request.nextUrl.searchParams;
-    const chatName = searchParams.get('chatName');
 
-    if (!userEmail || !chatName) {
-      return NextResponse.json({ error: "Email or chatName not provided" }, { status: 400 });
+    if (!userEmail || !chatId) {
+      return NextResponse.json({ error: "Email or chatId not provided" }, { status: 400 });
     }
 
-    // Update the logic to remove the chat from the database
     const user = await User.findOneAndUpdate(
       { email: userEmail },
-      { $pull: { savedChats: { chatName: chatName } } },
+      { $pull: { savedChats: { _id: chatId } } }, // Modify the query to delete by chat_id
       { new: true }
     );
 

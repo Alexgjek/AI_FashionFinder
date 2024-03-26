@@ -18,16 +18,24 @@ export async function PUT(request) {
       return NextResponse.json({ error: "Email, chatName, or messages not provided" }, { status: 400 });
     }
 
-    // Update the logic to find the user and update the chat with new messages
-    const user = await User.findOneAndUpdate(
-      { email: userEmail, "savedChats.chatName": chatName }, // Find user by email and chatName
-      { $set: { "savedChats.$.messages": messages } }, // Update the messages array for the matched chat
-      { new: true }
-    );
+    // Find the user
+    const user = await User.findOne({ email: userEmail });
 
     if (!user) {
-      return NextResponse.json({ error: "User or chat not found" }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    // Find the chat by chatName
+    const chatIndex = user.savedChats.findIndex(chat => chat.chatName === chatName);
+
+    if (chatIndex === -1) {
+      return NextResponse.json({ error: "Chat not found" }, { status: 404 });
+    }
+
+    // Update the messages of the chat
+    user.savedChats[chatIndex].messages = messages;
+    // No need to create a new document, just save the existing user document
+    await user.save();
 
     return NextResponse.json({ success: true, message: "Chat updated successfully" });
   } catch (error) {
