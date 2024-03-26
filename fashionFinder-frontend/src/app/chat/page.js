@@ -3,22 +3,176 @@
 import { useState, useRef, useEffect } from 'react';
 import SendChatButton from '@/components/buttons/SendChatButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare,faSave,faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Header from "@/components/Header";
-import { set } from 'mongoose';
-
+import ReviewModal from '@/components/ReviewModal/ReviewModal';
 
 export default function Home() {
   const [inputValue, setInputValue] = useState('');
-  const [showModal, setShowModal] = useState(false);
   const [conversation, setConversation] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [savedChats, setSavedChats] = useState([]);
+  const [chatName, setChatName] = useState('');
+  const [deleteIndex, setDeleteIndex] = useState(null);
+  const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
+  const [unsavedChangesModal, setUnsavedChangesModal] = useState(false);
+  const [isFetchingResponse, setIsFetchingResponse] = useState(false);
+  const [saveChatModal, setSaveChatModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [userAlbums, setUserAlbums] = useState([]);
   const [selectedAlbums, setSelectedAlbums] = useState([]);
   const conversationContainerRef = useRef(null);
   const [outfit, setOutfit] = useState('');
   
+  //angjelos code
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await axios.get('/api/users/getChats');
+        const { savedChats } = response.data;
+        setSavedChats(savedChats || []);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+      }
+    };
+    fetchChats();
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleUnload);
+
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, [isUnsavedChanges]);
+
+  const handleUnload = (e) => {
+    if (isUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  };
+
+  const isConversationIdentical = () => {
+    const existingChat = savedChats.find(chat => chat.chatName.toLowerCase() === chatName.toLowerCase());
+    if (existingChat) {
+      return existingChat.messages.length === conversation.length && existingChat.messages.every((msg, index) => msg.message === conversation[index].message);
+    }
+    return false;
+  };
+
+  const resetAiMemory = async () => {
+    try {
+      const response = await axios.post('http://localhost:8000/resetAiMemory');
+      console.log(response.data.message); // Log success message
+      // Handle success scenario
+    } catch (error) {
+      console.error('Error resetting AI memory:', error);
+      // Handle error scenario
+    }
+  };
+
+  const saveChat = async () => {
+    try {
+      const lowerCaseChatName = chatName.toLowerCase();
+      const existingChatIndex = savedChats.findIndex(chat => chat.chatName.toLowerCase() === lowerCaseChatName);
+  
+      if (existingChatIndex !== -1) {
+        // Update existing chat
+        const response = await axios.put('/api/users/updatedChats', {
+          chatName: lowerCaseChatName,
+          messages: conversation
+        });
+        const { message, success } = response.data;
+        if (success) {
+          console.log(message);
+          setSavedChats(prevChats => {
+            const updatedChats = [...prevChats];
+            updatedChats[existingChatIndex].messages = conversation;
+            return updatedChats;
+          });
+          // Reset input values and close modal
+          setConversation([]);
+          setIsSubmitted(false);
+          setChatName('');
+          toggleModal();
+          setIsUnsavedChanges(false); // Reset unsaved changes state
+        } else {
+          console.error(message);
+        }
+      } else {
+        // Save new chat
+        const response = await axios.post('/api/users/saveChats', {
+          chatName: lowerCaseChatName,
+          messages: conversation
+        });
+        
+        const { message, user } = response.data;
+        console.log(message);
+        setSavedChats(user.savedChats);
+        
+        // Reset input values and close modal
+        setConversation([]);
+        setIsSubmitted(false);
+        setChatName('');
+        toggleModal();
+        setIsUnsavedChanges(false); // Reset unsaved changes state
+      }
+    } catch (error) {
+      console.error('Error saving chat:', error);
+    }
+  };
+
+  const deleteChat = async (chatId) => {
+    try {
+      const response = await axios.delete(`/api/users/deleteChats?chatId=${chatId}`);
+      const { success, message } = response.data;
+      if (success) {
+        setSavedChats(savedChats.filter(chat => chat._id !== chatId));
+        console.log(message);
+      } else {
+        console.error(message);
+      }
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+    }
+  };
+
+  const confirmDeleteChat = (chatId) => {
+    setDeleteIndex(chatId);
+  };
+
+  const handleConfirmDeleteChat = async () => {
+    if (deleteIndex) {
+      console.log("Deleting chat:", deleteIndex);
+      try {
+        await deleteChat(deleteIndex);
+        if (savedChats.length === 1 || savedChats.length > 1) {
+          // If the last remaining saved chat is deleted, switch back to New Chat mode
+          handleNewChat();
+        }
+        setDeleteIndex(null); // Reset deleteIndex after successful deletion
+      } catch (error) {
+        console.error('Error deleting chat:', error);
+      }
+    }
+  };
+
+  const loadSavedChat = (savedChat) => {
+    if (isUnsavedChanges) {
+      setUnsavedChangesModal(true);
+    } else {
+      setConversation(savedChat.messages);
+      setChatName(savedChat.chatName); // Set the chat name
+      setIsSubmitted(true);
+      setIsUnsavedChanges(false);
+    }
+  };
+
+  //start of my code
   const handleAddButton = async (productUrl, imageUrl, price, color, brand, rating) => {
     try {
       const response = await axios.get('/api/users/getUserAlbums');
@@ -46,9 +200,17 @@ export default function Home() {
     setInputValue('');
   };
 
+  //modified to angjelos version
   const handleNewChat = () => {
-    setConversation([]);
-    setIsSubmitted(false);
+    if (isUnsavedChanges) {
+      setUnsavedChangesModal(true);
+    } else {
+      setConversation([]);
+      setIsSubmitted(false);
+      resetAiMemory();
+      setChatName('');
+      setIsUnsavedChanges(false);
+    }
   };
 
   useEffect(() => {
@@ -74,6 +236,8 @@ export default function Home() {
     try {
       const userInfoResponse = await axios.get('http://localhost:3000/api/users/userInfo');
       const userInfo = userInfoResponse.data;
+      setIsUnsavedChanges(true);
+      setIsFetchingResponse(true);
       const response = await axios.post('http://localhost:8000/getAIResponse', {
         prompt: inputValue,
         userInfo: userInfo,
@@ -122,11 +286,20 @@ export default function Home() {
             link: false
           }
         }
+
+        const fashionFinderReviewMessage = {
+          sender: "FashionFinder",
+          message: "Leave us a review!",
+          action: "review"
+        };
+
         console.log(matchMessage);
-        setConversation(prevConversation => [...prevConversation, matchMessage]);
+        setConversation(prevConversation => [...prevConversation, matchMessage, fashionFinderReviewMessage]); //added tis
       }
     } catch (error) {
       console.error('Error fetching AI response:', error);
+    } finally {
+      setIsFetchingResponse(false);
     }
   };
 
@@ -168,13 +341,30 @@ export default function Home() {
   
     closeModal();
   };
+  const toggleModal = () => {
+    setSaveChatModal(!saveChatModal);
+  };
+
+  const toggleReviewModal = () => {
+    setShowReviewModal(!showReviewModal);
+  };
   
+  const handleChatNameKeyDown = async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveChat();
+    }
+  };
+
+  const closeReviewModal = () => {
+    setShowReviewModal(false);
+  };
 
   return (
     <main>
       <Header />
       <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
-        <div className='bg-gray-200 col-span-1 left-0 p-1'>
+        <div className='bg-gray-200 col-span-1 left-0 p-1 overflow-y-auto' style={{ maxHeight: 'calc(100vh - 60px)'}} >
           <button
             className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
             onClick={handleNewChat}
@@ -182,6 +372,18 @@ export default function Home() {
             <span className='font-semibold text-sm'>New Chat</span>
             <FontAwesomeIcon icon={faPenToSquare} />
           </button>
+          <div>
+          {savedChats.slice().reverse().map((chat, index) => (
+              <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
+                <div>
+                  <p><strong>Chat:</strong> {chat.chatName.length > 50 ? chat.chatName.substring(0, 50) + '...' : chat.chatName}</p>
+                </div>
+                <div>
+                  <FontAwesomeIcon icon={faTrashAlt} onClick={() => confirmDeleteChat(chat._id)} className="text-red-300 cursor-pointer" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <div className='col-span-6 flex flex-col items-center justify-center'>
           {isSubmitted ? (
@@ -219,7 +421,11 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                    <div className='font-md'><p>{conv.message}</p></div>
+                      conv.action == "review" ?
+                      (<div className='font-md'>
+                        <button onClick={toggleReviewModal} className='text-blue-600'>{conv.message}
+                        </button></div>) :
+                      (<div className='font-md'><p>{conv.message}</p></div>)
                   )}
                   </>
                   <hr className='bg-black' />
@@ -245,8 +451,18 @@ export default function Home() {
               onChange={e => setInputValue(e.target.value)}
               className="w-2/4 p-4 rounded-l-xl outline-none z-10 bg-transparent border border-gray-300 border-r-0 resize-none"
               placeholder="Message FashionFinder..."
+              disabled={isFetchingResponse}
             />
             <SendChatButton inputValue={inputValue} clearInput={clearInput} handleClick={handleSubmit} />
+            <button
+                onClick={() => toggleModal()}
+                onKeyDown={handleChatNameKeyDown}
+                disabled={conversation.length === 0 || isFetchingResponse || (savedChats.some(chat => chat.chatName.toLowerCase() === chatName.toLowerCase()) && isConversationIdentical())}
+                className="border border-gray-300 bg-slate-500 text-white rounded-lg px-4 py-2 ml-2 h-full"
+                style={{ width: '120px' }}
+            >
+            <FontAwesomeIcon icon={faSave} className="mr-2" /> Save Chat
+            </button>
           </div>
           {showModal && (
             <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 z-50 gap-2 p-5">
@@ -279,7 +495,48 @@ export default function Home() {
           )}
         </div>
       </div>
+      {deleteIndex && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-700 bg-opacity-50">
+          <div className="bg-white p-10 rounded-md shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">Are you sure you want to delete this chat?</h2>
+            <div className="flex items-center justify-center">
+              <button className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={handleConfirmDeleteChat}>Yes</button>
+              <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" onClick={() => setDeleteIndex(null)}>No</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {unsavedChangesModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-700 bg-opacity-50">
+          <div className="bg-white p-10 rounded-md shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">Are you sure you want to leave? You have unsaved changes.</h2>
+            <div className="flex items-center justify-center">
+              <button className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={() => { setConversation([]); setIsUnsavedChanges(false); setUnsavedChangesModal(false); resetAiMemory(); setIsSubmitted(false) }}>Yes</button>
+              <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" onClick={() => setUnsavedChangesModal(false)}>No</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {saveChatModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-700 bg-opacity-50">
+          <div className="bg-white p-10 rounded-md shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">Enter Chat Name</h2>
+            <input
+              type="text"
+              value={chatName}
+              onChange={(e) => setChatName(e.target.value)}
+              onKeyDown={handleChatNameKeyDown}
+              className="border border-gray-300 rounded-md px-4 py-2 mb-2 w-full"
+              placeholder="Enter chat name"
+            />
+            <div className="flex items-center justify-center">
+              <button className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold" onClick={saveChat}>Save</button>
+              <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold" onClick={toggleModal}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showReviewModal && (<ReviewModal onClose={() => setShowReviewModal(false)} />)}
     </main>
   );
-  
-}    
+}

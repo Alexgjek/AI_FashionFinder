@@ -1,5 +1,14 @@
 import mongoose from "mongoose";
 
+const messageSchema = new mongoose.Schema({
+  sender: String,
+  message: String,
+  timestamp: {
+    type: Date,
+    default: Date.now
+  }
+}, { _id: false });
+
 const albumSchema = new mongoose.Schema({
   albumName: String,
   outfits: Array,
@@ -14,6 +23,12 @@ const albumSchema = new mongoose.Schema({
     default: 0
   }
 }, { _id: false });
+
+const chatSchema = new mongoose.Schema({
+  chatId: mongoose.Schema.Types.ObjectId, 
+  chatName: String,
+  messages: [messageSchema]
+}, { timestamps: true });
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -45,6 +60,7 @@ const userSchema = new mongoose.Schema({
     type: Date,
   },
   albums: [albumSchema],
+  savedChats: [chatSchema],
   brands: [String],
   budget: Number,
   forgotPasswordToken: String,
