@@ -1,9 +1,8 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle } from '@fortawesome/free-solid-svg-icons';
-import { faGlobe } from '@fortawesome/free-solid-svg-icons';
-import { useRouter } from 'next/navigation'; 
+"use client";
+import { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGlobe } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
   const [phraseIndex, setPhraseIndex] = useState(0);
@@ -14,7 +13,9 @@ export default function LandingPage() {
     const interval = setInterval(() => {
       setFadeIn(false);
       setTimeout(() => {
-        setPhraseIndex((prevIndex) => (prevIndex + 1) % userSearchExamples.length);
+        setPhraseIndex(
+          (prevIndex) => (prevIndex + 1) % userSearchExamples.length
+        );
         setFadeIn(true);
       }, 3000);
     }, 5000);
@@ -22,12 +23,12 @@ export default function LandingPage() {
   }, [phraseIndex]);
 
   const handleLoginClick = () => {
-    router.push('/login');
+    router.push("/login");
   };
 
   const handleRegisterClick = () => {
-    router.push('/register');
-  }; 
+    router.push("/register");
+  };
 
   const userSearchExamples = [
     "Find me an outfit for a night out",
@@ -49,38 +50,43 @@ export default function LandingPage() {
         <div className="col-span-3 bg-darkBlue">
           <p className="text-blue-300 p-1 font-bold inline-flex gap-2 text-2xl items-center absolute left-5 top-5">
             FashionFinder
-            <FontAwesomeIcon icon={faCircle} className="w-5" />
+            {/* <FontAwesomeIcon icon={faCircle} className="w-5" /> */}
           </p>
           <div className="h-full flex items-center">
-            <p className={`text-blue-300 text-4xl font-semibold text-left ml-4 mr-5 ${fadeIn ? 'fade-in' : 'fade-out'} max-w-[2/3`} key={phraseIndex} >
+            <p
+              className={`text-blue-300 text-4xl font-semibold text-left ml-4 mr-5 ${
+                fadeIn ? "fade-in" : "fade-out"
+              } max-w-[2/3`}
+              key={phraseIndex}
+            >
               {userSearchExamples[phraseIndex]}
             </p>
           </div>
         </div>
         <div className="col-span-2 bg-black flex flex-col items-center justify-center">
-          <p className="text-3xl font-bold text-white">
-            Get started
-          </p>
-          <div className='flex gap-4 w-full p-6'>
+          <p className="text-3xl font-bold text-white">Welcome</p>
+          <div className="flex gap-4 w-full p-6">
             <button
               className="p-4 bg-blue-700 font-bold w-full rounded-lg shadow-xl text-white hover:bg-opacity-70"
-              onClick={handleLoginClick}>
+              onClick={handleLoginClick}
+            >
               Login
             </button>
             <button
-              className='p-4 bg-blue-700 font-bold w-full rounded-lg shadow-xl text-white hover:bg-opacity-70'
-              onClick={handleRegisterClick}>
+              className="p-4 bg-blue-700 font-bold w-full rounded-lg shadow-xl text-white hover:bg-opacity-70"
+              onClick={handleRegisterClick}
+            >
               Register
             </button>
           </div>
-          <div className='inline-flex absolute bottom-10 gap-1'>
+          <div className="inline-flex absolute bottom-10 gap-1">
             <p className="text-gray-300">
-              <FontAwesomeIcon icon={faGlobe} className='h-4'/>
+              <FontAwesomeIcon icon={faGlobe} className="h-4" />
             </p>
             <p className="text-gray-300">MAGK</p>
           </div>
         </div>
       </div>
     </main>
-  )
+  );
 }
