@@ -47,22 +47,23 @@ export default function AboutPage() {
       </div>
 
 
-      <div className="pl-20 pb-10">
+      <div className="pl-10 pr-10 pb-10">
         <h1 className="text-3xl font-bold text-center pt-4 pb-6">Take a Look at Some of Our Reviews!</h1>
         <div class="w-full overflow-x-auto snap-mandatory">
           <ul className="flex gap-4">
             {ratingComments.map((review, index) => (
-              <li key={index} className="bg-gray-300 p-10">
-                {review.user.firstName}&nbsp;{review.user.lastName}
-                <Rating
+              <li key={index} className="border border-gray-900 p-10 rounded-lg bg-gray-200">
+                <span className="font-semibold pb-5">{review.user.firstName}</span>&nbsp;
+                <span className="font-semibold pb-5">{review.user.lastName}</span>
+                <Rating className="pb-2"
                     key={index}
                     initialValue={review.rating}
                     readonly={true}
                     allowFraction={false}
-                    SVGstyle={{ display: 'inline-block' }}
+                    SVGstyle={{ display: 'inline-block', paddingTop: '2' }}
                     allowHover={false}
                   />
-                {review.comment}
+                <span className="text-lg float-left">{review.comment}</span>
               </li>
             ))}
           </ul>

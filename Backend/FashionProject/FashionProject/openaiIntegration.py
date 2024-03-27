@@ -38,8 +38,9 @@ def generateResponse(prompt,userDetails=None):
         "The user only needs to specify one size, one type, one color and one gender",
         "You are not responsible for the search",
         "You do not know what we have in the database, so do not talk about that",
-        "Do not tell the user that we don't have something in the database"
-        "You do not do the searching"
+        "Do not tell the user that we don't have something in the database",
+        "If the user asks for dresses or dress, do not ask them to specific type",
+        "You do not do the searching",
         "Make sure to ask the user about the item type, color, size and the gender, and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":}"# and do not replay with anything else",
     ]
     
@@ -184,7 +185,7 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             #      "$lt": budget
             # }
         })
-        items = random.choices(list(cursor), k=5)
+        items = random.sample(list(cursor), k=5)
         # print(items)
     except Exception as e:
         print(e)
@@ -219,7 +220,7 @@ def getReviewsMongo ():
     db = client['test']
     cursor = db['reviews'].find({})
 
-    reviewlist = list(cursor)
+    reviewlist = random.sample(list(cursor), k=4)
 
     return json.loads(dumps(reviewlist))
 
