@@ -6,6 +6,9 @@ export default function ReviewModal({ onClose }) {
 
     const [rating, setRating] = useState(0);
     const [ratingComment, setRatingComment] = useState('');
+    //const [submitted, setSubmitted] = useState(false);
+
+    
 
     function handleRating(rate) {
         setRating(rate);
@@ -23,6 +26,7 @@ export default function ReviewModal({ onClose }) {
             const respJson = response.data;
             console.log(respJson);
             if (respJson.length > 0) {
+                //setSubmitted(true);
                 // Close the modal after submission
                 onClose();
             }
@@ -38,9 +42,12 @@ export default function ReviewModal({ onClose }) {
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-            <div className="p-8 border w-96 shadow-lg rounded-md bg-white">
+            <div className="py-6 border w-1/3 rounded-md bg-white pt-2 pb-2">
                 <div className="text-center">
-                    <div className="mt-2 px-7 py-3">
+                    <div className="mt-2">
+                        <h1 className='text-2xl font-semibold mb-1'>
+                            Review
+                        </h1>
                         <div className='flex items-center justify-center'>
                             <Rating
                                 onClick={handleRating}
@@ -52,14 +59,16 @@ export default function ReviewModal({ onClose }) {
                         <textarea
                             rows={5}
                             style={{ height: "100px" }}
-                            className="p-4 outline-none z-10 bg-transparent border border-gray-300 resize-none"
+                            className="p-4 outline-none z-10 bg-transparent border border-gray-300 resize-none mt-3 mb-3 w-2/3"
                             placeholder="Leave a review!"
+                            maxLength={74}
+                            minLength={10}
                             value={ratingComment}
                             onChange={e => setRatingComment(e.target.value)}></textarea>
                         <div className="flex gap-2 items-center justify-center">
-                            <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' onClick={handleSubmitRating}>Submit</button>
-                            {/* Pass handleCancel function to the onClick event */}
-                            <button className='bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded' onClick={handleCancel}>Close</button>
+                            <button className='bg-black text-white font-semibold py-2 px-4 rounded' onClick={handleSubmitRating}>Submit</button>
+                            <button className='bg-gray-300 text-black font-semibold py-2 px-4 rounded' onClick={handleCancel}>Close</button>
+                        {/* {submitted && <p className="text-green-500">Thank you for your review!</p>} */}
                         </div>
                     </div>
                 </div>
