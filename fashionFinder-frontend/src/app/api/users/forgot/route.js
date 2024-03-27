@@ -36,7 +36,7 @@ export const POST = async (request) => {
 
 
   const resetUrl = `http://localhost:3000/reset/${resetToken}`;
-  const body = `Reset Password by clicking the link, you have 6 min to reset before the link expires: ${resetUrl} \nThank you from the AI FashionFinder team.`;
+  const body = `Click the link below to reset your password: ${resetUrl} \nThank you from the AI FashionFinder team.`;
   console.log(resetUrl);
 
 
