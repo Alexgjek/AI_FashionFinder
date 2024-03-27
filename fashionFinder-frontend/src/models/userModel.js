@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema({
   sender: String,
   message: String,
+  link: Boolean,
+  action: String,
   timestamp: {
     type: Date,
     default: Date.now
