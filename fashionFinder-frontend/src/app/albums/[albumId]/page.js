@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {faXmark } from '@fortawesome/free-solid-svg-icons';
 import Header from '@/components/Header';
 import ShortHeader from '@/components/ShortHeader'; 
 import OutfitSort from '@/components/sorting/outfitSorting/OutfitSort';
@@ -23,27 +25,56 @@ export default function AlbumId({ params }) {
   const [lowerBound, setLowerBound] = useState('');
   const [upperBound, setUpperBound] = useState('');
   const [selectedFilters, setSelectedFilters] = useState([]);
+  const [slideIn, setSlideIn] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState([]);
   const [error, setError] = useState('');
 
   const handleFilterSelection = (filter) => {
-    setSelectedFilters(prevFilters => {
-      const isSelected = prevFilters.includes(filter);
-      if (isSelected) {
-        return prevFilters.filter(item => item !== filter);
-      } else {
-        return [...prevFilters, filter];
-      }
-    });
+    if (selectedFilters.includes(filter)) {
+      setSelectedFilters(selectedFilters.filter(f => f !== filter));
+    } else {
+      setSelectedFilters([...selectedFilters, filter]);
+    }
   };
-  
-  
 
+  useEffect(() => {
+    if (showModal) {
+      setAppliedFilters([...appliedFilters]);
+    }
+  }, [showModal]);
+
+  const handleModalSubmit = () => {
+    if (lowerBound && upperBound && Number(lowerBound) > Number(upperBound)) {
+      setError('Lower bound cannot be greater than upper bound');
+      return;
+    }
+    setSlideIn(false);
+    setAppliedFilters([...selectedFilters]);
+    setTimeout(() => setShowModal(false), 500);
+  }
+  
   const handleLowerBoundChange = (e) => {
-    setLowerBound(e.target.value);
+    const lowerBoundValue = e.target.value;
+    if (lowerBoundValue && upperBound && Number(lowerBoundValue) > Number(upperBound)) {
+      setError('Lower bound cannot be greater than upper bound');
+    } else {
+      setError('');
+    }
+    if (!lowerBoundValue || /^\d+$/.test(lowerBoundValue)) {
+      setLowerBound(lowerBoundValue);
+    }
   };
-
+  
   const handleUpperBoundChange = (e) => {
-    setUpperBound(e.target.value);
+    const upperBoundValue = e.target.value;
+    if (upperBoundValue && lowerBound && Number(upperBoundValue) < Number(lowerBound)) {
+      setError('Upper bound cannot be less than lower bound');
+    } else {
+      setError('');
+    }
+    if (!upperBoundValue || /^\d+$/.test(upperBoundValue)) {
+      setUpperBound(upperBoundValue);
+    }
   };
 
   const fetchOutfits = async () => {
@@ -64,7 +95,8 @@ export default function AlbumId({ params }) {
       
       const response = await axios.get(endpoint);
       setOutfits(response.data.outfits);
-  
+
+      const primaryColors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'brown', 'gray', 'black', 'white']
       const colors = [];
       const brands = [];
       response.data.outfits.forEach(outfit => {
@@ -72,8 +104,15 @@ export default function AlbumId({ params }) {
           let colorArray = Array.isArray(outfit.color) ? outfit.color : outfit.color.split(',');
           colorArray.forEach(color => {
             let normalizedColor = color.trim().toLowerCase();
-            if (!colors.includes(normalizedColor)) {
-              colors.push(normalizedColor);
+            const matchPrimaryColor = primaryColors.find(primaryColor => normalizedColor.includes(primaryColor));
+            if (matchPrimaryColor) {
+              if (!colors.includes(matchPrimaryColor)) {
+                colors.push(matchPrimaryColor);
+              }
+            } else {
+              if (!colors.includes(normalizedColor)) {
+                colors.push(normalizedColor);
+              }
             }
           });
         }
@@ -87,6 +126,7 @@ export default function AlbumId({ params }) {
       
       setItemColors(colors);
       console.log('brands:', brands)
+      console.log('colors:', colors)
       setItemBrands(brands);
     } catch (error) {
       console.error('Failed to grab outfits:', error);
@@ -96,8 +136,6 @@ export default function AlbumId({ params }) {
       }
     }
   };
-  
-  
 
   const handleSortChange = async (option) => {
     try {
@@ -239,19 +277,20 @@ export default function AlbumId({ params }) {
 
   const filtersModal = () => {
     setShowModal(true);
+    setTimeout(() => setSlideIn(true), 0);
   };
 
-  const handleModalSubmit = () => {
-    setError('');
-    
-    if (parseFloat(lowerBound) > parseFloat(upperBound)) {
-      setError('Lower bound cannot be greater than upper bound.');
-    }
-    setShowModal(false);
+  const clearFilters = () => {
+    setSelectedFilters([]);
+    setLowerBound('');
+    setUpperBound('');
+    setLowerBound('');
   };
 
   const handleModalCancel = () => {
-    setShowModal(false);
+    setSlideIn(false);
+    setSelectedFilters([...appliedFilters]);
+    setTimeout(() => setShowModal(false), 500);
   };
 
   return (
@@ -312,60 +351,77 @@ export default function AlbumId({ params }) {
         </div>
       )}
       {showModal && (
-          <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
-            <div className="bg-white p-8 rounded-lg w-2/5">
-              <p className="text-3xl font-semibold mb-4 text-center">Filters</p>
-              <div className="mb-2">
-                <p className='text-xl text-center font-semibold'>Brand</p>
-                <div className="flex flex-wrap justify-center gap-2 mt-2">
-                    {itemBrands.map((brand, index) => (
-                      <button key={index} 
-                      className={`border border-gray-200 shadow-md text-gray-800 px-3 py-1 rounded-md w-full truncate flex-1 overflow-ellipsis ${selectedFilters.includes(brand) ? 'bg-green-400 opacity-50' : 'bg-white'}`}
-                      onClick={() => handleFilterSelection(brand)}>{brand}</button>
-                    ))}
-                </div>
-                <hr className='bg-black mt-2 shadow-sm'/>
+        <div className="fixed inset-0 flex justify-start items-center bg-gray-900 bg-opacity-50 z-50 transition-opacity duration-500 ease-in-out">
+          <div 
+            className={`bg-white p-8 sm:w-full md:w-1/2 lg:w-2/5 h-full transform transition-transform duration-500 ease-in-out ${slideIn ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className='w-full inline-flex justify-between mb-8'>
+              <button 
+                className={`text-xl font-semibold underline ${selectedFilters.length === 0 && lowerBound === '' && upperBound === '' ? 'opacity-25 cursor-not-allowed' : ''}`}
+                onClick={clearFilters}
+                disabled={selectedFilters.length === 0 && lowerBound === '' && upperBound === ''}>
+                Clear Filters
+              </button>
+              <button 
+                className="border border-black px-3 text-black hover:bg-gray-800 hover:text-white"
+                onClick={handleModalCancel}>
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            </div>
+            <div className="mb-2">
+              <p className='text-xl text-left font-semibold'>Brand</p>
+              <div className="flex flex-wrap justify-start gap-2 mt-2">
+                {itemBrands.map((brand, index) => (
+                  <button key={index} 
+                  className={`border border-gray-200 shadow-md text-gray-800 px-3 py-1 rounded-md overflow-ellipsis ${selectedFilters.includes(brand) ? 'bg-green-400 opacity-50' : 'bg-white'}`}
+                  onClick={() => handleFilterSelection(brand)}>{brand}</button>
+                ))}
               </div>
-              <div className='text-xl mb-2 font-semibold'>
-                <p className='text-center'>Color</p>
-                  <div className="flex flex-wrap justify-center gap-2 mt-2">
-                    {itemColors.map((color, index) => (
-                      <button key={index} 
-                      className={`border border-gray-200 shadow-md px-3 py-1 rounded-md w-full truncate flex-1 overflow-ellipsis ${
-                        selectedFilters.includes(color) ? 'bg-green-400 opacity-50' : 'bg-white'
-                      }`}
-                      onClick={() => handleFilterSelection(color)}>{color}</button>
-                    ))}
-                </div>
-                <hr className='bg-black mt-2 shadow-sm'/>
+              <hr className='bg-black mt-2 shadow-sm'/>
+            </div>
+            <div className='text-xl mb-2'>
+              <p className='text-left font-semibold'>Color</p>
+                <div className="flex flex-wrap justify-start gap-2 mt-2">
+                  {itemColors.map((color, index) => (
+                    <button key={index} 
+                    className={`border border-gray-200 shadow-md text-gray-800 px-3 py-1 rounded-md overflow-ellipsis ${
+                      selectedFilters.includes(color) ? 'bg-green-400 opacity-50' : 'bg-white'}`}
+                    onClick={() => handleFilterSelection(color)}>{color}</button>
+                  ))}
               </div>
-              <div className='m-2 font-semibold outline-none'>
-                <p className='text-xl text-center'>Budget Range</p>
-                {error && <p className='text-red-500 text-center'>{error}</p>}
-                <div className='flex justify-center'>
-                  <div className='flex flex-col'>
-                    <input
-                      className='border border-gray-300 outline-none mb-2'
-                      placeholder='Lower Limit'
-                      value={lowerBound}
-                      onChange={handleLowerBoundChange}
-                    />
-                    <input
-                      className='border border-gray-300 outline-none'
-                      placeholder='Upper Limit'
-                      value={upperBound}
-                      onChange={handleUpperBoundChange}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-center gap-4">
-                <button onClick={handleModalCancel} className="px-4 py-2 bg-black text-white font-semibold rounded-md max-w-2/5">Apply</button>
-                <button onClick={handleModalCancel} className="px-4 py-2 bg-gray-300 text-black font-semibold rounded-md max-w-2/5">Cancel</button>
+              <hr className='bg-black mt-2 shadow-sm'/>
+            </div>
+            <div className='m-2 outline-none'>
+              <p className='text-xl text-left mb-2 font-semibold'>Budget Range</p>
+              {error && <p className='text-red-500 text-center'>{error}</p>}
+              <div className='flex justify-between gap-2 w-full'>
+                <input
+                  className='border border-gray-300 outline-none flex-grow w-1/2 p-1'
+                  placeholder='Lower Limit'
+                  value={lowerBound}
+                  onChange={handleLowerBoundChange}
+                />
+                <p className='self-center'>
+                  to
+                </p>
+                <input
+                  className='border border-gray-300 outline-none flex-grow w-1/2 p-1'
+                  placeholder='Upper Limit'
+                  value={upperBound}
+                  onChange={handleUpperBoundChange}
+                />
               </div>
             </div>
+            <div className="flex justify-center absolute bottom-10 left-8 right-8">
+            <button 
+              onClick={handleModalSubmit}
+              className={`py-3 bg-white text-black border border-black font-semibold rounded-md w-full hover:opacity-50 ${error ? 'opacity-50' : ''}`}
+              disabled={error !== ''}>
+                Apply
+              </button>
           </div>
-        )}
+      </div>
+    </div>
+  )}
     </main>
   );
   
