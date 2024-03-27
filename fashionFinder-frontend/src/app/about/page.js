@@ -42,7 +42,7 @@ export default function AboutPage() {
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold text-center pt-4 pb-6">How to Use FashionFinder?</h1>
         <div className="text-2xl text-gray-1500">
-          <iframe class="w-3/4 mx-auto aspect-video md:aspect-autp pb-6" src="https://www.youtube.com/..."></iframe>
+          <iframe class="w-3/4 mx-auto aspect-video md:aspect-autp pb-6" src="/VideoPlaceHolder.jpg"></iframe>
         </div>
       </div>
 
