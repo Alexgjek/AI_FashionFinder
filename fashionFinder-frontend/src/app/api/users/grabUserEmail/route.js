@@ -7,10 +7,10 @@ connect();
 
 export async function GET(request) {
     const token = request.cookies.get("token")?.value || '';
-    console.log('Token:', token);
+    
     const decodedToken = jwt.decode(token);
     const email = decodedToken ? decodedToken.email : '';
-    console.log('Decoded Email:', email); 
+    
 
   try {
     
@@ -24,7 +24,6 @@ export async function GET(request) {
       console.log('User not found');
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    console.log('found:', user.email);
     return NextResponse.json({ 
       email: user.email
     });
