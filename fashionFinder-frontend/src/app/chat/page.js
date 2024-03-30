@@ -25,7 +25,6 @@ export default function Home() {
   const [selectedAlbums, setSelectedAlbums] = useState([]);
   const conversationContainerRef = useRef(null);
   const [outfit, setOutfit] = useState('');
-  
   const [errorMessage, setErrorMessage] = useState('');
   const [albumName, setAlbumName] = useState('');
   const [showCreateAlbumModal, setShowCreateAlbumModal] = useState(false);
@@ -364,7 +363,7 @@ export default function Home() {
   const handleModalClose = () => {
     setShowModal(true);
     setAlbumName('');
-    setEditMode(false);
+    setShowCreateAlbumModal(false);
     setErrorMessage('');
   };
 
