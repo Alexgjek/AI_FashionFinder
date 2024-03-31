@@ -209,14 +209,14 @@ export default function LandingPage() {
   return (
     <main>
       <div className="w-full h-screen grid grid-cols-5">
-        <div className="col-span-3 bg-darkBlue">
-          <p className="text-blue-300 p-1 font-bold inline-flex gap-2 text-2xl items-center absolute left-5 top-5">
+        <div className="col-span-3 bg-gray-300">
+          <p className="text-black p-1 font-bold inline-flex gap-2 text-2xl items-center absolute left-5 top-5">
             FashionFinder
             {/* <FontAwesomeIcon icon={faCircle} className="w-5" /> */}
           </p>
           <div className="h-full flex items-center">
             <p
-              className={`text-blue-300 text-4xl font-semibold text-left ml-4 mr-5 ${
+              className={`text-black text-4xl font-semibold text-left ml-4 mr-5 ${
                 fadeIn ? "fade-in" : "fade-out"
               } max-w-[2/3`}
               key={phraseIndex}
@@ -225,17 +225,17 @@ export default function LandingPage() {
             </p>
           </div>
         </div>
-        <div className="col-span-2 bg-black flex flex-col items-center justify-center">
+        <div className="col-span-2 bg-zinc-700 flex flex-col items-center justify-center">
           <p className="text-3xl font-bold text-white">Welcome</p>
           <div className="flex gap-4 w-full p-6">
             <button
-              className="p-4 bg-blue-700 font-bold w-full rounded-lg shadow-xl text-white hover:bg-opacity-70"
+              className="p-4 bg-gray-500 font-bold w-full rounded-lg shadow-xl text-white hover:bg-opacity-70"
               onClick={handleLoginClick}
             >
               Login
             </button>
             <button
-              className="p-4 bg-blue-700 font-bold w-full rounded-lg shadow-xl text-white hover:bg-opacity-70"
+              className="p-4 bg-gray-500 font-bold w-full rounded-lg shadow-xl text-white hover:bg-opacity-70"
               onClick={handleRegisterClick}
             >
               Register

@@ -39,12 +39,13 @@ export default function AboutPage() {
         </div>
       </div>
       <p className="text-white">.</p>
-      <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold text-center pt-4 pb-6">How to Use FashionFinder?</h1>
+      <div className="container mx-auto p-4 flex flex-col items-center">
+        {/* <h1 className="text-2xl font-semibold">How to Use FashionFinder?</h1>
         <div className="text-2xl text-gray-1500">
-          <iframe class="w-3/4 mx-auto aspect-video md:aspect-autp pb-6" src="/VideoPlaceHolder.jpg"></iframe>
-        </div>
-      </div>
+          <iframe className="w-full max-w-3/4 aspect-video pb-6" src="/VideoPlaceHolder.jpg"></iframe>
+        </div> */}
+      </div> 
+
 
 
       <div className="pl-10 pr-10 pb-10">

@@ -8,7 +8,6 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import Header from "@/components/Header";
 import ShortHeader from "@/components/ShortHeader";
 import OutfitSort from "@/components/sorting/outfitSorting/OutfitSort";
-import { set } from "mongoose";
 
 export default function AlbumId({ params }) {
   const router = useRouter();
