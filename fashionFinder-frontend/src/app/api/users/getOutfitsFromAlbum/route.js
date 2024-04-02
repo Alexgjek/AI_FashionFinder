@@ -2,6 +2,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import queryString from "query-string";
 
 connect();
 
@@ -63,11 +64,10 @@ export async function GET(request) {
     let filteredOutfits = album.outfits;
     console.log("Filtered outfits:", filteredOutfits);
 
-    const queryParams = request.nextUrl.searchParams;
-    const filters = Array.from(queryParams.entries())
-      .filter(([key]) => key !== "albumName")
-      .map(([, value]) => value);
+    const filters = request.nextUrl.searchParams.getAll("filters[]");
+
     console.log("Filters:", filters);
+
 
     const brands = [
       ...new Set(
