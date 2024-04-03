@@ -69,7 +69,7 @@ export default function ContactPage() {
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
         {formError && <p className="text-red-500">{formError}</p>}
         <form onSubmit={handleSubmit} className="w-full">
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <input
               type="email"
               id="email"
@@ -80,7 +80,7 @@ export default function ContactPage() {
               className="w-full p-2 mb-4 border border-gray-300 rounded outline-none"
               readOnly // Make the field read-only
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <textarea
               id="message"
