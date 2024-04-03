@@ -471,24 +471,29 @@ export default function Home() {
                         Here's what I found:
                       </p>
                       <div className="ai-result-container">
-                        {conv.message.split("\n").map((part, idx) => 
-                          <div className="ai-result relative group" key={idx}>
-                            <img className="ai-image mb-2" src={part.split("^")[1]} alt="Result" />
-                            <div className="absolute inset-0 bg-gray-300 opacity-0 group-hover:opacity-50 transition-opacity duration-200 ease-in-out"></div>
-                            <a href={part.split("^")[0]} target="_blank" rel="noopener noreferrer" className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out">
-                              <button className="p-2 bg-transparent text-zinc-600 font-semibold">
-                                Go
-                              </button>
+                      {conv.message.split("\n").map((part, idx) => (
+                        <div className="ai-result relative group" key={idx}>
+                          <img className="ai-image" src={part.split("^")[1]} alt="Result" />
+                          <div className="flex gap-3 bg-white mb-2">
+                            <a
+                              href={part.split("^")[0]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="button-go p-2 bg-transparent text-gray-800 font-semibold"
+                            >
+                              Go
                             </a>
                             <button
                               onClick={() => handleAddButton(part.split("^")[0], part.split("^")[1], part.split("^")[2], part.split("^")[3], part.split("^")[4], part.split("^")[5])}
-                              className="absolute bottom-0 left-0 right-0 h-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out p-2 bg-transparent text-zinc-600 font-semibold">
+                              className="button-add p-2 bg-transparent text-gray-800 font-semibold"
+                            >
                               Add
                             </button>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      ))}
                     </div>
+                  </div>
                   ) : (
                       conv.action == "review" ?
                       (<div className='font-md'>
