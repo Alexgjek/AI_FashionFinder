@@ -105,7 +105,9 @@ export default function AlbumId({ params }) {
         endpoint += `&token=${shareToken}`;
       }
 
-      const filtersQueryString = appliedFilters.map(filter => `filters[]=${encodeURIComponent(filter)}`).join('&');
+      const filtersQueryString = appliedFilters
+        .map((filter) => `filters[]=${encodeURIComponent(filter)}`)
+        .join("&");
       endpoint += `&${filtersQueryString}`;
 
       console.log("Endpoint:", endpoint);
@@ -342,34 +344,39 @@ export default function AlbumId({ params }) {
             Filter
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+        <div className="grid xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4">
           {outfits.map((outfit, index) => (
-            <div key={index} className="group h-auto flex flex-col items-center">
-            <div className="relative h-64">
-              <img
-                src={outfit.imageUrl}
-                alt={`Outfit ${index + 1}`}
-                className="cursor-pointer object-contain w-full h-full"
-                onClick={() => window.open(outfit.outfitUrl, "_blank")}
-              />
+            <div
+              key={index}
+              className="group h-auto flex flex-col items-center"
+            >
+              <div className="relative">
+                <div className="h-64">
+                  <img
+                    src={outfit.imageUrl}
+                    alt={`Outfit ${index + 1}`}
+                    className="cursor-pointer object-cover w-full h-full"
+                    onClick={() => window.open(outfit.outfitUrl, "_blank")}
+                  />
+                </div>
+                <div className="bg-white flex items-center justify-center w-full gap-9">
+                  <button
+                    className="text-xl font-bold p-1 text-gray-700"
+                    onClick={() => window.open(outfit.outfitUrl, "_blank")}
+                  >
+                    Go
+                  </button>
+                  {!shareToken && (
+                    <button
+                      className="text-red-300 text-xl font-bold"
+                      onClick={() => handleDeleteOutfit(outfit.outfitUrl)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="bg-white flex flex-row items-center justify-center w-full gap-9">
-              <button
-                className="text-xl font-bold p-1 text-gray-700"
-                onClick={() => window.open(outfit.outfitUrl, "_blank")}
-              >
-                Go
-              </button>
-              {!shareToken && (
-                <button
-                  className="text-gray-700 text-xl font-bold"
-                  onClick={() => handleDeleteOutfit(outfit.outfitUrl)}
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          </div>
           ))}
         </div>
       </div>
