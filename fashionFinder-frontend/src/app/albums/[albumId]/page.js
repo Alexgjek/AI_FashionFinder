@@ -47,16 +47,20 @@ export default function AlbumId({ params }) {
   // }, [showModal]);
 
   const handleModalSubmit = () => {
+    if ((lowerBound && !upperBound) || (!lowerBound && upperBound)) {
+      setError("Please enter both lower and upper bounds");
+      return;
+    }
     if (lowerBound && upperBound && Number(lowerBound) > Number(upperBound)) {
       setError("Lower bound cannot be greater than upper bound");
       return;
     }
     const copyFilters = [...selectedFilters];
     if (lowerBound) {
-      copyFilters.push({ lowerBound });
+      copyFilters.push(lowerBound);
     }
     if (upperBound) {
-      copyFilters.push({ upperBound });
+      copyFilters.push(upperBound);
     }
 
     setAppliedFilters(copyFilters);
