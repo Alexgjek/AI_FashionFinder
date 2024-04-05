@@ -10,11 +10,23 @@ module.exports = {
       colors: {
         customColor: '#00002F', 
         darkBlue: '#000328',
+        
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      },
+      transitionProperty: {
+        'height': 'height',
+        'opacity': 'opacity',
+        'transform': 'transform',
+      },
+      transitionDuration: {
+        '500': '500ms',
+      },
+      transitionTimingFunction: {
+        'in-out': 'ease-in-out',
       },
     },
   },

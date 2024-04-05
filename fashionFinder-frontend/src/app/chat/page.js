@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import SendChatButton from '@/components/buttons/SendChatButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare,faSave,faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare,faSave,faTrashAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Header from "@/components/Header";
 import ReviewModal from '@/components/ReviewModal/ReviewModal';
@@ -25,7 +25,10 @@ export default function Home() {
   const [selectedAlbums, setSelectedAlbums] = useState([]);
   const conversationContainerRef = useRef(null);
   const [outfit, setOutfit] = useState('');
-  
+  const [errorMessage, setErrorMessage] = useState('');
+  const [albumName, setAlbumName] = useState('');
+  const [showCreateAlbumModal, setShowCreateAlbumModal] = useState(false);
+
   //angjelos code
   useEffect(() => {
     const fetchChats = async () => {
@@ -221,6 +224,9 @@ export default function Home() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!inputValue.trim()) {
+      return; // Exit early if input is empty
+    }
 
     console.log(inputValue)
 
@@ -310,6 +316,69 @@ export default function Home() {
       handleSubmit(e);
     }
   }
+
+  const handleCreateAlbum = () => {
+    console.log("Create Album");
+    setShowCreateAlbumModal(true);
+    console.log(showCreateAlbumModal);
+    setShowModal(false);
+    setErrorMessage('');
+  };
+
+  const handleModalInputChange = (e) => {
+    setAlbumName(e.target.value);
+    setErrorMessage('');
+  };
+
+  const handleModalSubmit = async () => {
+    const trimmedAlbumName = albumName.trim();
+    if (!trimmedAlbumName) {
+      setErrorMessage('Album name cannot be empty');
+      return;
+    }
+    if (trimmedAlbumName[0] === ' ') {
+      setErrorMessage('Album name cannot start with a space');
+      return;
+    }
+    try {
+      const response = await axios.post('/api/users/createAlbums', { albumName: trimmedAlbumName });
+      setUserAlbums(prevAlbums => [...prevAlbums, { albumName: trimmedAlbumName }]);
+      //handleSortChange(sortType);
+      setShowCreateAlbumModal(false);
+      setShowModal(true);
+      setAlbumName('');
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 400) {
+          setErrorMessage('Album already exists');
+        } else {
+          setErrorMessage('Failed to create album');
+        }
+      } else {
+        setErrorMessage('Network error. Please try again.');
+      }
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowModal(true);
+    setAlbumName('');
+    setShowCreateAlbumModal(false);
+    setErrorMessage('');
+  };
+
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handleModalSubmit(); 
+      }
+    };
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [albumName]);
 
   const toggleAlbumSelection = (albumName) => {
     setSelectedAlbums((prevSelected) => {
@@ -402,24 +471,29 @@ export default function Home() {
                         Here's what I found:
                       </p>
                       <div className="ai-result-container">
-                        {conv.message.split("\n").map((part, idx) => 
-                          <div className="ai-result relative group" key={idx}>
-                            <img className="ai-image mb-2" src={part.split("^")[1]} alt="Result" />
-                            <div className="absolute inset-0 bg-gray-300 opacity-0 group-hover:opacity-50 transition-opacity duration-200 ease-in-out"></div>
-                            <a href={part.split("^")[0]} target="_blank" rel="noopener noreferrer" className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out">
-                              <button className="p-2 bg-transparent text-zinc-600 font-semibold">
-                                Go
-                              </button>
+                      {conv.message.split("\n").map((part, idx) => (
+                        <div className="ai-result relative group" key={idx}>
+                          <img className="ai-image" src={part.split("^")[1]} alt="Result" />
+                          <div className="flex gap-3 bg-white mb-2">
+                            <a
+                              href={part.split("^")[0]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="button-go p-2 bg-transparent text-gray-800 font-semibold"
+                            >
+                              Go
                             </a>
                             <button
                               onClick={() => handleAddButton(part.split("^")[0], part.split("^")[1], part.split("^")[2], part.split("^")[3], part.split("^")[4], part.split("^")[5])}
-                              className="absolute bottom-0 left-0 right-0 h-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out p-2 bg-transparent text-zinc-600 font-semibold">
+                              className="button-add p-2 bg-transparent text-gray-800 font-semibold"
+                            >
                               Add
                             </button>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      ))}
                     </div>
+                  </div>
                   ) : (
                       conv.action == "review" ?
                       (<div className='font-md'>
@@ -450,7 +524,7 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               onChange={e => setInputValue(e.target.value)}
               className="w-2/4 p-4 rounded-l-xl outline-none z-10 bg-transparent border border-gray-300 border-r-0 resize-none"
-              placeholder="Message FashionFinder..."
+              placeholder={isFetchingResponse ? 'Waiting for FashionFinder response...' : 'Message FashionFinder...'}
               disabled={isFetchingResponse}
             />
             <SendChatButton inputValue={inputValue} clearInput={clearInput} handleClick={handleSubmit} />
@@ -482,13 +556,18 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
-                <div className="flex justify-center mt-4 gap-3">
+                <div className="flex justify-center mt-4 gap-3 items-center">
                   <button 
                   className='bg-black text-white px-4 py-2 rounded-md font-semibold w-2/5 text-center'
                   onClick={handleConfirm}>
                     Confirm
                     </button>
                   <button onClick={closeModal} className="bg-gray-300 text-black px-4 py-2 rounded-md font-semibold w-2/5 text-center">Cancel</button>
+                  <button 
+                    className='text-green bg-green-400 rounded-full w-8 h-8 inline'
+                    onClick={handleCreateAlbum}>
+                    <FontAwesomeIcon icon={faPlus} />
+                  </button>
                 </div>
               </div>
             </div>
@@ -537,6 +616,36 @@ export default function Home() {
         </div>
       )}
       {showReviewModal && (<ReviewModal onClose={() => setShowReviewModal(false)} />)}
+      {showCreateAlbumModal && (
+  <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-700 bg-opacity-50">
+    <div className="bg-white p-10 rounded-md shadow-lg">
+      <h2 className="text-lg font-semibold mb-2">Enter Album Name</h2>
+      {errorMessage && <p className="text-sm text-red-500 mb-2">{errorMessage}</p>}
+      <input
+        type="text"
+        className="border border-gray-300 rounded-md p-2 mb-2 outline-none"
+        value={albumName}
+        onChange={handleModalInputChange}
+        placeholder="Album Name"
+      />
+      <div className="flex items-center justify-center">
+        <button
+          className="bg-black text-white px-4 py-2 rounded-md mr-2 font-semibold disabled:opacity-50"
+          onClick={handleModalSubmit}
+          disabled={!albumName}
+        >
+          Create
+        </button>
+        <button
+          className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-semibold"
+          onClick={handleModalClose}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </main>
   );
 }

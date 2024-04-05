@@ -16,6 +16,8 @@ export async function POST(request) {
     const lowercasedEmail = email.toLowerCase();
     const user = await User.findOne({ email: lowercasedEmail });
 
+    console.log(JSON.stringify(messages))
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
