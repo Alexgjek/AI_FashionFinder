@@ -2,6 +2,8 @@ import openai
 import os
 import random
 import math
+import re
+
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -39,8 +41,10 @@ def generateResponse(prompt,userDetails=None):
         "Do not tell the user that we don't have something in the database",
         "If the user asks for dresses or dress, do not ask them to specific type",
         "You do not do the searching",
-        "you must get item type, color, size and gender from user",
-        "Make sure to ask the user about the item type, color, size and the gender, and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":}",
+        "If the user asks for a skirt, skirts, dress or dresses you can assume the gender to be a female",
+        "Make sure to ask the user about the brand, if not specified then get it from their user profile",
+        "Make sure to ask the user about the budget, if not specified then get it from their user profile",
+        "Make sure to ask the user about the item type, color, size and gender and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":, \"brand\": , \"budget\":}",
     ]
     
     prompt_string = "\n".join(prompts)
@@ -59,20 +63,20 @@ def generateResponse(prompt,userDetails=None):
         max_tokens=200
     )
     
-
     aiResponse = response.choices[0].message.content.strip()
     conversation_history.append({"role": "system", "content": aiResponse})
 
     return aiResponse
 
 
-def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, gender): 
+def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, gender, brands): 
     MONGODB = os.getenv("MONGO_URI")
     print(MONGODB)
 
     #Create a new client and connect to the server
     client = MongoClient(MONGODB, server_api=ServerApi('1'))
     items = []
+    #budget = re.sub(r'[^0-9.-]+', '', budget)
 
     # Send a ping to confirm a successful connection
     try:
@@ -86,6 +90,10 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
                 subCollectionName = "top"
             case "tops":
                 subCollectionName = "top"
+            case "shirt":
+                subCollectionName = "top"
+            case "shirts":
+                subCollectionName = "top"
             case "tshirt":
                 subCollectionName = "top"
             case "tshirts":
@@ -93,6 +101,22 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             case "t-shirt":
                 subCollectionName = "top"
             case "t-shirts":
+                subCollectionName = "top"
+            case "long-sleeve shirt":
+                subCollectionName = "top"
+            case "long sleeve shirt":
+                subCollectionName = "top"
+            case "polo-shirt":
+                subCollectionName = "top"
+            case "polo shirt":
+                subCollectionName = "top"
+            case "button-up shirt":
+                subCollectionName = "top"
+            case "button up shirt":
+                subCollectionName = "top"
+            case "graphic tee":
+                subCollectionName = "top"
+            case "tunic":
                 subCollectionName = "top"
             case "short":
                 subCollectionName = "shorts"
@@ -103,6 +127,14 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             case "jean":
                 subCollectionName = "pants"
             case "sweatpants":
+                subCollectionName = "pants"
+            case "joggers":
+                subCollectionName = "pants"
+            case "jogger":
+                subCollectionName = "pants"
+            case "dress pants":
+                subCollectionName = "pants"
+            case "cargo pants":
                 subCollectionName = "pants"
             case "leggings":
                 subCollectionName = "pants"
@@ -129,8 +161,26 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             case "dresses":
                 subCollectionName = "dress"
             case "dress":
-                subCollectionName = "dress"           
-
+                subCollectionName = "dress"
+            case "gown":
+                subCollectionName = "dress"
+            case "summer dress":
+                subCollectionName = "dress"
+            case "bomber jacket":
+                subCollectionName = "jackets"
+            case "puffer jacket":
+                subCollectionName = "jackets"
+            case "lightweight jacket":
+                subCollectionName = "jackets"
+            case "quilted jacket":
+                subCollectionName = "jackets"
+            case "jacket":
+                subCollectionName = "jackets"
+            case "coat":
+                subCollectionName = "jackets"
+            case "parka":
+                subCollectionName = "jackets"
+            
         # GENDER
         if "women" in gender.lower():
             gender = "female"
@@ -165,6 +215,16 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
         elif "extra extra large" in itemSize.lower():
             itemSize = "XXL"
 
+        # print(brands)
+        # # Generate brands filter
+        if(isinstance(brands, str)):
+            brands = [brands]
+        # # brandsRegExp = []
+        # # for brand in brands:
+        # #     brandsRegExp.append({"$regex": "^" + brand, "$options": "i"})
+        # brandsRegExp = re.compile('/(' + '|'.join(brands) + ')$/i')
+        # print(brandsRegExp.pattern)
+
         db = client[collectionName]
         cursor = db[subCollectionName].find({
             # "$or": [
@@ -177,13 +237,20 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             # "price": {
             #     "$lt": budget
             # }
-            "color": {"$regex": "^" + itemColor, "$options": "i"},
+            "color": {"$regex": "" + itemColor, "$options": "i"},
             "gender": {"$regex": "^" + gender, "$options": "i"},
             "size": {"$regex": "^" + itemSize, "$options": "i"},
-            # "price": {
-            #      "$lt": budget
-            # }
+            # "brand": {"$in": brandsRegExp}, # i = case-insensitive
+            "brand": {"$regex": "^" + '|'.join(brands), "$options": "i"}, # i = case-insensitive
+            
+            #"price": float(re.sub(r'[^0-9.-]+', '', budget)),
+            #"price":{"$lt": budget},
+            "priceFloat": {
+                 "$lt": budget
+            }
         })
+
+        # print(cursor.explain())
 
         # returns up to 5 
         cursor_list = list(cursor)
