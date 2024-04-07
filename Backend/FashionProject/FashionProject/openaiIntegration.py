@@ -76,7 +76,6 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
     #Create a new client and connect to the server
     client = MongoClient(MONGODB, server_api=ServerApi('1'))
     items = []
-    #budget = re.sub(r'[^0-9.-]+', '', budget)
 
     # Send a ping to confirm a successful connection
     try:
@@ -215,57 +214,34 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
         elif "extra extra large" in itemSize.lower():
             itemSize = "XXL"
 
-        # print(brands)
         
         # # Generate brands filter
         if(isinstance(brands, str)):
             brands = [brands]
-        # # brandsRegExp = []
-        # # for brand in brands:
-        # #     brandsRegExp.append({"$regex": "^" + brand, "$options": "i"})
-        # brandsRegExp = re.compile('/(' + '|'.join(brands) + ')$/i')
-        # print(brandsRegExp.pattern)
 
         db = client[collectionName]
         cursor = db[subCollectionName].find({
-            # "$or": [
-            #         {"color": {"$regex": itemColor, "$options": "i"}},
-            #         # {"size": itemSize}
-            #         {"gender": {"$regex": gender, "$options": "i"}}
-            # ]
-            #"color": {"$in": [itemColor]}
-            #"size": itemSize
-            # "price": {
-            #     "$lt": budget
-            # }
             "color": {"$regex": "" + itemColor, "$options": "i"},
             "gender": {"$regex": "^" + gender, "$options": "i"},
-            "size": {"$regex": "^" + itemSize, "$options": "i"},
-            # "brand": {"$in": brandsRegExp}, # i = case-insensitive
-            
+            "size": {"$regex": "^" + itemSize, "$options": "i"},            
             "brand": {"$regex": "^" + '|'.join(brands), "$options": "i"}, # i = case-insensitive
-            
-            #"price": float(re.sub(r'[^0-9.-]+', '', budget)),
-            #"price":{"$lt": budget},
             "priceFloat": {
                  "$lt": budget
             }
         })
 
-        # print(cursor.explain())
-
-        # returns up to 5 
+        # returns up to 5 matches 
         cursor_list = list(cursor)
         if len(cursor_list) >= 5:
             items = random.sample(cursor_list, k=5)
         else:
             items = random.sample(cursor_list, k=min(5, len(cursor_list)))
-        #items = random.sample(list(cursor), k=1)
+    
     except Exception as e:
         print(e)
     return json.loads(dumps(items))
 
-
+# function to save reviews in Mongo 
 def saveReviewMongo(rating, comment, userEmail): 
     MONGODB = os.getenv("MONGO_URI")
 
@@ -287,6 +263,7 @@ def saveReviewMongo(rating, comment, userEmail):
         print(e)
     return json.loads(dumps(review))
 
+# function to get reviews from Mongo 
 def getReviewsMongo ():
     MONGODB = os.getenv("MONGO_URI")
     client = MongoClient(MONGODB, server_api=ServerApi('1'))
