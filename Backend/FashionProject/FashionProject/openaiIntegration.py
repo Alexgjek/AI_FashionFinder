@@ -242,6 +242,7 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             "gender": {"$regex": "^" + gender, "$options": "i"},
             "size": {"$regex": "^" + itemSize, "$options": "i"},
             # "brand": {"$in": brandsRegExp}, # i = case-insensitive
+            
             "brand": {"$regex": "^" + '|'.join(brands), "$options": "i"}, # i = case-insensitive
             
             #"price": float(re.sub(r'[^0-9.-]+', '', budget)),
