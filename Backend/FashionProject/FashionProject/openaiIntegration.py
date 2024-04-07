@@ -216,6 +216,7 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             itemSize = "XXL"
 
         # print(brands)
+        
         # # Generate brands filter
         if(isinstance(brands, str)):
             brands = [brands]
