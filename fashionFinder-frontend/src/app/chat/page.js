@@ -701,7 +701,7 @@ export default function Home() {
                   <AlbumSort onSortChange={handleSortChange} />
                   <SearchBar onSearch={handleSearch} />
                 </div>
-                <div className="overflow-y-auto max-h-[20vh]">
+                <div className="overflow-y-auto max-h-[20vh] h-[20vh]">
                   <div className="grid grid-cols-3 gap-4">
                     {userAlbums
                       .filter((album) =>
