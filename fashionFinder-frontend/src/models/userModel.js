@@ -3,8 +3,18 @@ import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema({
   sender: String,
   message: String,
-  link: Boolean,
+  link: Boolean, // to show image links in saved chats 
   action: String,
+  
+  // added submitted and review message for review system to show either the review link or message 
+  submitted: {
+    type: Boolean,
+    default: false
+  },
+  reviewMessage: {
+    type: String,
+    default: ""
+  },
   timestamp: {
     type: Date,
     default: Date.now

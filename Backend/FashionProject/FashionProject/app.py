@@ -1,3 +1,4 @@
+import re
 from fastapi import FastAPI, Request
 from openaiIntegration import generateResponse, searchMongo, saveReviewMongo, getReviewsMongo, resetAiMemory
 from pydantic import BaseModel
@@ -41,7 +42,7 @@ def api_view(request: Request):
     # # Return AI response as JSON
     # return {'ai_response': ai_response}
     print("Default API")
-    mongoResult = searchMongo (collectionName = "DataClothes", subCollectionName = "dress", itemColor= "pink", itemSize= "small", budget= "100", gender='female')
+    mongoResult = searchMongo (collectionName = "DataClothes", subCollectionName = "dress", itemColor= "pink", itemSize= "small", budget= "100", gender='female', brands='Nike')
     return {'ai_response': mongoResult} 
 
 @app.post("/getAIResponse")
@@ -69,7 +70,7 @@ async def searchItems(request: Request):
         attributes = body.get('attributes')
         userInfo = UserInfo.parse_obj(body.get('userInfo'))
 
-        matches = searchMongo(collectionName = "DataClothes", subCollectionName = attributes['itemType'], itemColor= attributes['color'], itemSize= attributes['size'], budget= userInfo.budget, gender = attributes['gender'])
+        matches = searchMongo(collectionName = "DataClothes", subCollectionName = attributes['itemType'], itemColor= attributes['color'], itemSize= attributes['size'], budget= attributes['budget'], gender = attributes['gender'], brands= attributes['brand'])
         #matches = searchMongo(collectionName = "DataClothes", subCollectionName = "hoodie", itemColor= "", itemSize= "small", budget= userInfo.budget)
         # print(matches)
         return matches
@@ -101,7 +102,6 @@ async def getReviews(request: Request):
     reviews = getReviewsMongo()
 
     #print("test" + reviews)
-    
     return {"reviews":reviews}
     
 
@@ -129,3 +129,32 @@ async def reset_ai_memory():
     except Exception as e:
         return {"error": "An error occurred while resetting AI memory"}
     
+# api to get all prices from database and convert them into a float and store it in priceFloat
+@app.get("/parsePrice")
+async def test(request: Request):
+    MONGODB = os.getenv("MONGO_URI")
+
+    client = MongoClient(MONGODB, server_api=ServerApi('1'))
+    dbName = 'DataClothes'
+    collections = client[dbName].list_collection_names()
+
+    for collection in collections:
+        print('Fixing collection ' + collection)
+        col = client[dbName][collection]
+        for cursor in col.find():
+            try:
+                price = cursor["price"]
+                col.update_one({
+                    "_id": cursor["_id"]
+                }, {
+                    "$set": {
+                        #"priceFloat": float(re.sub(r'.?', '', re.sub(r'[^0-9.-]+', '', price)))
+                        "priceFloat": float(re.sub(r'[^0-9.-]+', '', price))
+                    }
+                })
+            except Exception as e:
+                print(e)
+                return {"error": "An error occurred while updating prices"}
+        print('Fixed collection ' + collection)
+    
+    return {"message":"ParsePrice API Working"}
