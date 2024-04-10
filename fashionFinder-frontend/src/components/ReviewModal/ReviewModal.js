@@ -28,7 +28,7 @@ export default function ReviewModal({ onClose }) {
             if (respJson.length > 0) {
                 //setSubmitted(true);
                 // Close the modal after submission
-                onClose();
+                onClose(true);
             }
         } catch (error) {
             console.error('Error fetching AI response:', error);
@@ -37,7 +37,7 @@ export default function ReviewModal({ onClose }) {
 
     function handleCancel() {
         // Close the modal on cancel
-        onClose();
+        onClose(false);
     }
 
     return (
