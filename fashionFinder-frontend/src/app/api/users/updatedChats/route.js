@@ -33,8 +33,7 @@ export async function PUT(request) {
     }
 
     // Update the messages of the chat
-    user.savedChats[chatIndex].messages = messages;
-    // No need to create a new document, just save the existing user document
+    user.savedChats[chatIndex].messages = user.savedChats[chatIndex].messages.concat(messages);    // No need to create a new document, just save the existing user document
     await user.save();
 
     return NextResponse.json({ success: true, message: "Chat updated successfully" });

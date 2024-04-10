@@ -126,28 +126,29 @@ export default function Home() {
   const saveChat = async () => {
     try {
       const lowerCaseChatName = chatName.toLowerCase();
-      const existingChatIndex = savedChats.findIndex(
-        (chat) => chat.chatName.toLowerCase() === lowerCaseChatName
-      );
-
+      const existingChatIndex = savedChats.findIndex(chat => chat.chatName.toLowerCase() === lowerCaseChatName);
+  
       if (existingChatIndex !== -1) {
         // Update existing chat
-        const response = await axios.put("/api/users/updatedChats", {
+        const existingMessages = savedChats[existingChatIndex].messages;
+        const newMessages = conversation.filter(message => !existingMessages.includes(message));
+        
+        const response = await axios.put('/api/users/updatedChats', {
           chatName: lowerCaseChatName,
-          messages: conversation,
+          messages: newMessages
         });
         const { message, success } = response.data;
         if (success) {
           console.log(message);
-          setSavedChats((prevChats) => {
+          setSavedChats(prevChats => {
             const updatedChats = [...prevChats];
-            updatedChats[existingChatIndex].messages = conversation;
+            updatedChats[existingChatIndex].messages = existingMessages.concat(newMessages);
             return updatedChats;
           });
           // Reset input values and close modal
           setConversation([]);
           setIsSubmitted(false);
-          setChatName("");
+          setChatName('');
           toggleModal();
           setIsUnsavedChanges(false); // Reset unsaved changes state
         } else {
@@ -155,24 +156,24 @@ export default function Home() {
         }
       } else {
         // Save new chat
-        const response = await axios.post("/api/users/saveChats", {
+        const response = await axios.post('/api/users/saveChats', {
           chatName: lowerCaseChatName,
-          messages: conversation,
+          messages: conversation
         });
-
+        
         const { message, user } = response.data;
         console.log(message);
         setSavedChats(user.savedChats);
-
+        
         // Reset input values and close modal
         setConversation([]);
         setIsSubmitted(false);
-        setChatName("");
+        setChatName('');
         toggleModal();
         setIsUnsavedChanges(false); // Reset unsaved changes state
       }
     } catch (error) {
-      console.error("Error saving chat:", error);
+      console.error('Error saving chat:', error);
     }
   };
 
@@ -311,9 +312,8 @@ export default function Home() {
       let attributes = {};
       let beginSearch = false;
       if (respJson.ai_response.indexOf("BEGIN_SEARCH") > -1) {
-        attributes = JSON.parse(
-          respJson.ai_response.replace("BEGIN_SEARCH", "")
-        );
+        attributes = JSON.parse(respJson.ai_response.match(/\{(.*)\}/)[0].replace(/\n/g,''));
+        attributes.brand = attributes.brand || "";
         beginSearch = true;
       }
       console.table(attributes);
@@ -375,6 +375,7 @@ export default function Home() {
         const fashionFinderReviewMessage = {
           sender: "FashionFinder",
           message: "Leave us a review!",
+          reviewMessage: "Thank you for your review!",
           action: "review",
         };
 
@@ -518,7 +519,21 @@ export default function Home() {
   const closeReviewModal = () => {
     setShowReviewModal(false);
   };
-
+  
+  // to check for review in each conv 
+  const onReviewSubmitted = (submitted) => {
+    let reviewConversationIndex = -1;
+    conversation.forEach((conv, index) => {
+      if(conv.action == "review") {
+        reviewConversationIndex = index;
+      }
+    })
+    if(reviewConversationIndex < 0) {
+      return;
+    }
+    conversation[reviewConversationIndex].submitted = submitted;
+    setConversation(conversation)
+  }
   return (
     <main>
       <Header />
@@ -624,20 +639,12 @@ export default function Home() {
                           ))}
                         </div>
                       </div>
-                    ) : conv.action == "review" ? (
-                      <div className="font-md">
-                        <button
-                          onClick={toggleReviewModal}
-                          className="text-blue-600"
-                        >
-                          {conv.message}
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="font-md">
-                        <p>{conv.message}</p>
-                      </div>
-                    )}
+                    ) : conv.action == "review" ?
+                    (<div className='font-md'>
+                      <button disabled = {conv.submitted} onClick={toggleReviewModal} className={conv.submitted ? ' text-green-500' : 'text-blue-600'}>
+                      {conv.submitted ? conv.reviewMessage : conv.message}
+                      </button></div>) :
+                    (<div className='font-md'><p>{conv.message}</p></div>)}
                   </>
                   <hr className="bg-black" />
                 </div>
@@ -833,9 +840,7 @@ export default function Home() {
           </div>
         </div>
       )}
-      {showReviewModal && (
-        <ReviewModal onClose={() => setShowReviewModal(false)} />
-      )}
+      {showReviewModal && (<ReviewModal onClose={(closed) => {setShowReviewModal(false); onReviewSubmitted(closed)}} />)} {/* onClose takes the parameter "closed" from the ReviewModal.js file  */}
       {showCreateAlbumModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-700 bg-opacity-50">
           <div className="bg-white p-10 rounded-md shadow-lg">
