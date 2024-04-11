@@ -2,6 +2,8 @@ import openai
 import os
 import random
 import math
+import re
+
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -22,17 +24,15 @@ def generateResponse(prompt,userDetails=None):
     prompts = [
         "You are a personal desinger named FashionFinder. You help users with fashion advice and recommendations.",
         "Users will ask you to help them find outfits, these outfits are stored within our database.",
-        # "If the users ask for a specific outfit, you will need to find the outfit in the database and provide the user with the link to the outfit.",
         "There is an albums feature to this website, if users ask you about it, tell the user that albums are a way for users to categorize their clothes, they can create albums, add clothes to them, share them, edit the names of these albums, remove clothes from them, and delete them.",
         "If a user asks them what you do, what you can help them with, or what your purpose is or something along those lines, tell them you are a personal designer that helps them with fashion advice as well as finding clothes/outfits for them.",
-        # "You must ask the user what items in their outfit theyd like if they only say one thing, they can pick just one if theyd like, but ask them if theyre looking for more than just one item",
         "You must ask the user what items in their outfit theyd like, they can pick just one item",
         "Do not answer questions that are not clothes, fashion, or outfit related.",
         "If the user asks if they can buy items from our website, tell them that they can not, but links are provided for items to where they will be redirected to where they can actually buy the items.",
         "We do not have shoes or accessories in our database, if the users ask for shoes or accessories, tell them that we only provide clothing items.",
         "Be sure to ask the user if they are looking for mens, womens, or unisex clothing."
         "Do not ask the user to confirm for what they ask for",
-        "Do not ask user to specify the shade of color they want",
+        "DO NOT ASK FOR SHADE",
         "When the user tells you they are looking for any type of pants like shorts or jeans or bottoms, do not ask for waist and hip size",
         "If the user doesn't give you a size or color, keep asking them and let them know that those are needed for you to proceed",
         "The user only needs to specify one size, one type, one color and one gender",
@@ -41,7 +41,10 @@ def generateResponse(prompt,userDetails=None):
         "Do not tell the user that we don't have something in the database",
         "If the user asks for dresses or dress, do not ask them to specific type",
         "You do not do the searching",
-        "Make sure to ask the user about the item type, color, size and the gender, and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":}"# and do not replay with anything else",
+        "If the user asks for a skirt, skirts, dress or dresses you can assume the gender to be a female",
+        "Make sure to ask the user about the brand, if not specified then get it from their user profile",
+        "Make sure to ask the user about the budget, if not specified then get it from their user profile",
+        "Make sure to ask the user about the item type, color, size and gender and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":, \"brand\": , \"budget\":}",
     ]
     
     prompt_string = "\n".join(prompts)
@@ -60,14 +63,13 @@ def generateResponse(prompt,userDetails=None):
         max_tokens=200
     )
     
-
     aiResponse = response.choices[0].message.content.strip()
     conversation_history.append({"role": "system", "content": aiResponse})
 
     return aiResponse
 
 
-def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, gender): 
+def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, gender, brands): 
     MONGODB = os.getenv("MONGO_URI")
     print(MONGODB)
 
@@ -87,6 +89,10 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
                 subCollectionName = "top"
             case "tops":
                 subCollectionName = "top"
+            case "shirt":
+                subCollectionName = "top"
+            case "shirts":
+                subCollectionName = "top"
             case "tshirt":
                 subCollectionName = "top"
             case "tshirts":
@@ -94,6 +100,22 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             case "t-shirt":
                 subCollectionName = "top"
             case "t-shirts":
+                subCollectionName = "top"
+            case "long-sleeve shirt":
+                subCollectionName = "top"
+            case "long sleeve shirt":
+                subCollectionName = "top"
+            case "polo-shirt":
+                subCollectionName = "top"
+            case "polo shirt":
+                subCollectionName = "top"
+            case "button-up shirt":
+                subCollectionName = "top"
+            case "button up shirt":
+                subCollectionName = "top"
+            case "graphic tee":
+                subCollectionName = "top"
+            case "tunic":
                 subCollectionName = "top"
             case "short":
                 subCollectionName = "shorts"
@@ -104,6 +126,14 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             case "jean":
                 subCollectionName = "pants"
             case "sweatpants":
+                subCollectionName = "pants"
+            case "joggers":
+                subCollectionName = "pants"
+            case "jogger":
+                subCollectionName = "pants"
+            case "dress pants":
+                subCollectionName = "pants"
+            case "cargo pants":
                 subCollectionName = "pants"
             case "leggings":
                 subCollectionName = "pants"
@@ -130,8 +160,26 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             case "dresses":
                 subCollectionName = "dress"
             case "dress":
-                subCollectionName = "dress"           
-
+                subCollectionName = "dress"
+            case "gown":
+                subCollectionName = "dress"
+            case "summer dress":
+                subCollectionName = "dress"
+            case "bomber jacket":
+                subCollectionName = "jackets"
+            case "puffer jacket":
+                subCollectionName = "jackets"
+            case "lightweight jacket":
+                subCollectionName = "jackets"
+            case "quilted jacket":
+                subCollectionName = "jackets"
+            case "jacket":
+                subCollectionName = "jackets"
+            case "coat":
+                subCollectionName = "jackets"
+            case "parka":
+                subCollectionName = "jackets"
+            
         # GENDER
         if "women" in gender.lower():
             gender = "female"
@@ -166,32 +214,34 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
         elif "extra extra large" in itemSize.lower():
             itemSize = "XXL"
 
+        
+        # # Generate brands filter
+        if(isinstance(brands, str)):
+            brands = [brands]
+
         db = client[collectionName]
         cursor = db[subCollectionName].find({
-            # "$or": [
-            #         {"color": {"$regex": itemColor, "$options": "i"}},
-            #         # {"size": itemSize}
-            #         {"gender": {"$regex": gender, "$options": "i"}}
-            # ]
-            #"color": {"$in": [itemColor]}
-            #"size": itemSize
-            # "price": {
-            #     "$lt": budget
-            # }
-            "color": {"$regex": "^" + itemColor, "$options": "i"},
+            "color": {"$regex": "" + itemColor, "$options": "i"},
             "gender": {"$regex": "^" + gender, "$options": "i"},
-            "size": {"$regex": "^" + itemSize, "$options": "i"},
-            # "price": {
-            #      "$lt": budget
-            # }
+            "size": {"$regex": "^" + itemSize, "$options": "i"},            
+            "brand": {"$regex": "^" + '|'.join(brands), "$options": "i"}, # i = case-insensitive
+            "priceFloat": {
+                 "$lt": budget
+            }
         })
-        items = random.sample(list(cursor), k=5)
-        # print(items)
+
+        # returns up to 5 matches 
+        cursor_list = list(cursor)
+        if len(cursor_list) >= 5:
+            items = random.sample(cursor_list, k=5)
+        else:
+            items = random.sample(cursor_list, k=min(5, len(cursor_list)))
+    
     except Exception as e:
         print(e)
     return json.loads(dumps(items))
 
-
+# function to save reviews in Mongo 
 def saveReviewMongo(rating, comment, userEmail): 
     MONGODB = os.getenv("MONGO_URI")
 
@@ -213,6 +263,7 @@ def saveReviewMongo(rating, comment, userEmail):
         print(e)
     return json.loads(dumps(review))
 
+# function to get reviews from Mongo 
 def getReviewsMongo ():
     MONGODB = os.getenv("MONGO_URI")
     client = MongoClient(MONGODB, server_api=ServerApi('1'))

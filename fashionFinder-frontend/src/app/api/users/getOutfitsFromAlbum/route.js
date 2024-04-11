@@ -2,6 +2,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import queryString from "query-string";
 
 connect();
 
@@ -9,6 +10,7 @@ export async function GET(request) {
   const token = request.cookies.get("token")?.value || "";
   const decodedToken = jwt.decode(token);
   const email = decodedToken ? decodedToken.email : "";
+  console.log("Search Params:", request.nextUrl.searchParams);
 
   try {
     let userEmail = email;
@@ -63,10 +65,8 @@ export async function GET(request) {
     let filteredOutfits = album.outfits;
     console.log("Filtered outfits:", filteredOutfits);
 
-    const queryParams = request.nextUrl.searchParams;
-    const filters = Array.from(queryParams.entries())
-      .filter(([key]) => key !== "albumName")
-      .map(([, value]) => value);
+    const filters = request.nextUrl.searchParams.getAll("filters[]");
+
     console.log("Filters:", filters);
 
     const brands = [
@@ -93,9 +93,22 @@ export async function GET(request) {
       const brandFilters = filters.filter((filter) =>
         brands.includes(filter.trim().toLowerCase())
       );
+      console.log("Brand filters:", brandFilters);
       const colorFilters = filters.filter(
-        (filter) => !brands.includes(filter.trim().toLowerCase())
+        (filter) => !brands.includes(filter.trim().toLowerCase()) && isNaN(parseFloat(filter))
       );
+      console.log("Color filters:", colorFilters);
+      const lowerBoundFilter = filters.find(
+        (filter) => !brands.includes(filter.trim().toLowerCase()) && !isNaN(parseFloat(filter))
+      );
+      
+      console.log("Lower bound filter:", lowerBoundFilter);
+      
+      const upperBoundFilter = filters.find(
+        (filter) => !brands.includes(filter.trim().toLowerCase()) && !isNaN(parseFloat(filter)) && filter !== lowerBoundFilter
+      );
+
+      console.log("Upper bound filter:", upperBoundFilter);
 
       filteredOutfits = filteredOutfits.filter((outfit) => {
         const outfitColors = outfit.color
@@ -106,40 +119,23 @@ export async function GET(request) {
         const outfitBrand = outfit.brand
           ? outfit.brand.trim().toLowerCase()
           : "";
-
-        const matchesBrandFilter = brandFilters.some(
+      
+        const matchesBrandFilter = brandFilters.length === 0 || brandFilters.some(
           (filter) => outfitBrand === filter.trim().toLowerCase()
         );
-        const matchesColorFilter = colorFilters.some((filter) =>
+        const matchesColorFilter = colorFilters.length === 0 || colorFilters.some((filter) =>
           outfitColors.includes(filter.trim().toLowerCase())
         );
-
-        if (brandFilters.length > 0 && colorFilters.length > 0) {
-          return matchesBrandFilter && matchesColorFilter;
-        } else {
-          return matchesBrandFilter || matchesColorFilter;
-        }
-      });
-    }
-
-    const lowerBoundParam = parseFloat(
-      request.nextUrl.searchParams.get("lowerBound")
-    );
-    const upperBoundParam = parseFloat(
-      request.nextUrl.searchParams.get("upperBound")
-    );
-    if (!isNaN(lowerBoundParam) && !isNaN(upperBoundParam)) {
-      filteredOutfits = filteredOutfits.filter((outfit) => {
-        if (outfit.price) {
-          const outfitPrice = parseFloat(
-            outfit.price.replace(/[^0-9.-]+/g, "")
-          );
-          return (
-            outfitPrice >= lowerBoundParam && outfitPrice <= upperBoundParam
-          );
-        }
-        return false;
-      });
+      
+        const withinPriceRange = !isNaN(parseFloat(lowerBoundFilter)) && !isNaN(parseFloat(upperBoundFilter))
+          ? outfit.price
+            ? parseFloat(outfit.price.replace(/[^0-9.-]+/g, "")) >= parseFloat(lowerBoundFilter) &&
+              parseFloat(outfit.price.replace(/[^0-9.-]+/g, "")) <= parseFloat(upperBoundFilter)
+            : false
+          : true;
+      
+        return matchesBrandFilter && matchesColorFilter && withinPriceRange;
+      });      
     }
 
     return NextResponse.json({ outfits: filteredOutfits });

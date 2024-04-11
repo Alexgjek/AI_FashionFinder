@@ -27,7 +27,7 @@ export const POST = async (request) => {
     existingUser.verifyTokenExpiry=verifyTokenExpires;
    
     const verifyUrl = `http://localhost:3000/successPage/${Token}`;
-    const body = `Verify Email by clicking this link, you have 6 min to verify before the link expires: "${verifyUrl} \nThank you from the AI FashionFinder team.`;
+    const body = `Click the link below to verify your email and join the FashionFinder family!: "${verifyUrl} \nThank you from the AI FashionFinder team.`;
     console.log(verifyUrl);
 
 

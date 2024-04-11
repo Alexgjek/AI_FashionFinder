@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import Header from '@/components/Header';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -9,7 +10,6 @@ export default function ProfilePage() {
   const [brandError, setBrandError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [errorMessages, setErrorMessages] = useState('');
-
 
   const [disabledInputs, setDisabledInputs] = useState([]);
   const [userInfo, setUserInfo] = useState({
@@ -19,19 +19,40 @@ export default function ProfilePage() {
     budget: '',
   });
 
-  useEffect(() => {
-    async function fetchUserData() {
-      try {
-        const response = await axios.get("/api/users/userInfo");
-        setUserInfo(response.data);
-        setDisabledInputs(response.data.brands.map(() => true));
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    }
+  
+  const [brandList, setBrandList] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [filteredBrands, setFilteredBrands] = useState([]);
 
-    fetchUserData();
+  useEffect(() => {
+      async function fetchData() {
+          try {
+              const userDataResponse = await axios.get("/api/users/userInfo");
+              setUserInfo(userDataResponse.data);
+              setDisabledInputs(userDataResponse.data.brands.map(() => true));
+
+              const brandsResponse = await axios.get("/api/users/getBrands");
+              setBrandList(brandsResponse.data.brands);
+          } catch (error) {
+              console.error("Error fetching data:", error);
+          }
+      }
+
+      fetchData();
   }, []);
+
+  useEffect(() => {
+      // Filter brands based on the search term
+      const filtered = brandList.filter(brand =>
+          brand.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredBrands(filtered);
+  }, [searchTerm, brandList]);
+
+  const handleSelectChange = (e) => {
+      setSelectedBrand(e.target.value);
+  };
 
   const handleSubmit = async () => {
     const filteredBrands = userInfo.brands.filter(brand => brand.trim() !== '');
@@ -53,6 +74,7 @@ export default function ProfilePage() {
       setErrorMessages("Budget must be $14 and up");
       return;
     }
+
     try {
       const response = await axios.post("/api/users/setBrandOrBudget", { ...userInfo, brands: uniqueBrands });
       console.log(response.data);
@@ -68,7 +90,6 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Error setting brands and budget:", error);
     }
-
   };
 
 
@@ -81,7 +102,6 @@ export default function ProfilePage() {
 
   const handleBudgetChange = (value) => {
     const formattedValue = value.replace(/^0(?!\.)/, '');
-   
     handleChange("budget", formattedValue);
   };
 
@@ -100,42 +120,26 @@ export default function ProfilePage() {
   };
 
   const addBrand = () => {
-    const isEmptyField = userInfo.brands.some(brand => brand.trim() === "");
-    if (isEmptyField) {
-      setBrandError(true);
-      return;
+    if (selectedBrand.trim() === "") {
+        setBrandError(true);
+        return;
     } else {
-      setBrandError(false);
+        setBrandError(false);
+    }
+
+    // Check if the selected brand already exists in user's brands
+    if (userInfo.brands.includes(selectedBrand.trim())) {
+        setErrorMessage("Brand already added.");
+        return;
     }
 
     setUserInfo({
-      ...userInfo,
-      brands: [...userInfo.brands, ""],
+        ...userInfo,
+        brands: [...userInfo.brands, selectedBrand.trim()],
     });
     setDisabledInputs(prevDisabledInputs => [...prevDisabledInputs, false]);
-
-  };
-
-
-  const handleBrandChange = (index, value) => {
-    const capitalizedBrand = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
-    const updatedBrands = [...userInfo.brands];
-    updatedBrands[index] = capitalizedBrand;
-    setUserInfo({
-      ...userInfo,
-      brands: updatedBrands,
-    });
-
-    if (!isEditing) {
-      setDisabledInputs(prevDisabledInputs => {
-        const updatedDisabledInputs = [...prevDisabledInputs];
-        updatedDisabledInputs[index] = false;
-        return updatedDisabledInputs;
-      });
-    }
-  };
-
-
+    setSelectedBrand('');
+};
 
   const handleDeleteBrand = async (index) => {
     try {
@@ -163,13 +167,14 @@ export default function ProfilePage() {
     }
   }
 
-
   const changePassword = () => {
     router.push("/forgot");
   };
 
   return (
-    <main className='p-6'>
+    <main>
+    <Header/>
+    <div className='p-6'>
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold p-3">Personal Information</h1>
         <div className="flex flex-col items-start">
@@ -216,62 +221,70 @@ export default function ProfilePage() {
               <hr className="border border-gray-300 mt-2 mb-2" />
             </div>
             <h6 className="mb-4">
-              BRANDS{" "}
-              {brandError && (
-                <p className='text-red-500 font-normal'>Field must be filled</p>
-              )}
-              {errorMessage && (
-                <p className='text-red-500 font-normal'>{errorMessage}</p>
-              )}
-              <div>
-                {isEditing ? (
-                  <>
-                    {userInfo.brands &&
-                      userInfo.brands.map((brand, index) => (
-                        <div
-                          key={index}
-                          style={{ display: "flex", alignItems: "center" }}>
-                          <input
-                            type="text"
-                            value={brand}
-                            onChange={(e) =>
-                              handleBrandChange(index, e.target.value)
-                            }
-                            placeholder="Enter brand"
-                            className="border border-gray-300 p-2 rounded-md mr-2 outline-none"
-                            disabled={disabledInputs[index]}
-                            />
-                          {brand && (
-                            <button
-                              onClick={() => handleDeleteBrand(index)}
-                              className="bg-gray-500 text-white px-2 py-1 rounded-md"
-                            >
-                              Remove
-                            </button>
-                          )}
+                        BRANDS{" "}
+                        <div>
+                            {isEditing ? (
+    <>
+        <input
+    type="text"
+    placeholder="Search brands..."
+    value={searchTerm}
+    onChange={e => setSearchTerm(e.target.value)}
+    className="border border-gray-300 mr-2 p-2 rounded-md outline-none w-48" // Fixed width added
+/>
+<select
+    className="border border-gray-300 p-2 rounded-md outline-none w-48" // Fixed width added
+    onChange={handleSelectChange}
+    value={selectedBrand}
+    onClick={() => setErrorMessage('')} // Clear error message on click
+>
+    <option value="">Select a brand...</option>
+    {filteredBrands.map((brand, index) => (
+        <option key={index} value={brand}>{brand}</option>
+    ))}
+</select>
+        <button
+            onClick={addBrand}
+            className="bg-black text-white m-2 px-2 py-1 rounded-md mt-2"
+        >
+            Add Brand
+        </button>
+        {errorMessage && (
+            <p className='text-red-500 font-normal'>{errorMessage}</p>
+        )}
+    </>
+) : (
+    <span className="font-normal">
+        {userInfo.brands.filter(brand => brand.trim() !== "").join(", ")}
+    </span>
+)}
+                            {brandError && (
+                                <p className='text-red-500 font-normal'>Brand field must be filled</p>
+                            )}
                         </div>
-                      ))}
+                    </h6>
+            {isEditing && (
+              <>
+                {userInfo.brands.map((brand, index) => (
+                  <div key={index} className="flex justify-between items-center mt-2">
+                    <span>{brand}</span>
                     <button
-                      onClick={addBrand}
-                      className="bg-black text-white px-2 py-1 rounded-md mt-2"
+                      onClick={() => handleDeleteBrand(index)}
+                      className="bg-red-500 text-white px-2 py-1 rounded-md"
                     >
-                      Add Brand
+                      Remove
                     </button>
-                  </>
-                ) : (
-                  <span className="font-normal">
-                    {userInfo.brands && userInfo.brands.filter(Boolean).join(", ")}
-                  </span>
-                )}
-              </div>
-            </h6>
+                  </div>
+                ))}
+              </>
+            )}
             <hr className="border border-gray-300 mt-2 mb-2" />
             <h6 className="mb-4">
               BUDGET{" "}
-              <div>
               {errorMessages && (
                 <p className='text-red-500 font-normal'>{errorMessages}</p>
               )}
+              <div>
                 {isEditing ? (
                   <div className='flex justify-between items-center'>
                     <input
@@ -307,8 +320,7 @@ export default function ProfilePage() {
           <p className='font-semibold'>Edit</p>}
         </button>
       </div>
-    </main>
+    </div>
+  </main>
   );
 }
-
-

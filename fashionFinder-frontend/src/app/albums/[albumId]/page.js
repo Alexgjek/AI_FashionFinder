@@ -47,16 +47,20 @@ export default function AlbumId({ params }) {
   // }, [showModal]);
 
   const handleModalSubmit = () => {
+    if ((lowerBound && !upperBound) || (!lowerBound && upperBound)) {
+      setError("Please enter both lower and upper bounds");
+      return;
+    }
     if (lowerBound && upperBound && Number(lowerBound) > Number(upperBound)) {
       setError("Lower bound cannot be greater than upper bound");
       return;
     }
     const copyFilters = [...selectedFilters];
     if (lowerBound) {
-      copyFilters.push({ lowerBound });
+      copyFilters.push(lowerBound);
     }
     if (upperBound) {
-      copyFilters.push({ upperBound });
+      copyFilters.push(upperBound);
     }
 
     setAppliedFilters(copyFilters);
@@ -105,15 +109,13 @@ export default function AlbumId({ params }) {
         endpoint += `&token=${shareToken}`;
       }
 
-      if (appliedFilters) {
-        Object.keys(appliedFilters).forEach((key) => {
-          const encodedValue = encodeURIComponent(appliedFilters[key]);
-          endpoint += `&${key}=${encodedValue}`;
-        });
-      }
+      const filtersQueryString = appliedFilters
+        .map((filter) => `filters[]=${encodeURIComponent(filter)}`)
+        .join("&");
+      endpoint += `&${filtersQueryString}`;
 
       console.log("Endpoint:", endpoint);
-
+      console.log("Applied filters:", appliedFilters);
       const response = await axios.get(endpoint);
       setOutfits(response.data.outfits);
       setFilteredOutfits(response.data.outfits);
@@ -235,7 +237,7 @@ export default function AlbumId({ params }) {
   useEffect(() => {
     fetchUserEmail();
     fetchOutfits(appliedFilters);
-  }, []);
+  }, [shareToken]);
 
   const handleDeleteOutfit = async (outfitUrl) => {
     if (shareToken) {
@@ -346,30 +348,37 @@ export default function AlbumId({ params }) {
             Filter
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+        <div className="grid xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4">
           {outfits.map((outfit, index) => (
-            <div key={index} className="relative group h-64">
-              <img
-                src={outfit.imageUrl}
-                alt={`Outfit ${index + 1}`}
-                className="cursor-pointer object-contain w-full h-full"
-                onClick={() => window.open(outfit.outfitUrl, "_blank")}
-              />
-              <div className="absolute inset-0 bg-gray-400 opacity-0 group-hover:opacity-50 flex flex-col justify-center items-center z-30">
-                <button
-                  className="text-violet-800 text-xl font-bold mb-4"
-                  onClick={() => window.open(outfit.outfitUrl, "_blank")}
-                >
-                  Go
-                </button>
-                {!shareToken && (
+            <div
+              key={index}
+              className="group h-auto flex flex-col items-center"
+            >
+              <div className="relative">
+                <div className="h-64">
+                  <img
+                    src={outfit.imageUrl}
+                    alt={`Outfit ${index + 1}`}
+                    className="cursor-pointer object-cover w-full h-full"
+                    onClick={() => window.open(outfit.outfitUrl, "_blank")}
+                  />
+                </div>
+                <div className="bg-white flex items-center justify-center w-full gap-9">
                   <button
-                    className="text-red-500 text-xl font-bold"
-                    onClick={() => handleDeleteOutfit(outfit.outfitUrl)}
+                    className="text-xl font-bold p-1 text-gray-700"
+                    onClick={() => window.open(outfit.outfitUrl, "_blank")}
                   >
-                    Delete
+                    Go
                   </button>
-                )}
+                  {!shareToken && (
+                    <button
+                      className="text-red-300 text-xl font-bold"
+                      onClick={() => handleDeleteOutfit(outfit.outfitUrl)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
