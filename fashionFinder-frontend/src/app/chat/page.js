@@ -43,20 +43,19 @@ export default function Home() {
     
     
     useEffect(() => {
-    const handleResize = () => {
-    // Check if window is defined before accessing window.innerWidth
-    if (typeof window !== 'undefined') {
-    setWindowWidth(window.innerWidth);
-    }
-    };
-    
-    
-    // Check if window is defined before adding event listener
-    if (typeof window !== 'undefined') {
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-    }
+      const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+        // Close the menu toggle when switching from small screen to full screen
+        if (window.innerWidth > 768) {
+          setIsMenuOpen(false);
+        }
+      };
+  
+      window.addEventListener('resize', handleResize);
+  
+      return () => window.removeEventListener('resize', handleResize);
     }, []);
+  
   const handleSearch = (query) => {
     setSearchQuery(query);
   };
@@ -559,13 +558,31 @@ export default function Home() {
     conversation[reviewConversationIndex].submitted = submitted;
     setConversation(conversation)
   }
-  return (
-    <main>
-      <Header />
-      <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
-        <div className='bg-gray-200 col-span-1 left-0 p-1 overflow-y-auto' style={{ maxHeight: 'calc(100vh - 60px)' }}>
-          {windowWidth > 768 ? (
-            <div className='bg-gray-200 col-span-1 left-0 p-1'>
+ return(
+  <main>
+  <Header />
+  <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
+    <div className={`${windowWidth > 768 ? 'bg-gray-200' : 'bg-gray-100'} col-span-1 left-0 p-1 overflow-y-auto`} style={{ maxHeight: 'calc(100vh - 60px)', width: isMenuOpen ? '125px' : 'auto' }}>
+      {windowWidth > 768 ? (
+        <div className='bg-gray-200 col-span-1 left-0 p-1'>
+          <button
+            className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
+            onClick={handleNewChat}
+          >
+            <span className='font-semibold text-sm'>New Chat</span>
+            <FontAwesomeIcon icon={faPenToSquare} />
+          </button>
+        </div>
+      ) : (
+        <div className='p-1'>
+          <button
+            className='rounded-lg p-2 hover:bg-gray-100'
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </button>
+          {isMenuOpen && (
+            <div className='bg-gray-200 p-1'>
               <button
                 className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
                 onClick={handleNewChat}
@@ -573,64 +590,54 @@ export default function Home() {
                 <span className='font-semibold text-sm'>New Chat</span>
                 <FontAwesomeIcon icon={faPenToSquare} />
               </button>
-            </div>
-
-          ) : (
-            <div className='p-1'>
-              <button
-                className='rounded-lg p-2 hover:bg-gray-100'
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                <FontAwesomeIcon icon={faBars} />
-              </button>
-              {isMenuOpen && (
-                <div className='bg-gray-200 p-1'>
-                  <button
-                    className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
-                    onClick={handleNewChat}
-                  >
-                    <span className='font-semibold text-sm'>New Chat</span>
-                    <FontAwesomeIcon icon={faPenToSquare} />
-                  </button>
-                </div>
-              )}
-            </div>
-            
-          )}
-          {savedChats.slice().reverse().map((chat, index) => (
-            <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: (window.innerWidth > 768 ? 'flex' : 'none'), justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
-              <div>
-                <p>
-                  <strong>Chat:</strong>{" "}
-                  {chat.chatName.length > 50
-                    ? chat.chatName.substring(0, 50) + "..."
-                    : chat.chatName}
-                </p>
-              </div>
-              <div>
-                <FontAwesomeIcon
-                  icon={faTrashAlt}
-                  onClick={() => confirmDeleteChat(chat._id)}
-                  className="text-red-300 cursor-pointer"
-                />
-              </div>
-            </div>
-          ))}
-          {isMenuOpen && window.innerWidth < 768 && (
-            <>
               {savedChats.slice().reverse().map((chat, index) => (
-                <div key={index} className="saved-chat-small-screen" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
+                <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
                   <div>
-                    <p><strong>Chat:</strong> {chat.chatName.length > 50 ? chat.chatName.substring(0, 50) + '...' : chat.chatName}</p>
+                    <p>
+                      <strong>Chat:</strong>{" "}
+                      {chat.chatName.length > 50
+                        ? chat.chatName.substring(0, 50) + "..."
+                        : chat.chatName}
+                    </p>
                   </div>
                   <div>
-                    <FontAwesomeIcon icon={faTrashAlt} onClick={() => confirmDeleteChat(chat._id)} className="text-red-300 cursor-pointer" />
+                    <FontAwesomeIcon
+                      icon={faTrashAlt}
+                      onClick={() => confirmDeleteChat(chat._id)}
+                      className="text-red-300 cursor-pointer"
+                    />
                   </div>
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
+      )}
+      {windowWidth > 768 && !isMenuOpen && savedChats.slice().reverse().map((chat, index) => (
+        <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
+          <div>
+            <p>
+              <strong>Chat:</strong>{" "}
+              {chat.chatName.length > 50
+                ? chat.chatName.substring(0, 50) + "..."
+                : chat.chatName}
+            </p>
+          </div>
+          <div>
+            <FontAwesomeIcon
+              icon={faTrashAlt}
+              onClick={() => confirmDeleteChat(chat._id)}
+              className="text-red-300 cursor-pointer"
+            />
+          </div>
+        </div>
+      ))}
+
+        </div>
+
+
+
+
         <div className="col-span-6 flex flex-col items-center justify-center">
           {isSubmitted ? (
             <div
