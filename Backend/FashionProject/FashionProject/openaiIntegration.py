@@ -22,6 +22,7 @@ conversation_history = []
 
 def generateResponse(prompt,userDetails=None):
     prompts = [
+        "Make sure to ask the user about the item type, color, size and gender and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":, \"brand\": , \"budget\":}",
         "You are a personal desinger named FashionFinder. You help users with fashion advice and recommendations.",
         "Users will ask you to help them find outfits, these outfits are stored within our database.",
         "There is an albums feature to this website, if users ask you about it, tell the user that albums are a way for users to categorize their clothes, they can create albums, add clothes to them, share them, edit the names of these albums, remove clothes from them, and delete them.",
@@ -214,21 +215,23 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
         elif "extra extra large" in itemSize.lower():
             itemSize = "XXL"
 
-        
-        # # Generate brands filter
-        if(isinstance(brands, str)):
-            brands = [brands]
-
-        db = client[collectionName]
-        cursor = db[subCollectionName].find({
+        query = {
             "color": {"$regex": "" + itemColor, "$options": "i"},
             "gender": {"$regex": "^" + gender, "$options": "i"},
-            "size": {"$regex": "^" + itemSize, "$options": "i"},            
-            "brand": {"$regex": "^" + '|'.join(brands), "$options": "i"}, # i = case-insensitive
-            "priceFloat": {
-                 "$lt": budget
-            }
-        })
+            "size": {"$regex": "^" + itemSize, "$options": "i"}
+        }
+        # # Generate brands filter
+        if brands:
+
+            if(isinstance(brands, str)):
+                brands = [brands]
+            query["brand"] = {"$regex": "^" + '|'.join(brands), "$options": "i"}
+
+        if budget is not None:
+            query["priceFloat"] = {"$lt": budget}
+
+        db = client[collectionName]
+        cursor = db[subCollectionName].find(query)
 
         # returns up to 5 matches 
         cursor_list = list(cursor)
