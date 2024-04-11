@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
@@ -47,23 +47,26 @@ export default function LandingPage() {
   return (
     <main>
       <div className="w-full h-screen grid grid-cols-5">
-        <div className="col-span-3 bg-gray-300">
+        <div className="col-span-3 bg-gray-300 relative hidden sm:block">
           <p className="text-black p-1 font-bold inline-flex gap-2 text-2xl items-center absolute left-5 top-5">
             FashionFinder
-            {/* <FontAwesomeIcon icon={faCircle} className="w-5" /> */}
           </p>
           <div className="h-full flex items-center">
             <p
               className={`text-black text-4xl font-semibold text-left ml-4 mr-5 ${
                 fadeIn ? "fade-in" : "fade-out"
-              } max-w-[2/3`}
+              } max-w-[2/3]`}
               key={phraseIndex}
             >
               {userSearchExamples[phraseIndex]}
             </p>
           </div>
         </div>
-        <div className="col-span-2 bg-zinc-700 flex flex-col items-center justify-center">
+        
+        <div className="col-span-5 sm:col-span-2 bg-zinc-700 flex flex-col items-center justify-center">
+         <p className="text-white p-1 font-bold inline-flex gap-2 text-2xl items-center absolute left-5 top-5 sm:hidden">
+            FashionFinder
+            </p>
           <p className="text-3xl font-bold text-white">Welcome</p>
           <div className="flex gap-4 w-full p-6">
             <button
@@ -84,8 +87,7 @@ export default function LandingPage() {
               <FontAwesomeIcon icon={faGlobe} className="h-4" />
             </p>
             <p className="text-gray-300">MAGK</p>
-          </div>
-        </div>
+            </div>        </div>
       </div>
     </main>
   );

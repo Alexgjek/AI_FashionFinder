@@ -6,9 +6,6 @@ export default function ReviewModal({ onClose }) {
 
     const [rating, setRating] = useState(0);
     const [ratingComment, setRatingComment] = useState('');
-    //const [submitted, setSubmitted] = useState(false);
-
-    
 
     function handleRating(rate) {
         setRating(rate);
@@ -26,8 +23,6 @@ export default function ReviewModal({ onClose }) {
             const respJson = response.data;
             console.log(respJson);
             if (respJson.length > 0) {
-                //setSubmitted(true);
-                // Close the modal after submission
                 onClose();
             }
         } catch (error) {
@@ -36,7 +31,6 @@ export default function ReviewModal({ onClose }) {
     };
 
     function handleCancel() {
-        // Close the modal on cancel
         onClose();
     }
 
@@ -54,6 +48,7 @@ export default function ReviewModal({ onClose }) {
                                 allowFraction={false}
                                 SVGstyle={{ display: 'inline-block' }}
                                 allowHover={false}
+                                size={calculateStarSize()}
                             />
                         </div>
                         <textarea
@@ -68,11 +63,19 @@ export default function ReviewModal({ onClose }) {
                         <div className="flex gap-2 items-center justify-center">
                             <button className='bg-black text-white font-semibold py-2 px-4 rounded' onClick={handleSubmitRating}>Submit</button>
                             <button className='bg-gray-300 text-black font-semibold py-2 px-4 rounded' onClick={handleCancel}>Close</button>
-                        {/* {submitted && <p className="text-green-500">Thank you for your review!</p>} */}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     );
+}
+
+
+function calculateStarSize() {
+    if (window.innerWidth < 768) {
+        return 20; 
+    } else {
+        return 40; 
+    }
 }

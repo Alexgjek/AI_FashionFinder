@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import SendChatButton from '@/components/buttons/SendChatButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare,faSave,faTrashAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare,faSave,faTrashAlt, faPlus,faBars } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Header from "@/components/Header";
 import ReviewModal from '@/components/ReviewModal/ReviewModal';
@@ -28,7 +28,33 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState('');
   const [albumName, setAlbumName] = useState('');
   const [showCreateAlbumModal, setShowCreateAlbumModal] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const [windowWidth, setWindowWidth] = useState(0); // Initialize with 0 or some default value
+  useEffect(() => {
+    // Check if window is defined before accessing window.innerWidth
+    if (typeof window !== 'undefined') {
+    setWindowWidth(window.innerWidth);
+    }
+    }, []);
+    
+    
+    useEffect(() => {
+    const handleResize = () => {
+    // Check if window is defined before accessing window.innerWidth
+    if (typeof window !== 'undefined') {
+    setWindowWidth(window.innerWidth);
+    }
+    };
+    
+    
+    // Check if window is defined before adding event listener
+    if (typeof window !== 'undefined') {
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+    }
+    }, []);
+    
   //angjelos code
   useEffect(() => {
     const fetchChats = async () => {
@@ -431,9 +457,11 @@ export default function Home() {
 
   return (
     <main>
-      <Header />
-      <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
-        <div className='bg-gray-200 col-span-1 left-0 p-1 overflow-y-auto' style={{ maxHeight: 'calc(100vh - 60px)'}} >
+  <Header />
+  <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
+    <div className='bg-gray-200 col-span-1 left-0 p-1 overflow-y-auto' style={{ maxHeight: 'calc(100vh - 60px)'}}>
+      {windowWidth > 768 ? (
+        <div className='bg-gray-200 col-span-1 left-0 p-1'>
           <button
             className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
             onClick={handleNewChat}
@@ -441,135 +469,173 @@ export default function Home() {
             <span className='font-semibold text-sm'>New Chat</span>
             <FontAwesomeIcon icon={faPenToSquare} />
           </button>
-          <div>
-          {savedChats.slice().reverse().map((chat, index) => (
-              <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
-                <div>
-                  <p><strong>Chat:</strong> {chat.chatName.length > 50 ? chat.chatName.substring(0, 50) + '...' : chat.chatName}</p>
-                </div>
-                <div>
-                  <FontAwesomeIcon icon={faTrashAlt} onClick={() => confirmDeleteChat(chat._id)} className="text-red-300 cursor-pointer" />
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
-        <div className='col-span-6 flex flex-col items-center justify-center'>
-          {isSubmitted ? (
-            <div
-              ref={conversationContainerRef}
-              className='absolute top-20 w-5/6 p-2'
-              style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}
-            >
-              {conversation.map((conv, index) => (
-                <div key={index} className='p-2'>
-                  <p className='font-bold'>{conv.sender}</p>
-                  <>
-                  {conv.link ? (
-                    <div>
-                      <p className='mb-2'>
-                        Here's what I found:
-                      </p>
-                      <div className="ai-result-container">
-                        {conv.message.split("\n").map((part, idx) => 
-                          <div className="ai-result relative group" key={idx}>
-                            <img className="ai-image mb-2" src={part.split("^")[1]} alt="Result" />
-                            <div className="absolute inset-0 bg-gray-300 opacity-0 group-hover:opacity-50 transition-opacity duration-200 ease-in-out"></div>
-                            <a href={part.split("^")[0]} target="_blank" rel="noopener noreferrer" className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out">
-                              <button className="p-2 bg-transparent text-zinc-600 font-semibold">
-                                Go
-                              </button>
-                            </a>
-                            <button
-                              onClick={() => handleAddButton(part.split("^")[0], part.split("^")[1], part.split("^")[2], part.split("^")[3], part.split("^")[4], part.split("^")[5])}
-                              className="absolute bottom-0 left-0 right-0 h-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out p-2 bg-transparent text-zinc-600 font-semibold">
-                              Add
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                      conv.action == "review" ?
-                      (<div className='font-md'>
-                        <button onClick={toggleReviewModal} className='text-blue-600'>{conv.message}
-                        </button></div>) :
-                      (<div className='font-md'><p>{conv.message}</p></div>)
-                  )}
-                  </>
-                  <hr className='bg-black' />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className='mx-auto'>
-              <img src="/FFlogo.png" alt="FashionFinder Logo" />
-              <h1 className='text-4xl mx-auto font-semibold text-center'>
-                Tell us what you're looking for
-              </h1>
-              <h2 className='font-semibold text-xl text-center p-2 mb-20'>
-                We'll find it for you
-              </h2>
+      ) : (
+        <div className='p-1'>
+          <button
+            className='rounded-lg p-2 hover:bg-gray-100'
+            
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </button>
+          {isMenuOpen && (
+            <div className='bg-gray-200 p-1'>
+              <button
+                className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
+                onClick={handleNewChat}
+              >
+                <span className='font-semibold text-sm'>New Chat</span>
+                <FontAwesomeIcon icon={faPenToSquare} />
+              </button>
             </div>
           )}
-          <div className="absolute bottom-5 w-5/6 flex justify-center h-16" >
-            <textarea
-              type="text"
-              value={inputValue}
-              onKeyDown={handleKeyDown}
-              onChange={e => setInputValue(e.target.value)}
-              className="w-2/4 p-4 rounded-l-xl outline-none z-10 bg-transparent border border-gray-300 border-r-0 resize-none"
-              placeholder={isFetchingResponse ? 'Waiting for FashionFinder response...' : 'Message FashionFinder...'}
-              disabled={isFetchingResponse}
-            />
-            <SendChatButton inputValue={inputValue} clearInput={clearInput} handleClick={handleSubmit} />
-            <button
-                onClick={() => toggleModal()}
-                onKeyDown={handleChatNameKeyDown}
-                disabled={conversation.length === 0 || isFetchingResponse || (savedChats.some(chat => chat.chatName.toLowerCase() === chatName.toLowerCase()) && isConversationIdentical())}
-                className="border border-gray-300 bg-slate-500 text-white rounded-lg px-4 py-2 ml-2 h-full"
-                style={{ width: '120px' }}
-            >
-            <FontAwesomeIcon icon={faSave} className="mr-2" /> Save Chat
-            </button>
+        </div>
+
+      )}
+     
+     <>
+  {savedChats.slice().reverse().map((chat, index) => (
+    <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: (window.innerWidth > 768 ? 'flex' : 'none'), justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
+      <div>
+        <p><strong>Chat:</strong> {chat.chatName.length > 50 ? chat.chatName.substring(0, 50) + '...' : chat.chatName}</p>
+      </div>
+      <div>
+        <FontAwesomeIcon icon={faTrashAlt} onClick={() => confirmDeleteChat(chat._id)} className="text-red-300 cursor-pointer" />
+      </div>
+    </div>
+    ))}
+
+
+  {isMenuOpen && window.innerWidth < 768 && (
+    <>
+      {savedChats.slice().reverse().map((chat, index) => (
+        <div key={index} className="saved-chat-small-screen" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
+          <div>
+            <p><strong>Chat:</strong> {chat.chatName.length > 50 ? chat.chatName.substring(0, 50) + '...' : chat.chatName}</p>
           </div>
-          {showModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 z-50 gap-2 p-5">
-              <div className='bg-gray-100 p-6 rounded-lg text-center'>
-                <h2 className="text-lg font-semibold mb-4">Which album would you like to add to?</h2>
-                <div className="overflow-y-auto max-h-[20vh]">
-                  <div className="grid grid-cols-3 gap-4">
-                    {userAlbums.map((album, index) => (
-                      <div key={index} className="mb-2">
-                        <button
-                          className={`border border-gray-200 shadow-md text-gray-800 px-4 py-2 rounded-md w-full truncate flex-1 overflow-ellipsis ${selectedAlbums.includes(album.albumName) ? 'bg-green-400 opacity-50' : 'bg-white'}`}
-                          onClick={() => toggleAlbumSelection(album.albumName)} 
-                        >
-                          {album.albumName}
-                        </button>
-                      </div>
-                    ))}
+          <div>
+            <FontAwesomeIcon icon={faTrashAlt} onClick={() => confirmDeleteChat(chat._id)} className="text-red-300 cursor-pointer" />
+          </div>
+        </div>
+      ))}
+    </>
+  )}
+</>
+    
+    </div>
+    <div className='col-span-6 flex flex-col items-center justify-center'>
+      {isSubmitted ? (
+        <div ref={conversationContainerRef} className='absolute top-20 w-5/6 p-2' style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+          {conversation.map((conv, index) => (
+            <div key={index} className='p-2'>
+              <p className='font-bold'>{conv.sender}</p>
+              <>
+                {conv.link ? (
+                  <div>
+                    <p className='mb-2'>
+                      Here's what I found:
+                    </p>
+                    <div className="ai-result-container">
+                      {conv.message.split("\n").map((part, idx) => 
+                        <div className="ai-result relative group" key={idx}>
+                          <img className="ai-image mb-2" src={part.split("^")[1]} alt="Result" />
+                          <div className="absolute inset-0 bg-gray-300 opacity-0 group-hover:opacity-50 transition-opacity duration-200 ease-in-out"></div>
+                          <a href={part.split("^")[0]} target="_blank" rel="noopener noreferrer" className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out">
+                            <button className="p-2 bg-transparent text-zinc-600 font-semibold">
+                              Go
+                            </button>
+                          </a>
+                          <button
+                            onClick={() => handleAddButton(part.split("^")[0], part.split("^")[1], part.split("^")[2], part.split("^")[3], part.split("^")[4], part.split("^")[5])}
+                            className="absolute bottom-0 left-0 right-0 h-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out p-2 bg-transparent text-zinc-600 font-semibold">
+                            Add
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-center mt-4 gap-3 items-center">
-                  <button 
+                ) : (
+                  conv.action == "review" ?
+                    (<div className='font-md'>
+                      <button onClick={toggleReviewModal} className='text-blue-600'>{conv.message}
+                      </button></div>) :
+                    (<div className='font-md'><p>{conv.message}</p></div>)
+                )}
+              </>
+              <hr className='bg-black' />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className='mx-auto'>
+          <img src="/FFlogo.png" alt="FashionFinder Logo" />
+          <h1 className='text-4xl mx-auto font-semibold text-center'>
+            Tell us what you're looking for
+          </h1>
+          <h2 className='font-semibold text-xl text-center p-2 mb-20'>
+            We'll find it for you
+          </h2>
+        </div>
+      )}
+      <div className="absolute bottom-5 w-5/6 flex justify-center h-16" >
+        <textarea
+          type="text"
+          value={inputValue}
+          onKeyDown={handleKeyDown}
+          onChange={e => setInputValue(e.target.value)}
+          className="w-2/4 p-4 rounded-l-xl outline-none z-10 bg-transparent border border-gray-300 border-r-0 resize-none"
+          placeholder={isFetchingResponse ? 'Waiting for FashionFinder response...' : 'Message FashionFinder...'}
+          disabled={isFetchingResponse}
+        />
+        <SendChatButton inputValue={inputValue} clearInput={clearInput} handleClick={handleSubmit} />
+        <button
+          onClick={() => toggleModal()}
+          onKeyDown={handleChatNameKeyDown}
+          disabled={conversation.length === 0 || isFetchingResponse || (savedChats.some(chat => chat.chatName.toLowerCase() === chatName.toLowerCase()) && isConversationIdentical())}
+          className="border border-gray-300 bg-slate-500 text-white rounded-lg px-4 py-2 ml-2 h-full"
+          style={{ width: '120px' }}
+        >
+          <FontAwesomeIcon icon={faSave} className="mr-2" /> Save Chat
+        </button>
+      </div>
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 z-50 gap-2 p-5">
+          <div className='bg-gray-100 p-6 rounded-lg text-center'>
+            <h2 className="text-lg font-semibold mb-4">Which album would you like to add to?</h2>
+            <div className="overflow-y-auto max-h-[20vh]">
+              <div className="grid grid-cols-3 gap-4">
+                {userAlbums.map((album, index) => (
+                  <div key={index} className="mb-2">
+                    <button
+                      className={`border border-gray-200 shadow-md text-gray-800 px-4 py-2 rounded-md w-full truncate flex-1 overflow-ellipsis ${selectedAlbums.includes(album.albumName) ? 'bg-green-400 opacity-50' : 'bg-white'}`}
+                      onClick={() => toggleAlbumSelection(album.albumName)} 
+                    >
+                      {album.albumName}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-center mt-4 gap-3 items-center">
+              <button 
                   className='bg-black text-white px-4 py-2 rounded-md font-semibold w-2/5 text-center'
                   onClick={handleConfirm}>
-                    Confirm
-                    </button>
-                  <button onClick={closeModal} className="bg-gray-300 text-black px-4 py-2 rounded-md font-semibold w-2/5 text-center">Cancel</button>
-                  <button 
-                    className='text-green bg-green-400 rounded-full w-8 h-8 inline'
-                    onClick={handleCreateAlbum}>
-                    <FontAwesomeIcon icon={faPlus} />
-                  </button>
-                </div>
-              </div>
+                Confirm
+              </button>
+              <button onClick={closeModal} className="bg-gray-300 text-black px-4 py-2 rounded-md font-semibold w-2/5 text-center">Cancel</button>
+              <button 
+                className='text-green bg-green-400 rounded-full w-8 h-8 inline'
+                onClick={handleCreateAlbum}>
+                <FontAwesomeIcon icon={faPlus} />
+              </button>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-      {deleteIndex && (
+      )}
+    </div>
+  </div>
+  {deleteIndex && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-700 bg-opacity-50">
           <div className="bg-white p-10 rounded-md shadow-lg">
             <h2 className="text-lg font-semibold mb-4">Are you sure you want to delete this chat?</h2>
@@ -640,7 +706,10 @@ export default function Home() {
       </div>
     </div>
   </div>
+  
 )}
     </main>
   );
 }
+
+                
