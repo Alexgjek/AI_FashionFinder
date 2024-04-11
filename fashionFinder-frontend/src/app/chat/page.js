@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import SendChatButton from "@/components/buttons/SendChatButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faPenToSquare,faSave,faTrashAlt,faPlus} from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare,faSave,faTrashAlt, faPlus,faBars } from '@fortawesome/free-solid-svg-icons';
 import axios from "axios";
 import Header from "@/components/Header";
 import ReviewModal from "@/components/ReviewModal/ReviewModal";
@@ -31,7 +31,31 @@ export default function Home() {
   const [showCreateAlbumModal, setShowCreateAlbumModal] = useState(false);
   const [sortType, setSortType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [windowWidth, setWindowWidth] = useState(0); // Initialize with 0 or some default value
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  useEffect(() => {
+    // Check if window is defined before accessing window.innerWidth
+    if (typeof window !== 'undefined') {
+    setWindowWidth(window.innerWidth);
+    }
+    }, []);
+    
+    
+    useEffect(() => {
+      const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+        // Close the menu toggle when switching from small screen to full screen
+        if (window.innerWidth > 768) {
+          setIsMenuOpen(false);
+        }
+      };
+  
+      window.addEventListener('resize', handleResize);
+  
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+  
   const handleSearch = (query) => {
     setSearchQuery(query);
   };
@@ -534,41 +558,40 @@ export default function Home() {
     conversation[reviewConversationIndex].submitted = submitted;
     setConversation(conversation)
   }
-  return (
-    <main>
-      <Header />
-      <div
-        className="m-0 w-full h-screen grid grid-cols-7"
-        style={{ height: "calc(100vh - 60px)" }}
-      >
-        <div
-          className="bg-gray-200 col-span-1 left-0 p-1 overflow-y-auto"
-          style={{ maxHeight: "calc(100vh - 60px)" }}
-        >
+ return(
+  <main>
+  <Header />
+  <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
+    <div className={`${windowWidth > 768 ? 'bg-gray-200' : 'bg-gray-100'} col-span-1 left-0 p-1 overflow-y-auto`} style={{ maxHeight: 'calc(100vh - 60px)', width: isMenuOpen ? '125px' : 'auto' }}>
+      {windowWidth > 768 ? (
+        <div className='bg-gray-200 col-span-1 left-0 p-1'>
           <button
-            className="w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center"
+            className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
             onClick={handleNewChat}
           >
-            <span className="font-semibold text-sm">New Chat</span>
+            <span className='font-semibold text-sm'>New Chat</span>
             <FontAwesomeIcon icon={faPenToSquare} />
           </button>
-          <div>
-            {savedChats
-              .slice()
-              .reverse()
-              .map((chat, index) => (
-                <div
-                  key={index}
-                  className="saved-chat"
-                  style={{
-                    padding: "5px",
-                    margin: "5px",
-                    borderRadius: "5px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                  onClick={() => loadSavedChat(chat)}
-                >
+        </div>
+      ) : (
+        <div className='p-1'>
+          <button
+            className='rounded-lg p-2 hover:bg-gray-100'
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </button>
+          {isMenuOpen && (
+            <div className='bg-gray-200 p-1'>
+              <button
+                className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
+                onClick={handleNewChat}
+              >
+                <span className='font-semibold text-sm'>New Chat</span>
+                <FontAwesomeIcon icon={faPenToSquare} />
+              </button>
+              {savedChats.slice().reverse().map((chat, index) => (
+                <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
                   <div>
                     <p>
                       <strong>Chat:</strong>{" "}
@@ -586,13 +609,40 @@ export default function Home() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+      {windowWidth > 768 && !isMenuOpen && savedChats.slice().reverse().map((chat, index) => (
+        <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
+          <div>
+            <p>
+              <strong>Chat:</strong>{" "}
+              {chat.chatName.length > 50
+                ? chat.chatName.substring(0, 50) + "..."
+                : chat.chatName}
+            </p>
+          </div>
+          <div>
+            <FontAwesomeIcon
+              icon={faTrashAlt}
+              onClick={() => confirmDeleteChat(chat._id)}
+              className="text-red-300 cursor-pointer"
+            />
           </div>
         </div>
+      ))}
+
+        </div>
+
+
+
+
         <div className="col-span-6 flex flex-col items-center justify-center">
           {isSubmitted ? (
             <div
               ref={conversationContainerRef}
-              className="absolute top-20 w-5/6 p-2"
+              className="absolute top-20 w-4/6 p-2"
               style={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
             >
               {conversation.map((conv, index) => (
@@ -641,9 +691,10 @@ export default function Home() {
                       </div>
                     ) : conv.action == "review" ?
                     (<div className='font-md'>
-                      <button disabled = {conv.submitted} onClick={toggleReviewModal} className={conv.submitted ? ' text-green-500' : 'text-blue-600'}>
-                      {conv.submitted ? conv.reviewMessage : conv.message}
-                      </button></div>) :
+                      <button disabled={conv.submitted} onClick={toggleReviewModal} className={conv.submitted ? ' text-green-500' : 'text-blue-600'}>
+                        {conv.submitted ? conv.reviewMessage : conv.message}
+                      </button>
+                    </div>) :
                     (<div className='font-md'><p>{conv.message}</p></div>)}
                   </>
                   <hr className="bg-black" />
@@ -661,7 +712,8 @@ export default function Home() {
               </h2>
             </div>
           )}
-          <div className="absolute bottom-5 w-5/6 flex justify-center h-16">
+        
+          <div className="absolute bottom-5 w-4/6 flex justify-center h-16">
             <textarea
               type="text"
               value={inputValue}
@@ -698,39 +750,41 @@ export default function Home() {
               <FontAwesomeIcon icon={faSave} className="mr-2" /> Save Chat
             </button>
           </div>
+          
           {showModal && (
             <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 z-50 gap-2 p-5">
-              <div className="bg-gray-100 p-6 rounded-lg text-center">
-                <h2 className="text-lg font-semibold mb-4">
-                  Which album would you like to add to?
-                </h2>
-                <div className="inline-flex mb-3 gap-2">
-                  <AlbumSort onSortChange={handleSortChange} />
-                  <SearchBar onSearch={handleSearch} />
-                </div>
-                <div className="overflow-y-auto max-h-[20vh] h-[20vh]">
-                  <div className="grid grid-cols-3 gap-4">
-                    {userAlbums
-                      .filter((album) =>
-                        album.albumName
-                          .toLowerCase()
-                          .startsWith(searchQuery.toLowerCase())
-                      )
-                      .map((album, index) => (
-                        <div key={index} className="mb-2">
-                          <button
-                            className={`border border-gray-200 shadow-md text-gray-800 px-4 py-2 rounded-md w-full truncate flex-1 overflow-ellipsis ${
-                              selectedAlbums.includes(album.albumName)
-                                ? "bg-green-400 opacity-50"
-                                : "bg-white"
-                            }`}
-                            onClick={() =>
-                              toggleAlbumSelection(album.albumName)
-                            }
-                          >
-                            {album.albumName}
-                          </button>
-                        </div>
+            <div className="bg-gray-100 p-6 rounded-lg text-center">
+              <h2 className="text-lg font-semibold mb-4">
+                Which album would you like to add to?
+              </h2>
+              <div className="inline-flex mb-3 gap-2">
+                <AlbumSort onSortChange={handleSortChange} />
+                <SearchBar onSearch={handleSearch} />
+              </div>
+              <div className="overflow-y-auto max-h-[20vh] h-[20vh]">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4">
+                  {userAlbums
+                    .filter((album) =>
+                      album.albumName
+                        .toLowerCase()
+                        .startsWith(searchQuery.toLowerCase())
+                    )
+                    .map((album, index) => (
+                      <div key={index} className="mb-2">
+                        <button
+                          className={`border border-gray-200 shadow-md text-gray-800 px-4 py-2 rounded-md w-full truncate flex-1 overflow-ellipsis ${
+                            selectedAlbums.includes(album.albumName)
+                              ? "bg-green-400 opacity-50"
+                              : "bg-white"
+                          }`}
+                          onClick={() =>
+                            toggleAlbumSelection(album.albumName)
+                          }
+                        >
+                          {album.albumName}
+                        </button>
+                      </div>
+                  
                       ))}
                   </div>
                 </div>
@@ -756,9 +810,9 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            
           )}
         </div>
-      </div>
       {deleteIndex && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-700 bg-opacity-50">
           <div className="bg-white p-10 rounded-md shadow-lg">
@@ -871,8 +925,12 @@ export default function Home() {
               </button>
             </div>
           </div>
-        </div>
+        </div>      
+
+        
       )}
+              </div>
+
     </main>
   );
 }

@@ -9,6 +9,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [brandError, setBrandError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessages, setErrorMessages] = useState('');
+
   const [disabledInputs, setDisabledInputs] = useState([]);
   const [userInfo, setUserInfo] = useState({
     email: "",
@@ -68,6 +70,10 @@ export default function ProfilePage() {
       setErrorMessage("Duplicate brand");
       return;
     }
+    if (userInfo.budget === '' || parseFloat(userInfo.budget) < 14) {
+      setErrorMessages("Budget must be $14 and up");
+      return;
+    }
 
     try {
       const response = await axios.post("/api/users/setBrandOrBudget", { ...userInfo, brands: uniqueBrands });
@@ -79,6 +85,8 @@ export default function ProfilePage() {
       }));
 
       setDisabledInputs(uniqueBrands.map(() => true));
+      setErrorMessages('');
+
     } catch (error) {
       console.error("Error setting brands and budget:", error);
     }
@@ -273,6 +281,9 @@ export default function ProfilePage() {
             <hr className="border border-gray-300 mt-2 mb-2" />
             <h6 className="mb-4">
               BUDGET{" "}
+              {errorMessages && (
+                <p className='text-red-500 font-normal'>{errorMessages}</p>
+              )}
               <div>
                 {isEditing ? (
                   <div className='flex justify-between items-center'>
