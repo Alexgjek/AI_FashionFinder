@@ -574,6 +574,7 @@ export default function Home() {
                 <FontAwesomeIcon icon={faPenToSquare} />
               </button>
             </div>
+
           ) : (
             <div className='p-1'>
               <button
@@ -594,47 +595,47 @@ export default function Home() {
                 </div>
               )}
             </div>
-          )} {savedChats.slice().reverse().map((chat, index) => (
+            
+          )}
+          {savedChats.slice().reverse().map((chat, index) => (
             <div key={index} className="saved-chat" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: (window.innerWidth > 768 ? 'flex' : 'none'), justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
               <div>
-        
-                    <p>
-                      <strong>Chat:</strong>{" "}
-                      {chat.chatName.length > 50
-                        ? chat.chatName.substring(0, 50) + "..."
-                        : chat.chatName}
-                    </p>
+                <p>
+                  <strong>Chat:</strong>{" "}
+                  {chat.chatName.length > 50
+                    ? chat.chatName.substring(0, 50) + "..."
+                    : chat.chatName}
+                </p>
+              </div>
+              <div>
+                <FontAwesomeIcon
+                  icon={faTrashAlt}
+                  onClick={() => confirmDeleteChat(chat._id)}
+                  className="text-red-300 cursor-pointer"
+                />
+              </div>
+            </div>
+          ))}
+          {isMenuOpen && window.innerWidth < 768 && (
+            <>
+              {savedChats.slice().reverse().map((chat, index) => (
+                <div key={index} className="saved-chat-small-screen" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
+                  <div>
+                    <p><strong>Chat:</strong> {chat.chatName.length > 50 ? chat.chatName.substring(0, 50) + '...' : chat.chatName}</p>
                   </div>
                   <div>
-                    <FontAwesomeIcon
-                      icon={faTrashAlt}
-                      onClick={() => confirmDeleteChat(chat._id)}
-                      className="text-red-300 cursor-pointer"
-                    />
+                    <FontAwesomeIcon icon={faTrashAlt} onClick={() => confirmDeleteChat(chat._id)} className="text-red-300 cursor-pointer" />
                   </div>
                 </div>
               ))}
-              {isMenuOpen && window.innerWidth < 768 && (
-    <>
-      {savedChats.slice().reverse().map((chat, index) => (
-        <div key={index} className="saved-chat-small-screen" style={{ padding: '5px', margin: '5px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between' }} onClick={() => loadSavedChat(chat)}>
-          <div>
-            <p><strong>Chat:</strong> {chat.chatName.length > 50 ? chat.chatName.substring(0, 50) + '...' : chat.chatName}</p>
-          </div>
-          <div>
-            <FontAwesomeIcon icon={faTrashAlt} onClick={() => confirmDeleteChat(chat._id)} className="text-red-300 cursor-pointer" />
-          </div>
-        </div>
-      ))}
-    </>
-  )}
-          </div>
+            </>
+          )}
         </div>
         <div className="col-span-6 flex flex-col items-center justify-center">
           {isSubmitted ? (
             <div
               ref={conversationContainerRef}
-              className="absolute top-20 w-5/6 p-2"
+              className="absolute top-20 w-4/6 p-2"
               style={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
             >
               {conversation.map((conv, index) => (
@@ -683,9 +684,10 @@ export default function Home() {
                       </div>
                     ) : conv.action == "review" ?
                     (<div className='font-md'>
-                      <button disabled = {conv.submitted} onClick={toggleReviewModal} className={conv.submitted ? ' text-green-500' : 'text-blue-600'}>
-                      {conv.submitted ? conv.reviewMessage : conv.message}
-                      </button></div>) :
+                      <button disabled={conv.submitted} onClick={toggleReviewModal} className={conv.submitted ? ' text-green-500' : 'text-blue-600'}>
+                        {conv.submitted ? conv.reviewMessage : conv.message}
+                      </button>
+                    </div>) :
                     (<div className='font-md'><p>{conv.message}</p></div>)}
                   </>
                   <hr className="bg-black" />
@@ -703,7 +705,8 @@ export default function Home() {
               </h2>
             </div>
           )}
-          <div className="absolute bottom-5 w-5/6 flex justify-center h-16">
+        
+          <div className="absolute bottom-5 w-4/6 flex justify-center h-16">
             <textarea
               type="text"
               value={inputValue}
@@ -740,39 +743,41 @@ export default function Home() {
               <FontAwesomeIcon icon={faSave} className="mr-2" /> Save Chat
             </button>
           </div>
+          
           {showModal && (
             <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 z-50 gap-2 p-5">
-              <div className="bg-gray-100 p-6 rounded-lg text-center">
-                <h2 className="text-lg font-semibold mb-4">
-                  Which album would you like to add to?
-                </h2>
-                <div className="inline-flex mb-3 gap-2">
-                  <AlbumSort onSortChange={handleSortChange} />
-                  <SearchBar onSearch={handleSearch} />
-                </div>
-                <div className="overflow-y-auto max-h-[20vh] h-[20vh]">
-                  <div className="grid grid-cols-3 gap-4">
-                    {userAlbums
-                      .filter((album) =>
-                        album.albumName
-                          .toLowerCase()
-                          .startsWith(searchQuery.toLowerCase())
-                      )
-                      .map((album, index) => (
-                        <div key={index} className="mb-2">
-                          <button
-                            className={`border border-gray-200 shadow-md text-gray-800 px-4 py-2 rounded-md w-full truncate flex-1 overflow-ellipsis ${
-                              selectedAlbums.includes(album.albumName)
-                                ? "bg-green-400 opacity-50"
-                                : "bg-white"
-                            }`}
-                            onClick={() =>
-                              toggleAlbumSelection(album.albumName)
-                            }
-                          >
-                            {album.albumName}
-                          </button>
-                        </div>
+            <div className="bg-gray-100 p-6 rounded-lg text-center">
+              <h2 className="text-lg font-semibold mb-4">
+                Which album would you like to add to?
+              </h2>
+              <div className="inline-flex mb-3 gap-2">
+                <AlbumSort onSortChange={handleSortChange} />
+                <SearchBar onSearch={handleSearch} />
+              </div>
+              <div className="overflow-y-auto max-h-[20vh] h-[20vh]">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4">
+                  {userAlbums
+                    .filter((album) =>
+                      album.albumName
+                        .toLowerCase()
+                        .startsWith(searchQuery.toLowerCase())
+                    )
+                    .map((album, index) => (
+                      <div key={index} className="mb-2">
+                        <button
+                          className={`border border-gray-200 shadow-md text-gray-800 px-4 py-2 rounded-md w-full truncate flex-1 overflow-ellipsis ${
+                            selectedAlbums.includes(album.albumName)
+                              ? "bg-green-400 opacity-50"
+                              : "bg-white"
+                          }`}
+                          onClick={() =>
+                            toggleAlbumSelection(album.albumName)
+                          }
+                        >
+                          {album.albumName}
+                        </button>
+                      </div>
+                  
                       ))}
                   </div>
                 </div>
@@ -798,6 +803,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            
           )}
         </div>
       {deleteIndex && (
@@ -912,9 +918,12 @@ export default function Home() {
               </button>
             </div>
           </div>
-        </div>
+        </div>      
+
         
       )}
+              </div>
+
     </main>
   );
 }
