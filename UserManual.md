@@ -60,3 +60,7 @@ Below is a description the FashionFinder's features as well as step-by-step guid
 4. Press the "Add" button
 5. Go to the Budget section, enter the highest price you are looking for
 6. Press the "Save" button at the bottom of the page
+
+### Customer Support and Review System 
+1. To contact the FashionFinder team, go to Contact Us page and write your message then click on "Send Message"
+2. To rate your experience and leave feedback, once you get matches, click on "leave us a review", and add a rating along with a comment and click the "Submit" button
