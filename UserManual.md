@@ -49,4 +49,8 @@ Below is a description the FashionFinder's features as well as step-by-step guid
 7. Press "Confirm" to confirm the deletion
 8. To filter the items, press the "Filter" button, select the filters you would like to apply and press the "Apply" button at the bottom
 
+### Going to External Website for Items
+1. Once you have saved an item to your album or gotten items after chatting with the FashionFinder, press the "Go" button
+2. You will now be redirected to the website for that item
+
 
