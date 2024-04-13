@@ -53,4 +53,10 @@ Below is a description the FashionFinder's features as well as step-by-step guid
 1. Once you have saved an item to your album or gotten items after chatting with the FashionFinder, press the "Go" button
 2. You will now be redirected to the website for that item
 
-
+### Adding/Deleting Brand and Budget Preferences
+1. Go to the Profile page via the navigation bar
+2. Under the Brands section, press the "Select a Brand" dropdown menu
+3. Click on the brand you'd like to add
+4. Press the "Add" button
+5. Go to the Budget section, enter the highest price you are looking for
+6. Press the "Save" button at the bottom of the page
