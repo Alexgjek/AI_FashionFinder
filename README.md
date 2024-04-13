@@ -2,7 +2,7 @@
 
 ## .env Setup
 
-Create the following environment variables:
+In the fashionFinder-frontend directory, create a .env file with the following environment variables:
 
 1. MONGO_URI=your_mongoDBatlas_uri
 2. OPENAI_KEY=your_openai_api_key
