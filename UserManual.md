@@ -10,7 +10,7 @@ Below is a description the FashionFinder's features as well as step-by-step guid
 7. Logging in/out of account
 8. Changing password of account
 9. Going to external websites on returned items
-10. Adding/removing brand/budget preferences
+10. Adding/removing brand or budget preferences
 11. Saving/deleting chats
 
 ## Step-by-step Instructions
