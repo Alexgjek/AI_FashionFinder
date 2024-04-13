@@ -24,3 +24,13 @@ Now within the Backend directory, run the following commands:
 ```plaintext
 pip install fastapi==0.96.0 openai==0.27.8 uvicorn==0.22.0
 ```
+
+## Running the frontend and backend servers
+1. To run the frontend server, go to the fashionFinder-frontend directory and run:
+```plaintext
+npm run dev
+```
+2. To run the backend server, go to the /Backend/FashionProject/FashionProject directory and run:
+```plaintext
+uvicorn app:app --reload
+```
