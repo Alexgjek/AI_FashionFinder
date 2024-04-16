@@ -22,9 +22,12 @@ conversation_history = []
 
 def generateResponse(prompt,userDetails=None):
     prompts = [
-        "Make sure to ask the user about the item type, color, size and gender and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":, \"brand\": , \"budget\":}",
+        # "If users ask for fashion advice, help them",
+        "Make sure to ask the user about the item type, color, size and gender (one at a time) and once you gather all these attributes, you must respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":, \"brand\": , \"budget\":}",
         "You are a personal desinger named FashionFinder. You help users with fashion advice and recommendations.",
-        "Users will ask you to help them find outfits, these outfits are stored within our database.",
+        # "Users will ask you to help them find outfits, these outfits are stored within our database.",
+        "User must specify if they are looking for mens or womens clothes",
+        "User must specify what size they are looking for",
         "There is an albums feature to this website, if users ask you about it, tell the user that albums are a way for users to categorize their clothes, they can create albums, add clothes to them, share them, edit the names of these albums, remove clothes from them, and delete them.",
         "If a user asks them what you do, what you can help them with, or what your purpose is or something along those lines, tell them you are a personal designer that helps them with fashion advice as well as finding clothes/outfits for them.",
         "You must ask the user what items in their outfit theyd like, they can pick just one item",
@@ -36,16 +39,17 @@ def generateResponse(prompt,userDetails=None):
         "DO NOT ASK FOR SHADE",
         "When the user tells you they are looking for any type of pants like shorts or jeans or bottoms, do not ask for waist and hip size",
         "If the user doesn't give you a size or color, keep asking them and let them know that those are needed for you to proceed",
-        "The user only needs to specify one size, one type, one color and one gender",
+        "The user only needs to specify one size, one type, one color and one gender(men or women)",
         "You are not responsible for the search",
         "You do not know what we have in the database, so do not talk about that",
         "Do not tell the user that we don't have something in the database",
         "If the user asks for dresses or dress, do not ask them to specific type",
         "You do not do the searching",
         "If the user asks for a skirt, skirts, dress or dresses you can assume the gender to be a female",
-        "Make sure to ask the user about the brand, if not specified then get it from their user profile",
+        # "Make sure to ask the user about the brand, if not specified then get it from their user profile",
+        "Ask for brand in the following format: 'Do you have any brand preferences?'",
         "Make sure to ask the user about the budget, if not specified then get it from their user profile",
-        "Make sure to ask the user about the item type, color, size and gender and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":, \"brand\": , \"budget\":}",
+        # "Make sure to ask the user about the item type, color, size and gender and once you gather all these attributes, respond with the message \"BEGIN_SEARCH\" and include all the matching attributes as a JSON object in this format {\"itemType\":,\"size\":,\"color\":,\"gender\":, \"brand\": , \"budget\":}",
     ]
     
     prompt_string = "\n".join(prompts)
@@ -158,6 +162,8 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
                 subCollectionName = "suit"
             case "suit pants":
                 subCollectionName = "suit"
+            case "dress pants":
+                subCollectionName = "suit"
             case "dresses":
                 subCollectionName = "dress"
             case "dress":
@@ -214,7 +220,73 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
             itemSize = "XXL"
         elif "extra extra large" in itemSize.lower():
             itemSize = "XXL"
-
+        elif "28x28" in itemSize.lower():
+            itemSize = "S"
+        elif "28x29" in itemSize.lower():
+            itemSize = "S"
+        elif "28x30" in itemSize.lower():
+            itemSize = "S"
+        elif "29x28" in itemSize.lower():
+            itemSize = "S"
+        elif "29x29" in itemSize.lower():
+            itemSize = "S"
+        elif "29x30" in itemSize.lower():
+            itemSize = "S"
+        elif "30x28" in itemSize.lower():
+            itemSize = 'S'
+        elif "30x29" in itemSize.lower():
+            itemSize = 'S'
+        elif "30x30" in itemSize.lower():
+            itemSize = 'S'
+        elif "31x28" in itemSize.lower():
+            itemSize = 'M'
+        elif "31x29" in itemSize.lower():
+            itemSize = 'M'
+        elif "31x30" in itemSize.lower():
+            itemSize = 'M'
+        elif "32x28" in itemSize.lower():
+            itemSize = 'M'
+        elif "32x29" in itemSize.lower():
+            itemSize = 'M'
+        elif "32x30" in itemSize.lower():
+            itemSize = 'M'
+        elif "33x28" in itemSize.lower():
+            itemSize = 'M'
+        elif "33x29" in itemSize.lower():
+            itemSize = 'M'
+        elif "33x30" in itemSize.lower():
+            itemSize = 'M'
+        elif "34x28" in itemSize.lower():
+            itemSize = 'L'
+        elif "34x29" in itemSize.lower():
+            itemSize = 'L'
+        elif "34x30" in itemSize.lower():
+            itemSize = 'L'
+        elif "35x28" in itemSize.lower():
+            itemSize = 'L'
+        elif "35x29" in itemSize.lower():
+            itemSize = 'L'
+        elif "35x30" in itemSize.lower():
+            itemSize = 'L'
+        elif "36x28" in itemSize.lower():
+            itemSize = 'L'
+        elif "36x29" in itemSize.lower():
+            itemSize = 'L'
+        elif "36x30" in itemSize.lower():
+            itemSize = 'L'
+        elif "38x28" in itemSize.lower():
+            itemSize = 'XL'
+        elif "38x29" in itemSize.lower():
+            itemSize = 'XL'
+        elif "38x30" in itemSize.lower():
+            itemSize = 'XL'
+        elif "40x28" in itemSize.lower():
+            itemSize = 'XL'
+        elif "40x29" in itemSize.lower():
+            itemSize = 'XL'
+        elif "40x30" in itemSize.lower():
+            itemSize = 'XL'
+        
         query = {
             "color": {"$regex": "" + itemColor, "$options": "i"},
             "gender": {"$regex": "^" + gender, "$options": "i"},
@@ -222,12 +294,16 @@ def searchMongo(collectionName, subCollectionName, itemColor, itemSize, budget, 
         }
         # # Generate brands filter
         if brands:
-
+            if brands == 'no':
+                brands = ['']
             if(isinstance(brands, str)):
                 brands = [brands]
             query["brand"] = {"$regex": "^" + '|'.join(brands), "$options": "i"}
 
-        if budget is not None:
+        #maybe should be float
+        if budget is not None and type(budget) == int:
+            print(type(budget))
+            print(budget)
             query["priceFloat"] = {"$lt": budget}
 
         db = client[collectionName]
