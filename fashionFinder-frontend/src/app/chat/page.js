@@ -31,8 +31,11 @@ export default function Home() {
   const [showCreateAlbumModal, setShowCreateAlbumModal] = useState(false);
   const [sortType, setSortType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [windowWidth, setWindowWidth] = useState(0); // Initialize with 0 or some default value
+  const [windowWidth, setWindowWidth] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [reviewSubmitted, SetReviewSubmitted] = useState(false);
+  const [currentReviewIndex, SetCurrentReviewIndex] = useState(-1);
+
 
   useEffect(() => {
     // Check if window is defined before accessing window.innerWidth
@@ -404,11 +407,8 @@ export default function Home() {
         };
 
         console.log(matchMessage);
-        setConversation((prevConversation) => [
-          ...prevConversation,
-          matchMessage,
-          fashionFinderReviewMessage,
-        ]); //added tis
+        setConversation(prevConversation => [...prevConversation, matchMessage, fashionFinderReviewMessage]); //added tis
+
       }
     } catch (error) {
       console.error("Error fetching AI response:", error);
@@ -529,7 +529,10 @@ export default function Home() {
     setSaveChatModal(!saveChatModal);
   };
 
-  const toggleReviewModal = () => {
+  const toggleReviewModal = (index) => {
+    console.log(index)
+    SetCurrentReviewIndex(index);
+    console.log(currentReviewIndex);
     setShowReviewModal(!showReviewModal);
   };
 
@@ -548,16 +551,19 @@ export default function Home() {
   const onReviewSubmitted = (submitted) => {
     let reviewConversationIndex = -1;
     conversation.forEach((conv, index) => {
-      if(conv.action == "review") {
+      console.log(currentReviewIndex,index,reviewConversationIndex)
+      if(conv.action == "review" && currentReviewIndex==index) {
         reviewConversationIndex = index;
+        conversation[reviewConversationIndex].submitted = submitted;
       }
     })
     if(reviewConversationIndex < 0) {
       return;
     }
-    conversation[reviewConversationIndex].submitted = submitted;
+    //conversation[reviewConversationIndex].submitted = submitted;
     setConversation(conversation)
   }
+
  return(
   <main>
   <Header />
@@ -691,7 +697,7 @@ export default function Home() {
                       </div>
                     ) : conv.action == "review" ?
                     (<div className='font-md'>
-                      <button disabled={conv.submitted} onClick={toggleReviewModal} className={conv.submitted ? ' text-green-500' : 'text-blue-600'}>
+                       <button disabled = {conv.submitted} onClick={(e) => toggleReviewModal(index)} className={conv.submitted ? ' text-green-500' : 'text-blue-600'}>
                         {conv.submitted ? conv.reviewMessage : conv.message}
                       </button>
                     </div>) :
