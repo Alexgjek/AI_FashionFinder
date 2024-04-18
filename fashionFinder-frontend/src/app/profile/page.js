@@ -70,7 +70,7 @@ export default function ProfilePage() {
       setErrorMessage("Duplicate brand");
       return;
     }
-    if (userInfo.budget === '' || parseFloat(userInfo.budget) < 14) {
+    if (parseFloat(userInfo.budget) < 14) {
       setErrorMessages("Budget must be $14 and up");
       return;
     }
@@ -101,9 +101,13 @@ export default function ProfilePage() {
   };
 
   const handleBudgetChange = (value) => {
+    if (!/^\d*\.?\d{0,2}$/.test(value)) {
+        // Handle non-numerical value or more than two digits after decimal
+        return;
+    }
     const formattedValue = value.replace(/^0(?!\.)/, '');
     handleChange("budget", formattedValue);
-  };
+};
 
   const handleBudgetReset = async () => {
     try {
