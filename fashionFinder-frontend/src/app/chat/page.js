@@ -570,7 +570,7 @@ export default function Home() {
   <div className='m-0 w-full h-screen grid grid-cols-7' style={{ height: 'calc(100vh - 60px)' }}>
     <div className={`${windowWidth > 768 ? 'bg-gray-200' : 'bg-gray-100'} col-span-1 left-0 p-1 overflow-y-auto`} style={{ maxHeight: 'calc(100vh - 60px)', width: isMenuOpen ? '125px' : 'auto' }}>
       {windowWidth > 768 ? (
-        <div className='bg-gray-200 col-span-1 left-0 p-1'>
+        <div className='bg-gray-200 col-span-1 left-0'>
           <button
             className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
             onClick={handleNewChat}
@@ -580,7 +580,7 @@ export default function Home() {
           </button>
         </div>
       ) : (
-        <div className='p-1'>
+        <div className=' relative'>
           <button
             className='rounded-lg p-2 hover:bg-gray-100'
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -588,7 +588,7 @@ export default function Home() {
             <FontAwesomeIcon icon={faBars} />
           </button>
           {isMenuOpen && (
-            <div className='bg-gray-200 p-1'>
+            <div className='bg-gray-200 absolute z-50 w-full'>
               <button
                 className='w-full rounded-lg p-2 hover:bg-gray-100 flex justify-between items-center'
                 onClick={handleNewChat}
